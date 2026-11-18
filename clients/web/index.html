@@ -4055,6 +4055,9 @@ let showBeyond = false;
 
 const FILTER_DIMS = ["topic", "action", "rank", "size", "time", "recurring"];
 function filterState() {
+  // A view left as it was chosen stands for itself: its filter is derived anew, so that facets
+  // of journals loaded after the choice follow the view instead of showing up as changes.
+  if (LS.getItem("agenda.fview") === "1") { const v = activeView(); if (v) return filterOfView(v); }
   let f = null;
   try { f = JSON.parse(LS.getItem("agenda.filter") || "null"); } catch {}
   f = f || {};
@@ -4063,7 +4066,10 @@ function filterState() {
   for (const d of FILTER_DIMS) f.off[d] = f.off[d] || [];
   return f;
 }
-function saveFilter(f) { LS.setItem("agenda.filter", JSON.stringify(f)); }
+function saveFilter(f, asView = false) {
+  LS.setItem("agenda.filter", JSON.stringify(f));
+  if (asView) LS.setItem("agenda.fview", "1"); else LS.removeItem("agenda.fview");
+}
 // The value of an item for one kind; time and recurring only distinguish present and absent.
 function filterValue(e, dim) {
   if (dim === "time" || dim === "recurring") return has(e, dim) ? "with" : "";
@@ -4257,8 +4263,8 @@ function viewDiff(v, f) {
 }
 function applyView(name) {
   const v = viewByName(name); if (!v) return;
-  saveFilter(filterOfView(v));
   LS.setItem("agenda.view", name);
+  saveFilter(filterOfView(v), true);
   closeViewMenu();
   if (view !== "agenda") setView(monthMode ? "month" : "agenda"); else render();
 }
@@ -4273,6 +4279,7 @@ function writeView(name, oldName) {
     else S.wc = (S.wc.trim() ? S.wc + "\n" : "") + viewText(name, sp) + " #type-meta";
   });
   LS.setItem("agenda.view", name);
+  LS.setItem("agenda.fview", "1");
   render(); scheduleSync();
 }
 function renameView(oldName, name) {
@@ -4507,7 +4514,12 @@ function toggleJournalFacets(j, only) {
 function filterUndo(label, before) {
   $("toast").innerHTML = `<span>${esc(label)}</span><button type="button" class="ghost" id="toastUndo">Undo</button>`;
   $("toast").classList.remove("hidden");
-  $("toastUndo").onclick = () => { LS.setItem("agenda.filter", before); hideToast(); render(); };
+  $("toastUndo").onclick = () => {
+    LS.setItem("agenda.filter", before);
+    // Back to the view as chosen: it stands for itself again.
+    const v = activeView(); if (v && JSON.stringify(filterOfView(v)) === before) LS.setItem("agenda.fview", "1");
+    hideToast(); render();
+  };
   clearTimeout(toastTimer);
   toastTimer = setTimeout(hideToast, 6000);
 }
@@ -6893,7 +6905,7 @@ async function migrateFacets(to, chosen) {
     const o = oldKeys.get(c.name + "|" + c.from), n = facetKey(c.name, to);
     if (o !== n && f.facet.includes(o)) f.facet = f.facet.filter(k => k !== o).concat(f.facet.includes(n) ? [] : [n]);
   }
-  saveFilter(f);
+  saveFilter(f, LS.getItem("agenda.fview") === "1");
   LS.removeItem("agenda.fbar.order");
   withJ("", () => {
     const lines = S.wc.split("\n"), i = lines.findIndex(l => FU_RE.test((parse(l) || {}).text || ""));
