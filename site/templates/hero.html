@@ -435,12 +435,23 @@
         font-size: 16px;
       }
     }
+    /* Phones: the header in one line; GitHub is reached through the contents (ui.md 9.3). */
+    @media (max-width: 600px) {
+      header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: nowrap; }
+      header .logo { white-space: nowrap; flex: none; }
+      header nav { display: flex; align-items: baseline; gap: 14px; white-space: nowrap; flex-wrap: nowrap; }
+      header nav a[href*="github.com"] { display: none; }
+    }
     /* Agenda: grid items may shrink, so that code and tables scroll instead of widening the page. */
     .section > * { min-width: 0; }
     @media (max-width: 700px) { .section-text table { display: block; overflow-x: auto; } }
     /* the name in two lines, set close: the wordmark, then Agenda */
     .hero-text h1 { line-height: 1.12; margin-bottom: 1.25rem; }
     .hero-text h1 .wm { display: block; margin: 0 0 .2em; font-size: .85em; }
+    /* Below 800 px a strip of the key visual under the subtitle takes the place of the picture. */
+    .hero-strip { display: block; width: 100%; height: auto; margin: 4px 0 28px; }
+    @media (max-width: 799px) { .hero-image { display: none; } }
+    @media (min-width: 800px) { .hero-strip { display: none; } }
   </style>
 </head>
 <body>
@@ -460,6 +471,7 @@
       <div class="hero-text">
         <h1><span class="wm">ergonoi</span> Agenda</h1>
         <p class="subtitle"><!-- HERO_SUBTITLE --></p>
+        <img class="hero-strip" src="<!-- ASSETS -->assets/hero-strip.png" alt="">
         <p class="lead">
           <!-- HERO_LEAD -->
         </p>
