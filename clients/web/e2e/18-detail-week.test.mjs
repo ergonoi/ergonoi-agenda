@@ -39,6 +39,14 @@ export default async function ({ svc, b }) {
   await A.evaluate(() => document.querySelector('#detail [data-dact="done"]').click()); await sleep(400);
   check((await fileLine(A, "Call the joiner")).includes("#done-" + t0), "Done closes the entry");
 
+  // Status apart from the note, nothing standing out; a memo is not rescheduled.
+  await pick(A, "Order oak boards"); await sleep(300);
+  check(await A.evaluate(() => { const b = document.querySelector('#detail [data-dact="done"]'); return b.textContent === "Mark as done" && !b.classList.contains("primary") && /^Status/.test(document.querySelector("#detail .dre").textContent); }), "Mark as done under Status, not emphasised");
+  await A.evaluate(() => { S.wc += "\nGlasses #facet-work #type-memo"; render(); document.getElementById("btnMemo").click(); }); await sleep(300);
+  await pick(A, "Glasses"); await sleep(300);
+  check(await A.evaluate(() => !!document.querySelector('#detail [data-dact="done"]') && !document.querySelector('#detail [data-dact="tomorrow"]') && !document.getElementById("dDate")), "a memo: Mark as done, no reschedule");
+  await A.evaluate(() => document.getElementById("btnMemo").click()); await sleep(200);
+
   // The head of the column holds everything about time.
   await addLine(A, `Team standup #facet-work #date-${d2} #date-${await A.evaluate(d => addDays(d, 35), d2)} #time-09:00-09:15 #recurring-weekly #skip-${await A.evaluate(d => addDays(d, 14), d2)}`);
   await pick(A, "Team standup"); await sleep(300);

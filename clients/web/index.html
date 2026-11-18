@@ -210,7 +210,7 @@
     #detail .dexp { border:0; background:transparent; min-height:32px; min-width:32px; padding:0; color:var(--fg2); display:inline-flex; align-items:center; justify-content:center; }
     #detail #dNote { display:block; width:100%; box-sizing:border-box; min-height:72px; padding:10px 12px; border:.5px solid var(--line); border-radius:0; background:var(--bg); color:var(--fg); font:15px/1.45 "Inter", var(--font, sans-serif); white-space:pre-wrap; overflow-wrap:anywhere; overflow-x:hidden; overflow-y:hidden; resize:none; }
     #detail .dcount { text-align:right; font-size:12px; color:var(--muted); margin-top:4px; }
-    #detail .dre { margin:20px 0 0; }
+    #detail .dre { margin:24px 0 0; padding-top:14px; border-top:.5px solid var(--line); }
     #detail .dre button, #detail .dre .dpick { min-height:44px; font-size:14px; }
     #detail .dre .ddone, #detail .dre .dseries { width:100%; }
     #detail .dre .dseries { margin-top:16px; }
@@ -602,7 +602,7 @@
   #exGroups .exh { border-bottom:.5px solid var(--line); font-weight:600; }
   #exGroups .exr span { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   #exGroups select { flex:none; max-width:55%; }
-  button.danger { background:transparent; border:1px solid var(--scarlet); color:var(--scarlet); }
+  button.danger { background:transparent; border:1px solid var(--scarlet); color:var(--scarlet); border-radius:0; }
   @media (prefers-color-scheme: dark) { button.sec { background:transparent; border:1px solid var(--wisteria); color:var(--wisteria); } }
   .jr { display:flex; align-items:center; gap:12px; min-height:52px; padding:14px 0; border-bottom:.5px solid var(--line); }
   .jr:last-child { border-bottom:0; }
@@ -1024,7 +1024,7 @@
       <div class="btnrow" id="logRow"><button type="button" class="sec" id="btnLogCopy">Copy log</button><button type="button" class="sec" id="btnLogSave">Save log</button><button type="button" class="sec" id="btnLogFlush">Flush log</button><span class="hint" id="logCount"></span></div>
       <h3>About</h3>
       <div class="about">
-        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.31</p>
+        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.32</p>
         <p>Author: Markus Schatzl</p>
         <p class="am"><span id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project: </span><span class="one">Technology is potential. Accessibility makes it matter.</span></p>
         <p class="al"><a href="https://ergonoi.github.io/ergonoi-agenda/" target="_blank" rel="noopener">Documentation <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://github.com/ergonoi/ergonoi-agenda" target="_blank" rel="noopener">Source code on GitHub <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://ergonoi.com" target="_blank" rel="noopener">ergonoi.com <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
@@ -1056,7 +1056,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.9.31</span>
+    <span class="ver">v0.9.32</span>
   </footer>
 </main>
 <nav id="bnav" aria-label="View">
@@ -4903,10 +4903,13 @@ function renderDetail() {
     const steps = [["tomorrow", "Next day"], ["weeks1", "1 week"], ["months1", "1 month"], ["days2", "2 days"], ["weeks2", "2 weeks"], ["months3", "3 months"]];
     act = `<div class="dnote"><div class="dlbl"><label for="dNote">Note</label><button type="button" class="dexp" data-dnotebig="1" title="Larger field" aria-label="Larger field"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg></button></div>`
       + `<textarea id="dNote" maxlength="${NOTE_MAX}" rows="3" placeholder="Add a note" data-ref="${esc(idx)}">${esc(e.note || "")}</textarea><div class="dcount" id="dNoteCount">${(e.note || "").length} / ${NOTE_MAX}</div></div>`
-      + `<div class="dre" data-dline="${esc(idx)}">`
-      + (rec ? `<div class="dtop"><button type="button" class="primary" data-dact="occdone">Done</button><button type="button" class="sec" data-dact="skip">Skip</button></div>` : `<button type="button" class="primary ddone" data-dact="done">Done</button>`)
-      + `<div class="dlbl">Reschedule</div><div class="dgrid">${steps.map(([a, l]) => `<button type="button" class="sec" data-dact="${a}">${l}</button>`).join("")}</div>`
-      + `<label class="sec dpick"><input type="date" id="dDate"><span>Other date</span></label>`
+      // Status apart from the note, the same order for every kind of entry (ui.md 1a, step 3):
+      // nothing stands out, so that a click after writing does not close the entry by mistake.
+      // A memo has no date, so it is not rescheduled.
+      + `<div class="dre" data-dline="${esc(idx)}"><div class="dlbl">Status</div>`
+      + (rec ? `<div class="dtop"><button type="button" class="sec" data-dact="occdone">Occurrence done</button><button type="button" class="sec" data-dact="skip">Skip occurrence</button></div>` : `<button type="button" class="sec ddone" data-dact="done">Mark as done</button>`)
+      + (isMemo(e) ? "" : `<div class="dlbl">Reschedule</div><div class="dgrid">${steps.map(([a, l]) => `<button type="button" class="sec" data-dact="${a}">${l}</button>`).join("")}</div>`
+      + `<label class="sec dpick"><input type="date" id="dDate"><span>Other date</span></label>`)
       + (rec ? `<button type="button" class="danger dseries" data-dact="done">Delete series</button>` : "") + `</div>`;
   }
   box.innerHTML = `<div class="dhead"><span class="dj">${esc(journalName(j))}</span><button type="button" class="dx" data-dclose="1" aria-label="Close" title="Close">×</button></div>${html}${act}`;
@@ -6367,7 +6370,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.9.31, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.32, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -6575,7 +6578,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.9.31";
+const APP_VERSION = "0.9.32";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
