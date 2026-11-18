@@ -119,6 +119,8 @@
   #fpanel summary { list-style:none; display:flex; align-items:center; gap:10px; cursor:pointer; padding:14px 18px; font:600 14px "Inter", var(--font, sans-serif); color:var(--fg2); }
   #fpanel .more { padding:0 18px; }
   #fpanel .more.jmore { padding:0 0 6px; }
+  #fpanel .vedit .vn { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #fpanel .vedit.sel { background:var(--mist); }
   #fpanel summary::-webkit-details-marker { display:none; }
   #fpanel summary .fchev { flex:none; color:var(--fg2); transition:transform .15s; }
   #fpanel details[open] > summary .fchev { transform:rotate(90deg); }
@@ -1012,6 +1014,10 @@
       <label class="check"><input type="checkbox" id="cfgMinimal"><span><span class="lt">ergonoi theme</span><span class="ld">the name ergonoi Agenda with its wordmark; colour only where it points to something (facets, overdue, now, danger), a light Wisteria header and grey buttons. This device only.</span></span></label>
     </section>
     <section data-st="system">
+      <h3 id="logLabel">Log</h3>
+      <label class="check"><input type="checkbox" id="cfgLog"><span><span class="lt">Diagnostic log</span><span class="ld">written in this browser to trace faults. It records syncs, errors and changes to the journal list, never entries or phrases.</span></span></label>
+      <div class="hint hidden" id="logMsg" style="color:var(--scarlet)"></div>
+      <div class="btnrow" id="logRow"><button type="button" class="sec" id="btnLogCopy">Copy log</button><button type="button" class="sec" id="btnLogSave">Save log</button><button type="button" class="sec" id="btnLogFlush">Flush log</button><span class="hint" id="logCount"></span></div>
       <h3>About</h3>
       <div class="about">
         <p><strong id="aboutName">@@BRAND_NAME@@</strong> · version @@VERSION@@</p>
@@ -1019,10 +1025,6 @@
         <p class="am"><span id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project: </span><span class="one">Technology is potential. Accessibility makes it matter.</span></p>
         <p class="al"><a href="@@DOCS_URL@@" target="_blank" rel="noopener">Documentation <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="@@REPO_URL@@" target="_blank" rel="noopener">Source code on GitHub <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://ergonoi.com" target="_blank" rel="noopener">ergonoi.com <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
       </div>
-      <h3 id="logLabel">Log</h3>
-      <label class="check"><input type="checkbox" id="cfgLog"><span><span class="lt">Diagnostic log</span><span class="ld">written in this browser to trace faults. It records syncs, errors and changes to the journal list, never entries or phrases.</span></span></label>
-      <div class="hint hidden" id="logMsg" style="color:var(--scarlet)"></div>
-      <div class="btnrow" id="logRow"><button type="button" class="sec" id="btnLogCopy">Copy log</button><button type="button" class="sec" id="btnLogSave">Save log</button><button type="button" class="sec" id="btnLogFlush">Flush log</button><span class="hint" id="logCount"></span></div>
     </section>
   </div>
 
@@ -3183,6 +3185,8 @@ function filterState() {
 function saveFilter(f, asView = false) {
   LS.setItem("agenda.filter", JSON.stringify(f));
   if (asView) LS.setItem("agenda.fview", "1"); else LS.removeItem("agenda.fview");
+  // While a view is being edited, the change goes into it at once.
+  if (!asView && typeof editingView === "function" && editingView()) writeView(vEdit, vEdit);
 }
 // The value of an item for one kind; time and recurring only distinguish present and absent.
 function filterValue(e, dim) {
@@ -3486,13 +3490,18 @@ document.addEventListener("pointerdown", ev => {
 
 // The panel: a drawer on narrow screens, a column on wide ones (CSS decides).
 let panelEdit = false, panelNaming = false;
+// Editing views (ui.md 4.6): after Edit each view offers Select; the selected one is edited,
+// and every change of the filter is written into it at once, without Save. Another view can
+// be selected next; Done ends editing.
+let vEdit = "";
+function editingView() { return panelEdit && vEdit && LS.getItem("agenda.view") === vEdit && viewByName(vEdit) ? vEdit : ""; }
 const panelDocked = () => window.matchMedia("(min-width: 1240px)").matches;
 function openPanel(on) {
   $("fpanel").classList.toggle("open", on);
   $("fdim").classList.toggle("hidden", !on || panelDocked());
   $("tabFilter").setAttribute("aria-pressed", String(on));
   if (on) renderPanel();
-  else { panelEdit = false; panelNaming = false; }
+  else { panelEdit = false; panelNaming = false; vEdit = ""; }
 }
 $("tabFilter").onclick = () => openPanel(!$("fpanel").classList.contains("open"));
 $("fdim").onclick = () => openPanel(false);
@@ -3513,7 +3522,9 @@ function renderPanel() {
   const total = countBy(all, "facet"), c = countBy(items, "facet");
   const vs = viewLines(), cur = LS.getItem("agenda.view");
   let h = `<h3>Views${vs.length ? `<button type="button" class="ghost" data-vedit="1">${panelEdit ? "Done" : "Edit"}</button>` : ""}</h3>`;
-  if (panelEdit) h += vs.map(v => `<div class="vedit">${viewSw(v)}<input data-vren="${esc(v.name)}" value="${esc(v.name)}" maxlength="40" aria-label="Name of the view"><button type="button" class="warn" data-vdel="${esc(v.name)}">Delete</button></div>`).join("");
+  if (panelEdit) h += vs.map(v => v.name === vEdit
+    ? `<div class="vedit sel">${viewSw(v)}<input data-vren="${esc(v.name)}" value="${esc(v.name)}" maxlength="40" aria-label="Name of the view"><button type="button" class="warn" data-vdel="${esc(v.name)}">Delete</button></div>`
+    : `<div class="vedit">${viewSw(v)}<span class="vn">${esc(v.name)}</span><button type="button" class="sec" data-vsel="${esc(v.name)}">Select</button></div>`).join("");
   else h += vs.map(v => `<button type="button" class="vrow${v.name === cur ? " on" : ""}" data-view="${esc(v.name)}">${viewSw(v)}${esc(v.name)}</button>`).join("");
   h += panelNaming
     ? `<form class="vname" data-vnew="1"><input id="panelNewName" placeholder="Name of the view" autocomplete="off" maxlength="40"><button type="submit">Save</button></form>`
@@ -3632,6 +3643,7 @@ function filterUndo(label, before) {
   $("toast").classList.remove("hidden");
   $("toastUndo").onclick = () => {
     LS.setItem("agenda.filter", before);
+    if (editingView()) writeView(vEdit, vEdit);
     // Back to the view as chosen: it stands for itself again.
     const v = activeView(); if (v && JSON.stringify(filterOfView(v)) === before) LS.setItem("agenda.fview", "1");
     hideToast(); render();
@@ -3669,9 +3681,10 @@ for (const id of ["fpanel", "fline"]) {
     const b = ev.target.closest("button");
     if (b && b.dataset.view !== undefined) { applyView(b.dataset.view); if (!panelDocked()) openPanel(false); return; }
     if (b && b.dataset.mset) { openPanel(false); setView("settings"); settingsTab(b.dataset.mset); return; }
-    if (b && b.dataset.vedit) { panelEdit = !panelEdit; renderPanel(); return; }
+    if (b && b.dataset.vedit) { panelEdit = !panelEdit; vEdit = ""; renderPanel(); return; }
     if (b && b.dataset.vsave) { panelNaming = true; renderPanel(); return; }
     if (b && b.dataset.vdel) { deleteView(b.dataset.vdel); return; }
+    if (b && b.dataset.vsel) { vEdit = b.dataset.vsel; applyView(vEdit); renderPanel(); return; }
     if (b && b.dataset.vupd) { const v = activeView(); if (v) { writeView(v.name, v.name); showInfo("View saved: " + v.name); } return; }
     if (b && b.dataset.vrev) { const v = activeView(); if (v) applyView(v.name); return; }
     const t = filterTarget(ev.target);
