@@ -3,26 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#97EAD2">
+<meta name="theme-color" content="#E2C8E8">
 <!-- The default theme is set at build time (brand.json, docs/rebrand.md); the choice in Settings wins per device. -->
-<script>(function () { let m = null; try { if (localStorage.getItem("agenda.compact") === "1") document.documentElement.classList.add("compact"); m = localStorage.getItem("agenda.minimal"); } catch {} const on = m ? m === "1" : "outheis" === "ergonoi"; document.documentElement.classList.toggle("minimal", on); document.querySelector('meta[name="theme-color"]').content = on ? "#E2C8E8" : "#97EAD2"; })();</script>
+<script>(function () { let m = null; try { if (localStorage.getItem("agenda.compact") === "1") document.documentElement.classList.add("compact"); m = localStorage.getItem("agenda.minimal"); } catch {} const on = m ? m === "1" : "ergonoi" === "ergonoi"; document.documentElement.classList.toggle("minimal", on); document.querySelector('meta[name="theme-color"]').content = on ? "#E2C8E8" : "#97EAD2"; })();</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="οὐθείς Agenda">
+<meta name="apple-mobile-web-app-title" content="ergonoi Agenda">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<title>οὐθείς Agenda</title>
+<title>ergonoi Agenda</title>
 <!-- Link preview (Open Graph). The service replaces the origin placeholder with the address the page was requested from. -->
 <meta name="description" content="An open planning journal, lightweight, cross-device and confidential by design.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="οὐθείς Agenda">
+<meta property="og:title" content="ergonoi Agenda">
 <meta property="og:description" content="An open planning journal, lightweight, cross-device and confidential by design.">
 <meta property="og:url" content="@@ORIGIN@@/">
 <meta property="og:image" content="@@ORIGIN@@/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="οὐθείς Agenda">
+<meta property="og:image:alt" content="ergonoi Agenda">
 <meta name="twitter:card" content="summary_large_image">
 <style>
   /* outheis CI: colours from outheis-beta webui/assets/colors.md; IBM Plex Sans embedded (self-hosted).
@@ -747,7 +747,7 @@
 <header>
   <div class="row">
     <button type="button" id="btnMenu" aria-label="Menu" title="Views, facets, settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-    <h1><button type="button" id="homeLink" aria-haspopup="menu" aria-expanded="false" title="Views"><span class="vwrap"><span class="brand">οὐθείς Agenda</span><span id="viewName"></span></span><svg class="caret" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg></button></h1>
+    <h1><button type="button" id="homeLink" aria-haspopup="menu" aria-expanded="false" title="Views"><span class="vwrap"><span class="brand">ergonoi Agenda</span><span id="viewName"></span></span><svg class="caret" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg></button></h1>
     <div id="hsearch" class="hidden"><button type="button" id="searchBack" aria-label="Close the search" title="Close the search"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><span class="qwrap"><input id="searchQ" type="text" inputmode="search" placeholder="Search text, notes, #tags" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="search"><button type="button" id="searchClear" class="qclear hidden" aria-label="Clear the search"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round"/></svg></button></span></div>
     <div id="viewMenu" class="hidden" role="menu"></div>
     <div id="status"></div>
@@ -949,7 +949,7 @@
 </dialog>
 <dialog id="dlgAbout">
   <form method="dialog">
-    <strong id="aboutName">οὐθείς Agenda</strong>
+    <strong id="aboutName">ergonoi Agenda</strong>
     <p id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project:</p>
     <p style="margin-top:14px">Technology is potential. Accessibility makes it matter.</p>
     <p class="hint">Version 0.9.11 · outheis-labs</p>

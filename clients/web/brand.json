@@ -1,5 +1,5 @@
 {
-  "default": "outheis",
+  "default": "ergonoi",
   "themes": {
     "outheis": { "name": "οὐθείς Agenda", "color": "#97EAD2" },
     "ergonoi": { "name": "ergonoi Agenda", "color": "#E2C8E8" }

@@ -1,10 +1,10 @@
 {
-  "name": "οὐθείς Agenda",
-  "short_name": "οὐθείς Agenda",
+  "name": "ergonoi Agenda",
+  "short_name": "ergonoi Agenda",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#FFFFFF",
-  "theme_color": "#97EAD2",
+  "theme_color": "#E2C8E8",
   "icons": [
     {
       "src": "icon-192.png",
