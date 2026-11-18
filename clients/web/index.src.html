@@ -112,7 +112,11 @@
   #fpanel .fac.off { opacity:var(--off); }
   #fpanel .fac:focus-visible, #fpanel .jh:focus-visible { outline:0; text-decoration:underline; text-underline-offset:4px; }
   #fpanel details { margin-top:14px; border-top:.5px solid var(--line); }
-  #fpanel summary { list-style:none; display:flex; align-items:center; gap:10px; cursor:pointer; padding:12px 18px 4px; font:600 14px "Inter", var(--font, sans-serif); color:var(--fg2); }
+  /* Each fold line between two rules, its text centred: the same space above and below. */
+  #fpanel details + details { margin-top:0; }
+  #fpanel details + .mlist { margin-top:0; }
+  #fpanel details:not([open]) + details, #fpanel details:not([open]) + .mlist { padding-top:0; }
+  #fpanel summary { list-style:none; display:flex; align-items:center; gap:10px; cursor:pointer; padding:14px 18px; font:600 14px "Inter", var(--font, sans-serif); color:var(--fg2); }
   #fpanel .more { padding:0 18px; }
   #fpanel .more.jmore { padding:0 0 6px; }
   #fpanel summary::-webkit-details-marker { display:none; }
