@@ -2054,7 +2054,10 @@ function facetOwners(f, res = reservations()) {
 function facetChoices() {
   const multi = journals().length > 1, res = reservations(), out = [];
   for (const f of facetValues()) for (const j of facetOwners(f, res)) if (!readOnly(j)) out.push({ f, j, k: multi ? f + "@" + j : f, label: multi ? journalName(j) : "" });
-  return out;
+  // Own facets first (ui.md 4.2): the default journal, then the other own journals, then
+  // shared ones; within each group the order stays.
+  const rank = j => j === "" ? 0 : isOwner(j) ? 1 : 2;
+  return out.map((c, i) => [rank(c.j), i, c]).sort((x, y) => x[0] - y[0] || x[1] - y[1]).map(x => x[2]);
 }
 // Tag definitions of one value (facet or topic) in one journal, open ones.
 // Returns Map("j|dim|val" -> [{idx, e}]) for values with more than one definition.
