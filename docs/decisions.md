@@ -120,7 +120,7 @@ One A4 page as a full-width checklist: it is ticked off by hand, photographed an
 
 ### 4.6 Documentation for users
 
-Conventions such as Tag definitions and journal names cannot be discovered by using the app. They are explained in `docs/guide.md`, which is also served as `guide.html` from the settings, and summarised behind the `?` buttons.
+Conventions such as Tag definitions and journal names cannot be discovered by using the app. They are explained in the user documentation, a site of its own in `site/` (English as the base, German alongside), published by GitHub Pages and opened from *Documentation* at the bottom left; the `?` buttons summarise them and link there. Structure, templates and build follow outheis-docs; the content is never shared with it.
 
 ## 5. Several and shared journals (architecture 8.11)
 
@@ -192,6 +192,23 @@ Import and export of calendar files, single and in batches, were set as a core f
 
 Two further steps were noted and deferred: fetching subscribed calendar addresses in the nightly run of the Node client (browsers usually cannot fetch them), and letting other calendar programs subscribe to the agenda, which needs plain text outside the client and therefore touches the trust model of section 2.1.
 
+## 6.4 Several servers (draft, open; 18 November 2026)
+
+Today a journal lives on one server, and the client knows which. With several servers a journal has to be found without a central directory. Considered, in this order:
+
+1. **The client knows where a journal lives.** Codes and key lines carry the address of the home server; the client talks to several servers directly (CORS allows it). Servers need no knowledge of each other. First step.
+2. **Mirrors.** Servers keep copies of encrypted files for each other; lines merge by id and revision, conflicts stay with the clients. For availability, later.
+3. **Finding a journal on an unknown server.** Either a search with a hop limit (each server knows a few others; with five each and three hops at most 155 servers are asked, once), started as a background search to see whether it is worth it; or a distributed hash table, for which the journal id (a hash already) is the natural key and a lookup takes logarithmically few hops.
+
+Forwarding by servers on behalf of clients in general (a server asks its peers whenever it lacks an id) was rejected: most new attack surface, little that 1 does not give.
+
+**Privacy.** Today only the home server knows which address uses which journal (the token is in a header; the network sees only that an address talks to the server). A table "journal X is on server Y" on other servers would add parties who know that X exists, where, and when it is looked for. Three rules keep this small:
+- **Blinded key:** the table holds a hash of the journal id, not the id; whoever sees an entry can do nothing with it at the home server.
+- **Lookups only through the own server:** the user's address stays where it is today; other servers see only the server's address.
+- **Short-lived entries:** the home server renews them regularly, otherwise they expire after hours; nothing lies with third parties for good, and a journal that is switched off disappears from the table by itself. The rule that a server keeps nothing but the encrypted file holds: these entries live in memory only.
+
+**Deleting and replacing across servers.** A server holding a copy must not be able to roll a journal back, serve a shortened state or declare it deleted. Required before any copies between servers: the owner gets a signing key pair (e.g. Ed25519); deleting and replacing count only with the owner's signature, which every server can check without reading the content (appending likewise with the allies' key). A mirror never replaces a longer state by a shorter one without such a signature. The clients remain the last instance: they know their last state and the highest revision and already detect and offer to restore vanished lines (architecture 6.4a).
+
 ## 7. Open items and next steps
 
 1. **Node client with MCP tools and a nightly run** on top of the core module (next step).
@@ -206,7 +223,8 @@ Two further steps were noted and deferred: fetching subscribed calendar addresse
 10. **Backups, server:** nightly versioned restic backup to two providers, prepared in `deploy/backup/` and described in `deploy/DEPLOY.md` 8a; to be deployed. Until then the deploy script takes a copy that is fetched by `scp`.
 11. **Backups, users:** the Node client's nightly run also writes the encrypted file of each journal into a folder of the user's choice (cloud drive, NAS), so that copies exist independently of the server.
 12. **Evaluate the experiment** (ui.md 4.14b) after a few weeks of use from saved logs: share of uses in the folded bar, unfolds per day; then adjust weights and half-life, adopt or drop it.
-13. **When the repository goes public:** enable Pages (*Settings → Pages*, source *GitHub Actions*) and add the push trigger back to `.github/workflows/pages.yml`; until then the workflow runs only by hand.
+13. Done: the repository is public, Pages publishes `site/` on every push.
 14. **Calendar, later:** a week view with a time axis (overlapping entries side by side) and moving entries by dragging, once the month view (ui.md 4.17) has proved itself.
 15. **Evaluate the compact layout and the minimal colours** (ui.md 2.9, 2.10) in daily use; adopt them as the default, keep them as options, or drop them.
 16. **Journal identity and aggregators** (architecture 8.11f, 8.11g): a `Journal id` line that survives conversions; aggregators as a bot that mirrors sources into a read-only journal marked by its `Aggregated journal:` lines (not by `Journal type:`, which stays for fixed or mixed dates), one level only (decided: no aggregator of aggregators), duplicates recognised by journal id. Depends on 5 (guest codes) and on the Node client (1).
+17. **Several servers** (6.4): first the home server's address in codes and key lines and a client that talks to several servers; owner signatures before any mirroring; search across servers only with blinded, short-lived entries and lookups through the own server.
