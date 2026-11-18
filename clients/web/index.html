@@ -171,6 +171,29 @@
   .ctest .run .mk { color:var(--muted); }
   .ctest .dt { grid-column:2; color:var(--muted); }
   #setHead { display:none; }
+  #detail { display:none; }
+  @media (min-width: 1440px) {
+    html main, html header .row { margin-left:280px; margin-right:400px; max-width:none; }
+    #detail { display:block; position:fixed; z-index:4; top:var(--hh, 61px); right:0; bottom:0; width:400px; overflow:auto; padding:0 24px 24px; background:var(--side, var(--bg)); border-left:.5px solid var(--line); }
+    #detail .dhead { display:flex; align-items:center; justify-content:space-between; min-height:52px; border-bottom:.5px solid var(--line); margin-bottom:12px; font:500 13px "Inter", var(--font, sans-serif); color:var(--muted); letter-spacing:.4px; }
+    #detail .dx { border:0; background:transparent; font-size:24px; min-height:var(--tap); padding:0 4px; color:var(--fg2); }
+    #detail .item { border-left-width:4px; padding-left:12px; margin:0; box-shadow:none; background:transparent; display:block; }
+    #detail .item .fold, #detail .item .swipehint { display:none; }
+    #detail .item .when { margin-bottom:6px; }
+    #detail .item .text { font-size:20px; line-height:1.35; }
+    #detail .item .body { margin:0; padding:0; }
+    #detail .item .chips { display:flex; flex-direction:column; align-items:stretch; gap:0; margin:16px 0 0; padding:0; border-top:.5px solid var(--line); }
+    #detail .item .chip:not(.plus):not(.notebtn) { display:flex; align-items:center; gap:8px; width:100%; min-height:44px; margin:0; padding:0; border:0; border-bottom:.5px solid var(--line); border-radius:0; background:transparent; font-size:15px; color:var(--muted); }
+    #detail .item .chip b { margin-left:auto; font-weight:500; color:var(--fg); }
+    #detail .item .cbtns { display:flex; gap:8px; margin-top:12px; }
+    #detail .item .cbtns .notebtn { display:none; }
+    #detail .dact { display:flex; flex-direction:column; margin-top:20px; border-top:.5px solid var(--line); }
+    #detail .dact button { display:flex; text-align:left; justify-content:flex-start; min-height:48px; border:0; border-bottom:.5px solid var(--line); border-radius:0; background:transparent; font-size:15px; color:var(--fg); padding:0; }
+    #detail .dempty { color:var(--muted); font-size:15px; margin-top:24px; }
+    #agenda .item { cursor:pointer; }
+    #agenda .item .fold, #agenda .item .chips { display:none !important; }
+    #agenda .item.sel { background:var(--sel, rgba(0,0,0,.045)); }
+  }
   #journalList .chev { display:none; }
   #viewSettings label.check .ld::before { content:": "; }
   @media (max-width: 600px) {
@@ -833,6 +856,7 @@
 </nav>
 <div id="fdim" class="hidden"></div>
 <aside id="fpanel" aria-label="Views and facets"></aside>
+<aside id="detail" aria-label="Entry"></aside>
 
 
 <dialog id="dlgPin">
@@ -4168,7 +4192,28 @@ function renderMonth() {
   $("addLine").placeholder = calDay === t0 ? "New item — talk or type" : "New item on " + fmtDate(calDay);
 }
 
+// The detail column (ui.md 1a, step 3): the chosen entry with all its tags, on screens
+// wide enough for panel, list and detail side by side.
+const wide3 = () => matchMedia("(min-width: 1440px)").matches;
+let selKey = null;
+const drawnItems = new Map(); // key -> [item, group] of the entries drawn last
+function renderDetail() {
+  const box = $("detail");
+  document.querySelectorAll("#agenda .item.sel").forEach(x => x.classList.remove("sel"));
+  if (!wide3()) { box.innerHTML = ""; return; }
+  const el = selKey && [...document.querySelectorAll("#agenda .item")].find(x => x.dataset.key === selKey);
+  const got = el && drawnItems.get(selKey);
+  if (!got) { box.innerHTML = `<p class="dempty">Choose an entry to see and change all its tags here.</p>`; return; }
+  el.classList.add("sel");
+  const [it, g] = got, had = openItems.has(selKey);
+  openItems.add(selKey);
+  let html; try { html = itemHtml(it, g); } finally { if (!had) openItems.delete(selKey); }
+  const j = it.j || "", idx = el.dataset.line;
+  box.innerHTML = `<div class="dhead"><span class="dj">${esc(journalName(j))}</span><button type="button" class="dx" data-dclose="1" aria-label="Close" title="Close">×</button></div>${html}`
+    + (idx && !el.dataset.ro ? `<div class="dact"><button type="button" data-dsheet="${esc(idx)}">Done or reschedule …</button><button type="button" data-note="${esc(idx)}">${it.e.note ? "Edit note" : "Add note"}</button></div>` : "");
+}
 function itemHtml({ e, idx, j, d, local, overdue, closed, carried, snapId }, g) {
+  drawnItems.set((j ? j + ":" : "") + (e.id || "line:" + idx), [arguments[0], g]);
   const ro = !!(j && readOnly(j));
   if (ro) idx = ""; // read only: no line to change
   // In Today and Tomorrow the date is implied by the group; it is shown only on wide screens (CSS).
@@ -4745,7 +4790,16 @@ window.addEventListener("pointermove", ev => {
 window.addEventListener("pointerup", ev => { if (swipe && ev.pointerId === swipe.id) endSwipe(true); });
 window.addEventListener("pointercancel", ev => { if (swipe && ev.pointerId === swipe.id) endSwipe(false); });
 
-$("agenda").addEventListener("click", ev => {
+function agendaClick(ev) {
+  // Wide screens (ui.md 1a, step 3): a tap on an entry chooses it for the detail column;
+  // its text and tags are changed there.
+  if (wide3() && !ev.target.closest("#detail")) {
+    const it = ev.target.closest(".item");
+    if (it && !ev.target.closest(".chip, .fold, button, input, [data-note]")) { selKey = it.dataset.key; renderDetail(); return; }
+  }
+  const dsh = ev.target.closest("[data-dsheet]");
+  if (dsh) { openSheet(dsh.dataset.dsheet); return; }
+  if (ev.target.closest("[data-dclose]")) { selKey = null; renderDetail(); return; }
   const cd = ev.target.closest("[data-cday]");
   if (cd) { calDay = cd.dataset.cday; if (calDay.slice(0, 7) !== calMonth.slice(0, 7)) calMonth = calDay.slice(0, 8) + "01"; render(); return; }
   const cn = ev.target.closest("[data-cnav]");
@@ -4799,7 +4853,9 @@ $("agenda").addEventListener("click", ev => {
   const text = ev.target.closest(".text");
   if (text && lastDrag < 6) editText(text);
   lastDrag = 0;
-});
+}
+$("agenda").addEventListener("click", agendaClick);
+$("detail").addEventListener("click", agendaClick);
 document.addEventListener("click", ev => {
   if (!$("pop").classList.contains("hidden") && !ev.target.closest("#pop") && !ev.target.closest(".chip")) closePop();
 });
@@ -4895,7 +4951,7 @@ function render() {
   renderStatus();
   renderNotices();
   renderViewTitle();
-  if (view === "agenda") renderAgenda();
+  if (view === "agenda") { renderAgenda(); renderDetail(); }
   else if (view === "settings") { if (!$("dlgJournal").open) renderJournalList(); renderExRow(); }
   else if (!manualActive()) { renderTextJ(); $("wc").value = visibleWc(textJ); }
 }
