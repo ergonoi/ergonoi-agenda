@@ -1020,7 +1020,7 @@
       <div class="btnrow" id="logRow"><button type="button" class="sec" id="btnLogCopy">Copy log</button><button type="button" class="sec" id="btnLogSave">Save log</button><button type="button" class="sec" id="btnLogFlush">Flush log</button><span class="hint" id="logCount"></span></div>
       <h3>About</h3>
       <div class="about">
-        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.28</p>
+        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.29</p>
         <p>Author: Markus Schatzl</p>
         <p class="am"><span id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project: </span><span class="one">Technology is potential. Accessibility makes it matter.</span></p>
         <p class="al"><a href="https://ergonoi.github.io/ergonoi-agenda/" target="_blank" rel="noopener">Documentation <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://github.com/ergonoi/ergonoi-agenda" target="_blank" rel="noopener">Source code on GitHub <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://ergonoi.com" target="_blank" rel="noopener">ergonoi.com <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
@@ -1052,7 +1052,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.9.28</span>
+    <span class="ver">v0.9.29</span>
   </footer>
 </main>
 <nav id="bnav" aria-label="View">
@@ -4636,15 +4636,18 @@ function journalFixed(j) {
 // the group limits; the facet selection and the filter tab still apply.
 // ---------------------------------------------------------------------------
 
-const SEARCH = { open: false, q: "", done: false };
+const SEARCH = { open: false, q: "", done: false, unfiltered: false };
 const fold = s => s.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
 function searchTerms() { return fold(SEARCH.q).split(/\s+/).filter(Boolean); }
 function matchesSearch(e, terms) {
   const hay = fold([e.text, e.note || "", ...e.tags.map(t => "#" + t.dim + (t.val ? "-" + t.val : ""))].join(" "));
   return terms.every(t => hay.includes(t));
 }
-function openSearch(on) {
+// A filter that hides nothing.
+function openFilter() { const f = { facet: [], off: {}, select: false, sel: [] }; for (const d of FILTER_DIMS) f.off[d] = []; return f; }
+function openSearch(on, unfiltered = false) {
   SEARCH.open = on;
+  SEARCH.unfiltered = on && unfiltered;
   if (!on) { SEARCH.q = ""; $("searchQ").value = ""; $("searchClear").classList.add("hidden"); }
   $("hsearch").classList.toggle("hidden", !on);
   document.documentElement.classList.toggle("searching", on);
@@ -4674,7 +4677,8 @@ function renderAgenda() {
   const groups = Object.fromEntries(GROUPS.map(g => [g.key, []]));
   const t0 = today(), t1 = addDays(t0, 1), t7 = addDays(t0, 7), t30 = addDays(t0, 30);
   let beyondCount = 0;
-  const flt = filterState();
+  // "Go to item" searches without the filter until the search is left (ui.md 4.2).
+  const flt = SEARCH.open && SEARCH.unfiltered ? openFilter() : filterState();
   renderFilters();
   refIndex = null;
   const ovs = overlayMap();
@@ -4778,7 +4782,7 @@ function renderAgenda() {
   if (!searching && !showBeyond && beyondCount) html += `<button class="more" data-beyond="1">Show all (${beyondCount})</button>`;
   else if (!searching && showBeyond) html += `<button class="more" data-beyond="0">Hide items after 30 days</button>`;
   $("sline").classList.toggle("hidden", !searching);
-  $("sline").innerHTML = searching ? `<span>Search: <b>${esc(SEARCH.q.trim())}</b> · ${hits} ${hits === 1 ? "entry" : "entries"}${hiddenHits ? ` · ${hiddenHits} more hidden by the filter` : ""}</span><label class="sdone"><input type="checkbox" data-sdone="1"${SEARCH.done ? " checked" : ""}> include done</label>` : "";
+  $("sline").innerHTML = searching ? `<span>Search: <b>${esc(SEARCH.q.trim())}</b> · ${hits} ${hits === 1 ? "entry" : "entries"}${SEARCH.unfiltered ? " · without the filter" : ""}${hiddenHits ? ` · ${hiddenHits} more hidden by the filter` : ""}</span><label class="sdone"><input type="checkbox" data-sdone="1"${SEARCH.done ? " checked" : ""}> include done</label>` : "";
   if (searching) { $("agenda").innerHTML = hits ? html : `<p class="hint">No entry matches the search${hiddenHits ? " with the current filter" : ""}.</p>`; return; }
   const filtered = flt.facet.length || otherActive(flt);
   $("agenda").innerHTML = /class="item|data-beyond/.test(html) ? html : filtered
@@ -6023,7 +6027,7 @@ function goToAdded() {
   const el = [...document.querySelectorAll("#agenda .item")].find(x => x.dataset.key === key);
   if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1600); return; }
   // hidden by the filter or beyond the shown days: the search finds it
-  openSearch(true); $("searchQ").value = w.text; $("searchQ").dispatchEvent(new Event("input"));
+  openSearch(true, true); $("searchQ").value = w.text; $("searchQ").dispatchEvent(new Event("input"));
 }
 // Date and time chosen in the facet choice (ui.md 4.2); without a date, today applies.
 let sheetWhen = { date: "", until: "", from: "", to: "" };
@@ -6358,7 +6362,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.9.28, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.29, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -6566,7 +6570,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.9.28";
+const APP_VERSION = "0.9.29";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)

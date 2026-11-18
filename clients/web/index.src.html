@@ -3746,15 +3746,18 @@ function journalFixed(j) {
 // the group limits; the facet selection and the filter tab still apply.
 // ---------------------------------------------------------------------------
 
-const SEARCH = { open: false, q: "", done: false };
+const SEARCH = { open: false, q: "", done: false, unfiltered: false };
 const fold = s => s.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
 function searchTerms() { return fold(SEARCH.q).split(/\s+/).filter(Boolean); }
 function matchesSearch(e, terms) {
   const hay = fold([e.text, e.note || "", ...e.tags.map(t => "#" + t.dim + (t.val ? "-" + t.val : ""))].join(" "));
   return terms.every(t => hay.includes(t));
 }
-function openSearch(on) {
+// A filter that hides nothing.
+function openFilter() { const f = { facet: [], off: {}, select: false, sel: [] }; for (const d of FILTER_DIMS) f.off[d] = []; return f; }
+function openSearch(on, unfiltered = false) {
   SEARCH.open = on;
+  SEARCH.unfiltered = on && unfiltered;
   if (!on) { SEARCH.q = ""; $("searchQ").value = ""; $("searchClear").classList.add("hidden"); }
   $("hsearch").classList.toggle("hidden", !on);
   document.documentElement.classList.toggle("searching", on);
@@ -3784,7 +3787,8 @@ function renderAgenda() {
   const groups = Object.fromEntries(GROUPS.map(g => [g.key, []]));
   const t0 = today(), t1 = addDays(t0, 1), t7 = addDays(t0, 7), t30 = addDays(t0, 30);
   let beyondCount = 0;
-  const flt = filterState();
+  // "Go to item" searches without the filter until the search is left (ui.md 4.2).
+  const flt = SEARCH.open && SEARCH.unfiltered ? openFilter() : filterState();
   renderFilters();
   refIndex = null;
   const ovs = overlayMap();
@@ -3888,7 +3892,7 @@ function renderAgenda() {
   if (!searching && !showBeyond && beyondCount) html += `<button class="more" data-beyond="1">Show all (${beyondCount})</button>`;
   else if (!searching && showBeyond) html += `<button class="more" data-beyond="0">Hide items after 30 days</button>`;
   $("sline").classList.toggle("hidden", !searching);
-  $("sline").innerHTML = searching ? `<span>Search: <b>${esc(SEARCH.q.trim())}</b> · ${hits} ${hits === 1 ? "entry" : "entries"}${hiddenHits ? ` · ${hiddenHits} more hidden by the filter` : ""}</span><label class="sdone"><input type="checkbox" data-sdone="1"${SEARCH.done ? " checked" : ""}> include done</label>` : "";
+  $("sline").innerHTML = searching ? `<span>Search: <b>${esc(SEARCH.q.trim())}</b> · ${hits} ${hits === 1 ? "entry" : "entries"}${SEARCH.unfiltered ? " · without the filter" : ""}${hiddenHits ? ` · ${hiddenHits} more hidden by the filter` : ""}</span><label class="sdone"><input type="checkbox" data-sdone="1"${SEARCH.done ? " checked" : ""}> include done</label>` : "";
   if (searching) { $("agenda").innerHTML = hits ? html : `<p class="hint">No entry matches the search${hiddenHits ? " with the current filter" : ""}.</p>`; return; }
   const filtered = flt.facet.length || otherActive(flt);
   $("agenda").innerHTML = /class="item|data-beyond/.test(html) ? html : filtered
@@ -5133,7 +5137,7 @@ function goToAdded() {
   const el = [...document.querySelectorAll("#agenda .item")].find(x => x.dataset.key === key);
   if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1600); return; }
   // hidden by the filter or beyond the shown days: the search finds it
-  openSearch(true); $("searchQ").value = w.text; $("searchQ").dispatchEvent(new Event("input"));
+  openSearch(true, true); $("searchQ").value = w.text; $("searchQ").dispatchEvent(new Event("input"));
 }
 // Date and time chosen in the facet choice (ui.md 4.2); without a date, today applies.
 let sheetWhen = { date: "", until: "", from: "", to: "" };
