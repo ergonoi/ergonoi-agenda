@@ -1,6 +1,6 @@
 // The panel (ui.md 4.6): the own journal's facets first; the further journals folded below as
-// "More journals (n)", allies first, then guests, each by name; open by itself when one of
-// their facets is hidden; one journal only: no fold.
+// "More journals (n)", allies first, then guests, each by name; it keeps the state it was left
+// in and names hidden facets; one journal only: no fold. "without facet" only with such entries.
 import { device, newAccount, addLine, check, sleep, settled } from "./lib.mjs";
 
 const make = (p, name, line) => p.evaluate(async (name, line) => {
@@ -39,7 +39,20 @@ export default async function ({ svc, b }) {
   // A hidden facet in there keeps it open.
   await A.evaluate(() => { document.getElementById("fpJour").open = true; }); await sleep(100);
   await A.evaluate(() => [...document.querySelectorAll("#fpJour .fac")].pop().click()); await sleep(200);
-  await A.evaluate(() => { localStorage.setItem("agenda.fjour", "0"); openPanel(false); openPanel(true); }); await sleep(200);
-  check(await A.evaluate(() => document.getElementById("fpJour").open), "open while one of its facets is hidden");
+  // Closed by hand: it stays closed, and its line says what is hidden.
+  await A.evaluate(() => { document.getElementById("fpJour").open = false; }); await sleep(200);
+  await A.evaluate(() => { openPanel(false); openPanel(true); }); await sleep(200);
+  check(await A.evaluate(() => !document.getElementById("fpJour").open && /· 1 hidden/.test(document.querySelector("#fpJour summary").textContent)), "closed stays closed after closing and opening the panel, with the hidden count");
+  await A.evaluate(() => { document.getElementById("fpJour").open = true; }); await sleep(200);
+  await A.evaluate(() => { openPanel(false); openPanel(true); }); await sleep(200);
+  check(await A.evaluate(() => document.getElementById("fpJour").open), "open stays open");
+  // Without facet: only with entries without a facet, below the own journal.
+  await A.evaluate(() => document.querySelector('#fpanel [data-fnone]').click()); await sleep(200);
+  check(await A.evaluate(() => !document.querySelector('#fpanel [data-facetf=""]')), "no row without facet when no entry lacks one");
+  await A.evaluate(() => document.querySelector('#fpanel [data-fall]').click()); await sleep(100);
+  await A.evaluate(() => openPanel(false));
+  await A.evaluate(() => { S.wc += "\nLoose note #date-" + today(); render(); }); await sleep(200);
+  await A.evaluate(() => openPanel(true)); await sleep(200);
+  check(await A.evaluate(() => { const r = document.querySelector('#fpanel [data-facetf=""]'); return r && r.nextElementSibling && r.nextElementSibling.id === "fpJour"; }), "with one, the row stands below the own journal, before More journals");
   check(!A.errors.length && !B.errors.length, "no page errors " + A.errors.concat(B.errors).join(" | "));
 }
