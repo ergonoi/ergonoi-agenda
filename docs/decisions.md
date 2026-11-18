@@ -258,10 +258,18 @@ Phrases chosen by the user were rejected: their randomness cannot be judged (peo
 
 Instead every device chooses the language of its words: English (BIP39), German (dys2p `de-2048`: nouns, verbs and adjectives, 4 to 8 letters, no umlauts), French, Spanish, Italian, Portuguese, Czech (BIP39, accents removed). Default is the browser's language where a list exists. New phrases are drawn from that list and keep their language; ally codes are shown in it and read in any list. Accents typed or not make no difference. Existing English phrases are unchanged.
 
+
+## 6.9 Calendar subscriptions without the service (21 November 2026)
+
+Wanted: a journal that follows a calendar feed, such as a school calendar, set up and tested in the web client. A test with a real school portal showed the limit: the feed answers with a valid calendar (97 events) but without `Access-Control-Allow-Origin`, so the browser does not hand the answer to a web page, whenever and however often it asks.
+
+Rejected: the service fetching the feed and passing it on unchanged. It would work for every provider, but the service would see the address and the events in plain text, if only for the moment of the request. The service must never see contents; this holds for feeds as well.
+
+Chosen: only clients that hold the key fetch. The web client does so where the provider allows web pages to fetch (architecture 8.13 names the conditions) and says plainly where it does not. For other feeds the CLI (cron or launchd) or later a native shell around the web client on a phone. No device has to run all the time; any that runs now and then is enough, as the import is idempotent. Not built yet: web client and CLI are to be built together, so that the subscription line and the closing of events gone from the feed are tried on both paths before journals hold subscriptions.
 ## 7. Open items and next steps
 
 1. **Node client with MCP tools and a nightly run** on top of the core module (next step).
-2. **Calendar subscriptions** (6.3): the Node client fetches subscribed `.ics` addresses in its nightly run; whether other calendar programs may subscribe to the agenda is to be decided (trust model).
+2. **Calendar subscriptions** (6.3, 6.9): designed, not built; whether other calendar programs may subscribe to the agenda is to be decided (trust model).
 3. The pickers of 4.3a are tested in Chrome only; behaviour on iOS and Android has to be confirmed by testers.
 4. Proposed and not yet decided: hints per line in the import preview; merging another journal file (keep ids and revisions, try the own phrase first) (calendar import is done, 6.3).
 5. **Private lines, ally codes, read-only access, deleting by the owner** (architecture 8.11e), needed in the medium term, not a priority: from the phrase a private key, an ally secret and a delete token; the account ID combines the fingerprint of the delete token with the read token, so the service tells owner, allies and guests apart without storing anything beyond the file. Ally codes have 16 words (accepted). Names of the levels, chosen because most journals belong to people: *owner* (the phrase), *ally* (may read and write), *guest* (may only read). Key lines, aliases, overlays and add-on lines become private lines in the same file. Existing journals move by conversion and are added again in the clients.
