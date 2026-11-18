@@ -666,7 +666,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.7.1</span>
+    <span class="ver">v0.7.2</span>
     <a href="#" id="aboutLink">About</a>
     <a href="https://outheis-labs.github.io/outheis-agenda/" target="_blank" rel="noopener">Documentation <svg width="7" height="7" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
   </footer>
@@ -696,7 +696,7 @@
     <strong>οὐθείς Agenda</strong>
     <p>οὐθείς Agenda is an <b>ergonoi</b> project:</p>
     <p style="margin-top:14px">Technology is potential. Accessibility makes it matter.</p>
-    <p class="hint">Version 0.7.1 · outheis-labs</p>
+    <p class="hint">Version 0.7.2 · outheis-labs</p>
     <div class="btnrow" style="justify-content:flex-end"><button class="primary">Close</button></div>
   </form>
 </dialog>
@@ -954,14 +954,9 @@
   <form method="dialog">
     <strong>Note</strong>
     <div class="hint" id="noteFor" style="margin:4px 0 0"></div>
-    <textarea id="noteText" rows="8" maxlength="500" autocomplete="off"></textarea>
+    <div style="position:relative"><textarea id="noteText" rows="8" maxlength="500" autocomplete="off" style="padding-right:30px"></textarea><button type="button" id="noteClear" class="qclear hidden" style="top:8px; transform:none" aria-label="Clear the note"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>
     <div class="hint" id="noteCount" style="text-align:right; margin:4px 0 0"></div>
-    <div style="display:flex; gap:8px; align-items:center; margin-top:12px">
-      <button type="button" class="danger" id="noteRemove">Remove note</button>
-      <span style="flex:1"></span>
-      <button type="button" class="ghost" id="noteCancel">Cancel</button>
-      <button type="button" class="primary" id="noteSave">Save</button>
-    </div>
+    <p class="hint" style="margin:4px 0 0">Closing keeps what is written; an empty note is removed. <i>Undo</i> takes it back.</p>
   </form>
 </dialog>
 <dialog id="dlgScan">
@@ -5045,7 +5040,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.7.1, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.7.2, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -5211,20 +5206,20 @@ function explainRecurrence(ref) {
 
 // The note of an entry (architecture 2.4): up to NOTE_MAX characters kept in the line
 // as {{…}}; the list shows only an icon, which opens this field.
-let noteRef = null;
+let noteRef = null, noteOrig = "";
 function openNote(ref) {
   const e = entryAt(ref);
   if (!e) return;
   noteRef = ref;
   $("noteFor").textContent = e.text;
   $("noteText").value = e.note || "";
-  $("noteRemove").classList.toggle("hidden", !e.note);
+  noteOrig = e.note || "";
   noteCount();
   uiBusy = true; hideToast();
   $("dlgNote").showModal();
   $("noteText").focus();
 }
-function noteCount() { $("noteCount").textContent = $("noteText").value.length + " / " + NOTE_MAX; }
+function noteCount() { $("noteCount").textContent = $("noteText").value.length + " / " + NOTE_MAX; $("noteClear").classList.toggle("hidden", !$("noteText").value); }
 $("noteText").addEventListener("input", noteCount);
 function saveNote(v) {
   const ref = noteRef; noteRef = null;
@@ -5233,11 +5228,17 @@ function saveNote(v) {
   updateLine(ref, x => { x.note = v; });
   render(); scheduleSync();
 }
-// A note without visible characters is removed from the entry.
-$("noteSave").onclick = () => { const v = $("noteText").value.replace(/\r/g, "").trim(); saveNote(/[^\s\u200b-\u200d\u2060\ufeff]/.test(v) ? v.slice(0, NOTE_MAX) : ""); };
-$("noteRemove").onclick = () => saveNote("");
-$("noteCancel").onclick = () => { noteRef = null; $("dlgNote").close(); };
-$("dlgNote").addEventListener("close", () => { uiBusy = false; });
+$("noteClear").onclick = () => { $("noteText").value = ""; noteCount(); $("noteText").focus(); };
+// Closing the dialog (×, Escape, outside) keeps the text (ui.md 4.9); a note without
+// visible characters is removed from the entry; nothing is written if it is unchanged.
+$("dlgNote").addEventListener("close", () => {
+  uiBusy = false;
+  if (noteRef === null) return;
+  const t = $("noteText").value.replace(/\r/g, "").trim();
+  const v = /[^\s\u200b-\u200d\u2060\ufeff]/.test(t) ? t.slice(0, NOTE_MAX) : "";
+  if (v === noteOrig) { noteRef = null; return; }
+  saveNote(v);
+});
 
 // ---------------------------------------------------------------------------
 // Journal version (architecture 3.7): the oldest app version that can write the
@@ -5245,7 +5246,7 @@ $("dlgNote").addEventListener("close", () => { uiBusy = false; });
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.7.1";
+const APP_VERSION = "0.7.2";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
