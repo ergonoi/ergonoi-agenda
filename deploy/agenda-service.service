@@ -1,0 +1,27 @@
+[Unit]
+Description=journal relay
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=agenda
+Group=agenda
+WorkingDirectory=/var/lib/agenda
+ExecStart=/usr/local/bin/agenda-service -listen 127.0.0.1:41380 -data /var/lib/agenda/accounts
+# Member tables (architecture 8.4a) are kept in memory only and start anew with
+# every restart. To keep them across restarts, add to ExecStart:
+#   -members-dir /var/lib/agenda/members
+# (/tmp does not survive a restart here: PrivateTmp gives the service a new one.)
+# Not decided yet; off by default.
+Restart=on-failure
+RestartSec=5
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/agenda
+
+[Install]
+WantedBy=multi-user.target

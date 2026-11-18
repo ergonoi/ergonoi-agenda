@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>οὐθείς Agenda — Guide</title>
+<link rel="icon" href="favicon-32.png">
+<style>
+  @font-face { font-family:"IBM Plex Sans"; font-weight:100 700; font-display:swap; src:url(fonts/ibm-plex-sans-variable.woff2) format("woff2"); }
+  @font-face { font-family:"Inter"; font-weight:100 900; font-display:swap; src:url(fonts/inter-latin-wght.woff2) format("woff2"); unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+2000-206F,U+20AC,U+2122,U+2212; }
+  @font-face { font-family:"Inter"; font-weight:100 900; font-display:swap; src:url(fonts/inter-greek-wght.woff2) format("woff2"); unicode-range:U+0370-03FF; }
+  @font-face { font-family:"Inter"; font-weight:100 900; font-display:swap; src:url(fonts/inter-greek-ext-wght.woff2) format("woff2"); unicode-range:U+1F00-1FFF; }
+  @font-face { font-family:"IBM Plex Mono"; font-weight:400; font-display:swap; src:url(fonts/ibm-plex-mono-latin-400.woff2) format("woff2"); }
+  :root { --fg:#1A1A1A; --muted:#6B6767; --line:#B8B4B4; --aqua:#97EAD2; }
+  body { margin:0; font:16px/1.55 "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--fg); background:#fff; }
+  header { background:var(--aqua); border-bottom:.5px solid #1A1A1A; padding:14px 16px; }
+  header a { color:var(--fg); text-decoration:none; font-size:15px; }
+  main { max-width:720px; margin:0 auto; padding:8px 16px 48px; }
+  h1, h2, h3, header .name { font-family:"Inter", sans-serif; }
+  h1 { font-size:26px; margin:18px 0 8px; }
+  h2 { font-size:20px; margin:32px 0 8px; border-top:.5px solid var(--line); padding-top:20px; }
+  h3 { font-size:17px; margin:22px 0 6px; }
+  code { font:14px "IBM Plex Mono", ui-monospace, "SF Mono", Consolas, monospace; }
+  pre { overflow:auto; padding:10px 12px; border:.5px solid var(--line); border-radius:6px; }
+  table { border-collapse:collapse; width:100%; font-size:14px; }
+  th, td { text-align:left; vertical-align:top; padding:6px 8px 6px 0; border-bottom:.5px solid var(--line); }
+  li { margin:4px 0; }
+</style>
+</head>
+<body>
+<header><a href="./">← οὐθείς Agenda</a></header>
+<main>
+<h1>οὐθείς Agenda — Guide</h1>
+<h2>What it is</h2>
+<p>οὐθείς Agenda is an open and lightweight planning journal: appointments, tasks and notes in one list, on all your devices, kept confidential by its design rather than by a promise.</p>
+<ul>
+<li><strong>Confidential by design.</strong> The server keeps exactly one file per journal, and that file is encrypted end to end. The key is derived from the eight words of the journal and never leaves your devices, so the server knows nothing about the content and needs to know nothing (zero knowledge). Everything that gives access lies with you, in your app.</li>
+<li><strong>Cross-device.</strong> Every device with the eight words of your account shows the same journal; changes are synchronised through the server.</li>
+<li><strong>Sharing is your own agreement.</strong> Whether you share a journal, and with whom, is settled between the people involved: whoever gets the words of a journal can use it. No platform has to support it, and nobody has to be invited through an account of some provider.</li>
+<li><strong>Across platforms.</strong> Sharing calendars between people on different systems usually takes a lot of effort and does not scale. A shared journal works the same in every browser, on every operating system.</li>
+<li><strong>Compatible.</strong> Calendar files (<code>.ics</code>, iCal) can be imported and exported, so appointments can be taken over from other calendars and handed back to them.</li>
+</ul>
+<p>This guide explains how to use the agenda. The technical background is in the architecture; this page covers what you need to know to work with it.</p>
+<h2>Entries</h2>
+<p>An entry is one line: text first, tags after it.</p>
+<pre><code>Call the plumber #facet-home #date-2026-11-20 #time-08:00
+</code></pre>
+<p>You do not have to type tags. Write or dictate the text in the field at the top and tap <em>Add</em>. If the line has no facet, the app asks for one. Everything else can be added later with the <code>+</code> next to an entry's tags.</p>
+<p><strong>Notes.</strong> An entry can carry a note of up to 500 characters, such as an address, a phone number or an agenda: the note button next to the <code>+</code> opens a text field; <em>Save</em> attaches the note, an empty field removes it. The list then shows a small document icon after the entry's text; tapping it opens the note. In the line, the note stands in double braces before the tags: <code>Meet the client {{Address: Garden Square 3}} #facet-work</code>. Calendar descriptions become notes when you import a calendar file.</p>
+<table>
+<thead>
+<tr>
+<th>Tag</th>
+<th>Meaning</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#facet-…</code></td>
+<td>area of life or work; every entry has one, at most three (the first decides the journal and the colour; add more with <code>+</code> → <em>another facet</em>)</td>
+<td><code>#facet-work</code>, <code>#facet-garden #facet-school</code></td>
+</tr>
+<tr>
+<td><code>#date-…</code></td>
+<td>the day from which the entry appears; two dates make a span</td>
+<td><code>#date-2026-11-20</code></td>
+</tr>
+<tr>
+<td><code>#time-…</code></td>
+<td>a time, a span or a duration</td>
+<td><code>#time-08:00</code>, <code>#time-09:00-15:00</code>, <code>#time-45m</code>, <code>#time-1h30m</code></td>
+</tr>
+<tr>
+<td><code>#recurring-…</code></td>
+<td>repetition</td>
+<td><code>#recurring-daily</code>, <code>#recurring-tue-thu</code>, <code>#recurring-monthly-1-15</code></td>
+</tr>
+<tr>
+<td><code>#rank-…</code></td>
+<td>importance</td>
+<td><code>high</code>, <code>medium</code>, <code>low</code></td>
+</tr>
+<tr>
+<td><code>#size-…</code></td>
+<td>effort</td>
+<td><code>s</code>, <code>m</code>, <code>l</code></td>
+</tr>
+<tr>
+<td><code>#action-…</code></td>
+<td>state</td>
+<td><code>required</code>, <code>now</code>, <code>waiting</code>, <code>idle</code></td>
+</tr>
+<tr>
+<td><code>#topic-…</code></td>
+<td>subject; words may be joined by hyphens</td>
+<td><code>#topic-taxes</code>, <code>#topic-open-day</code></td>
+</tr>
+<tr>
+<td><code>#done-…</code></td>
+<td>closed on this day</td>
+<td><code>#done-2026-11-20</code></td>
+</tr>
+</tbody>
+</table>
+<p>A new account starts with the facets <code>private</code> and <code>work</code> and the topics <code>sports</code>, <code>official</code> and <code>travel</code>, each kept by a Tag definition (see below), and with a few example entries. <em>Settings → Example tags and entries</em> removes them with <em>Delete</em> or keeps them with <em>Keep</em>; if your own entries already use these tags, you choose for each whether it keeps the tag, moves to another facet or topic (a new one can be created there), or is deleted. Facets and topics are not configured anywhere else. A value exists as soon as an entry uses it, and it disappears when no entry has used it for longer than the retention period (90 days after an entry is closed).</p>
+<h2>Working with the list</h2>
+<ul>
+<li><strong>Swipe right</strong> on an entry: mark it done or reschedule it (next day, 2 days, 1 or 2 weeks, 1 or 3 months, or another date). On a recurring entry this concerns its next occurrence only: <em>Skip</em> it (the gym on Monday is cancelled) or <em>Reschedule</em> it (Wednesday's session moves to Friday, same time); the series stays as it is. <em>Delete series</em> ends it altogether.</li>
+<li><strong>Fixed or flexible.</strong> You choose nothing when adding: entries with a time or a repetition belong to their date, others move along. Where that is wrong, set <code>anchor</code> in the entry's tag menu. A fixed entry belongs to its day — a visit, an appointment, something that must happen exactly then. If its day passes without <em>Done</em>, it waits in <em>Past</em> at the top of the list with <em>Done</em> and <em>Reschedule</em>, so a visit that fell through is not lost. A flexible entry — writing an offer, calling someone back — moves along to <em>Today</em> each day, marked <em>now</em>, until you mark it done. A time window that may slip to the next day gets <code>anchor</code> <em>flex</em>. Entries imported from a calendar pass without asking; their calendar decides. A <em>memo</em> is something to keep and look up later, such as a customs number: tap the bookmark when adding. It is never due, appears in no list, and the search finds it under <em>Memos</em>.</li>
+<li><strong>Birthdays, holidays.</strong> For a journal that only holds fixed dates, tick <em>Fixed dates</em> in the journal's <em>Edit</em> dialog (settings, <em>Journals</em>): its entries pass without asking, for everyone who shares it.</li>
+<li><strong>Search:</strong> the magnifier at the top (or <code>/</code> on a computer) searches text, notes and tags of all journals, also beyond the next 30 days; <em>include done</em> finds closed entries as well.</li>
+<li><strong>Date of a new entry:</strong> set it in the facet choice that opens after <em>Add</em> (calendar and clock buttons); without it, the entry is for today. In the tag menu, <code>date</code> and <code>time</code> have calendar and clock buttons (<em>from</em>, <em>to</em>).</li>
+<li><strong>Tap the text</strong> to change it; <strong>tap a tag</strong> to change or remove it; <strong><code>+</code></strong> adds a tag. For values without a fixed list (facet, topic, date, time, recurrence) the field at the top of the menu shows the complete tag, e.g. <code>#topic-</code>, and you type only the value.</li>
+<li><strong>Groups:</strong> Today (with overdue entries), Tomorrow, Next 7 days, Later (up to 30 days). Each group shows a limited number of entries; <em>more</em> shows the rest. Entries with a clock time are always shown.</li>
+<li><strong>Text</strong> shows the working copy as plain text, one entry per line. <strong>Manual edit</strong> makes it editable like a text file: change lines in place, add lines, select everything and copy it. To delete lines, tick their boxes on the left and press <em>Delete</em>. Nothing is written until you tap <em>Save</em>; <em>Review</em> lists what you changed, and lines that cannot be read (an impossible date, a missing facet) are listed and must be corrected first. <em>Dismiss</em> discards your changes.</li>
+</ul>
+<h2>Month view</h2>
+<p><em>Month</em> next to <em>List</em> shows the same entries as a calendar: dots in the facet colours under each day, and below the grid the entries of the day you tap, handled as in the list. A series appears on each of its days; <em>Skip</em>, <em>Done</em> and <em>Reschedule</em> in the swipe menu then concern that day. Entries without a date, and flexible ones carried from earlier days, appear on today only. With another day chosen, a new entry gets that date. Filters apply as in the list.</p>
+<h2>Filter</h2>
+<ul>
+<li>The <strong>facet bar</strong> below the input field shows every facet with its number of entries. Tap a facet to hide or show it; press and hold to show only this facet; <em>All</em> shows all facets again, <em>None</em> hides all of them, so that you can switch on single ones.</li>
+<li><strong>Same name in several journals.</strong> The bar has one button per name, e.g. <em>sport</em> for all journals that have it; its colour line shows one segment per journal. To choose the facet of one journal only, use <em>Facets by journal</em> in the filter tab; the bar then shows <em>sport</em> dimmed and the filter line says which journals are shown.</li>
+<li><strong>Order and folding.</strong> The facets you assign most often come first; the order changes at most once a day. With many facets the bar shows two rows and a button <code>+n</code> for the rest, which you can unfold and fold again. Facets you have switched off are folded last, and the button tells how many of the folded ones are off. After <em>None</em>, the facets you switch on come first, in the order you chose them; <em>All</em> ends this.</li>
+<li>The <strong>filter tab</strong> (funnel) covers the other tags: topic, action, rank, size, time, recurrence. Tap to hide or show a value, press and hold to show only this value. The result appears in the list, with a line naming the filter and a <em>Reset</em> button. <em>Reset</em> clears these filters; the facet selection stays.</li>
+</ul>
+<h2>Experimental: facet bar ordered by use</h2>
+<p><em>Settings → Experimental → Order the facet bar by how you use the facets</em> orders the bar not by how many entries carry a facet but by what you do with it: giving it to an entry counts most, setting it as filter less, seeing its entries in <em>Today</em> or <em>Tomorrow</em> least. Recent use counts more than old use (a use from two weeks ago counts half). The order changes at most once a day, so that the buttons stay where they are while you work.</p>
+<ul>
+<li>The setting and the scores are kept in one line of your journal, <code>Addon function: statistical facet order …</code>, so the order is the same on all your devices. Switched off, the bar is ordered by counts again; the scores are kept.</li>
+<li>Switching it on also switches on the diagnostic log (<em>Settings → Log</em>), which then records how the order was chosen and whether the facets you used were visible without unfolding. While the experiment is on, the log cannot be switched off. Nothing is written while the log is off. To help evaluate the experiment, send the file from <em>Save log</em> to whoever runs your server or develops the app; it contains facet names, never entries or phrases.</li>
+<li>The experiment is a heuristic and may change or disappear.</li>
+</ul>
+<h2>Experimental: compact layout and minimal colours</h2>
+<p>Two switches under <em>Settings → Experimental</em>, each for this device only and combinable. <em>Compact layout</em> gives a denser view: smaller type and buttons, entries with the time on the left. <em>Minimal colours</em> keeps colour for what needs attention (facets, overdue, now, danger) and draws everything else in black, grey and white. Nothing else changes; switch them off again at any time.</p>
+<h2>A shared journal in your own terms</h2>
+<p>In a shared journal's dialog (<em>Settings → Journals</em>, tap the journal) you can choose one of your own facets under <em>For you only: every entry of this journal also has the facet</em>. From then on every entry of that journal carries it in your views, also new ones, and nobody else sees it. Give the journals of your three children your facet <em>family</em>, and one tap on <em>family</em> shows everything of all three together with your own family entries.</p>
+<h2>Moving facets to another journal</h2>
+<p>To give some of your facets a journal of their own, create the journal (<em>Settings → Journals → Add journal → Create a new journal</em>), open it and tap <em>Pass facets</em>. Choose the facets, one or several; the preview says what will move. Every entry whose first facet is one of them moves, open or done, with the facet's definition; an entry that has it only as a further facet stays and loses it. Nothing is copied: afterwards the facet exists only in the new journal. If the server cannot be reached, nothing is moved.</p>
+<h2>Keeping values: Tag definitions</h2>
+<p>A facet or topic disappears when it is no longer used. To keep it, add an entry that starts with <code>Tag definition:</code> and is dated 31 December 3000:</p>
+<pre><code>Tag definition: annual tax return #type-meta #topic-taxes
+Tag definition: family appointments #facet-family #type-meta
+</code></pre>
+<p>When you create a facet or topic in the field for a new value (with the prefix <code>#facet-</code> or <code>#topic-</code>), the app writes this line for you. With several journals it asks which journal a new facet belongs to, and in which journals a new topic is kept. The <code>?</code> next to the field summarises this. Such entries never appear in the list, because the list ends three months ahead; they stay in the journal and can be edited in the <em>Text</em> view. The text after the colon describes what the value stands for; a language model that sorts new entries can use it. Tag definitions need no facet.</p>
+<p>A Tag definition with a facet also decides which journal that facet belongs to (see <em>Sharing a journal</em>).</p>
+<h2>Your account</h2>
+<p>The account is a phrase of eight words, shown once when the account is created. Write it down. It is the only key to your journal: the server stores only encrypted lines and cannot read them, and nobody can restore a lost phrase.</p>
+<ul>
+<li>Whoever has the phrase can read and change the journal. Do not pass it on except for a journal you share on purpose.</li>
+<li><em>Settings → Account ID</em> is a code you can give to the operator of the server to find your file. It does not give access to anything.</li>
+<li><em>Export journal file</em> downloads the encrypted file; with the phrase it can be opened in any browser with <em>Open local journal</em>, without a server. The plain-text export is readable by anyone who gets the file.</li>
+</ul>
+<h2>Sharing a journal</h2>
+<p>Several people can share a journal, for example for family appointments. A shared journal is an account of its own with its own phrase; everyone who shares it adds it in their app. Your own journal stays private.</p>
+<ol>
+<li>One person opens <em>Settings → + Add journal</em>, taps <em>Create a new journal</em>, gives it a name and writes down the eight words.</li>
+<li>The others open <em>Settings → + Add journal</em>, enter the same eight words and tap <em>Add</em>.</li>
+<li>Someone declares the facet that belongs to the shared journal, with a Tag definition in that journal (in the <em>Text</em> view, choose the journal first):</li>
+</ol>
+<p><code>Tag definition: family appointments #facet-family #type-meta</code></p>
+<p>From then on, in every app that has the shared journal:</p>
+<ul>
+<li>Wherever you choose a facet, each one carries the name of its journal in small letters (<em>family · Familie</em>). Choosing <em>family · Familie</em> writes the entry to the shared journal. Several journals may have a facet of the same name (three children with <code>sports</code> each); they are different facets.</li>
+<li>If you type <code>#facet-family</code> yourself, the entry goes to the shared journal only after you confirm it; a facet of one of your own journals needs no confirmation. In the list, hovering over a facet shows its journal.</li>
+<li>The list shows the entries of all your journals together. Entries from a shared journal carry its name.</li>
+<li>To move an entry to another journal, tap its facet and choose the facet with the other journal's name; the current facet is also offered in every journal that does not have it yet (<em>new here</em>). <em>Undo</em> takes it back. Nothing is ever moved without your choice.</li>
+</ul>
+<h3>Your journals on all your devices</h3>
+<p>The journals you add belong to your account: add one on your phone, and your other devices show it after their next sync. <em>Remove from my journals</em> removes it from all your devices; the journal itself stays on the server for the others.</p>
+<p>Only the person who created a journal is offered <em>Delete on server</em>. If the owner deletes a shared journal, your app says so and keeps its last state, so you can still export it; then remove it.</p>
+<h3>Who uses a journal</h3>
+<p><em>Edit</em> shows under <em>Used by</em> how many people have used the journal recently: you, and how many others. The server recognises people by an ID that is different for every journal and does not tell who they are; all your devices count as one. It is a guide, not proof.</p>
+<h3>Your own tags on shared entries</h3>
+<p>On an entry of another journal, <code>+</code> → <em>another facet</em> or <em>another topic</em> adds a tag only you see, for example <code>family</code> on your children's school and music entries. It is kept in your own journal; the others' journal is not changed. Such tags have a dashed border. If the entry is closed or removed, your tag goes with it.</p>
+<h3>Preparations and references</h3>
+<p><code>+</code> → <em>reference to an entry</em> links an entry to another one, for example "Find the sheet music" to the music lesson it belongs to. The chip shows the other entry's text; tapping it offers to go there.</p>
+<h3>Stop sharing</h3>
+<p><em>Settings → Journals → Edit → Stop sharing for anybody</em> (only for a journal you created) ends sharing for everyone at once. Behind the scenes, the app moves the journal's content into a newly created journal with new words, puts the new journal on all your devices and deletes the old one on the server. The others see the old journal as deleted by its owner; what they have already seen stays in their browser. To go on sharing with some of them, give them the new words or the QR code again.</p>
+<h3>Passing the words by QR code</h3>
+<p>Instead of reading out the eight words: open <em>Settings → Journals → Edit → Show QR code</em> on one phone, and on the other <em>+ Add journal → Scan QR code</em>. The app reads the code itself; the words do not go through a link, the browser history or the server. On a computer without camera, type the words.</p>
+<h3>The journal's name</h3>
+<p>A journal names itself with an entry like this:</p>
+<pre><code>Journal name: Familie #type-meta
+</code></pre>
+<p>Everyone who shares the journal sees the same name. <em>Settings → Journals → Edit</em> changes it. For a journal someone else created you can also set an <strong>alias</strong> there: it is shown only to you, on all your devices, and does not change the name the others see. When you add an existing journal, the name you type becomes your alias. A journal without such an entry is shown with the first four characters of its account ID.</p>
+<h3>Two journals, one facet name</h3>
+<p>Two people may well choose the same facet name, for example <code>familie</code> in their own journal and in the shared one. The app keeps them apart: wherever the name occurs in more than one journal, the journal's name follows it (<code>familie · Familie</code>), each has its own colour and can be filtered on its own, and when you add an entry with that facet, the app asks which one you mean. The journals themselves keep the plain name.</p>
+<p>If you want to change a name anyway, <em>Settings → Rename tag</em> renames a facet or topic across the journals you choose (all of them unless you leave some out): choose the value and the new name; the preview tells you per journal how many entries change. Tag definitions are renamed with the entries. If the new name already exists in a journal, both values are merged there.</p>
+<p>If entries with a facet that another journal declares are still in your own journal, a notice offers to move them there, or to keep them where they are.</p>
+<h2>Repeating entries with two dates</h2>
+<p>A repeating entry with two dates is read in one of two ways, depending on how far apart the dates are:</p>
+<ul>
+<li><strong>Closer than one repetition:</strong> one occurrence over several days that repeats. <code>Summer festival #date-2026-07-10 #date-2026-07-12 #recurring-yearly</code> is every year from 10 to 12 July.</li>
+<li><strong>Otherwise:</strong> the start and end of the series. <code>Training #date-2026-11-16 #date-2027-03-31 #time-12:00-13:00 #recurring-mon-wed</code> is Mondays and Wednesdays from 12 to 13 o'clock, until 31 March.</li>
+</ul>
+<p>Weekday lists such as <code>mon-wed</code> and <code>daily</code> always mean start and end of the series. The list shows how an entry is read, and marks cases that look unintended with <em>check dates</em>.</p>
+<h2>Date and time of a new entry</h2>
+<p>Type the entry and tap <em>Add</em>. When you then choose its facet, the calendar and clock buttons at the top right of that dialog set its date and time (<em>from</em>, <em>to</em>). Without a date, the entry is for today. You can also type the tags yourself, for example <code>#date-2026-11-27 #time-09:30-10:15</code>.</p>
+<h2>Calendar files</h2>
+<p>The agenda can be the one place for appointments from all your calendars.</p>
+<ul>
+<li><strong>Import:</strong> <em>Import entries</em> → <em>Choose files</em> accepts one or several <code>.ics</code> files (for example invitations you received, or an export of your work or private calendar); you can also paste the content of a calendar file. In the preview you choose the facet, for all events or one by one. Importing the same file again later updates the entries instead of duplicating them; their facet stays as you set it. Repetitions that the agenda cannot express (every second week, for example) are imported once and marked for review.</li>
+<li><strong>Export:</strong> <em>Settings → Export calendar</em> writes the open items of the facets you choose, for 30 days, 3 months or all, into one <code>.ics</code> file that Outlook, Apple Calendar, Google Calendar or Proton can import. This file is not encrypted.</li>
+</ul>
+<h2>Printing</h2>
+<p><em>Settings → Print agenda</em> prints the next 30 days on one A4 page as a checklist with room for notes, for the facets you select (preselected from the facet bar). Each line carries a short reference to the entry.</p>
+<h2>Without network</h2>
+<p>The app keeps a copy of your journals in the browser and works offline. Changes are sent when the server is reachable again. <em>in sync</em> in the header shows that everything has been sent.</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<!-- Source of the app icon. Render at the size given by ?s= (default 512) with a
+     headless browser; fonts: Inter 600 (OFL), from @fontsource/inter, placed next
+     to this file as inter-latin-600-normal.woff2. See docs/ui.md, 2.7. -->
+<html><head><meta charset="utf-8"><style>
+@font-face { font-family:Inter; font-weight:600; src:url(inter-latin-600-normal.woff2); }
+html, body { margin:0; }
+#icon { position:relative; overflow:hidden; background:linear-gradient(#97EAD2 0 37.5%, #C490D1 37.5% 100%); }
+#icon span { position:absolute; left:0; right:0; top:50%; transform:translateY(-50%); text-align:center; color:#460A46; font:600 1px/1 Inter; }
+</style></head><body><div id="icon"><span>A</span></div>
+<script>
+const s = Number(new URLSearchParams(location.search).get("s")) || 512;
+const el = document.getElementById("icon");
+el.style.width = el.style.height = s + "px";
+el.querySelector("span").style.fontSize = (s * 150 / 180) + "px";
+</script></body></html>

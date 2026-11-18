@@ -1,0 +1,10 @@
+# build output
+/agenda-service
+/agenda-service.exe
+/agenda-service-linux-*
+/clients/demo/dist/
+
+# user data (journal, keys, tokens, settings, filled-in prompts)
+/human/
+/data/
+/site/html/
