@@ -34,7 +34,7 @@ Die vollständige Liste, mit den Tags, die die App selbst schreibt, steht unter 
 
 ## Notizen zum Eintrag
 
-Ein Eintrag kann eine Notiz von bis zu 500 Zeichen tragen: eine Adresse, eine Telefonnummer, eine Tagesordnung. Die Notiz-Schaltfläche neben `+` öffnet sie. In der Zeile steht die Notiz in doppelten geschweiften Klammern vor den Tags: `Kundentermin {{Gartenplatz 3}} #facet-work`.
+Ein Eintrag kann eine Notiz von bis zu 500 Zeichen tragen: eine Adresse, eine Telefonnummer, eine Tagesordnung. Die Notiz-Schaltfläche neben `+` öffnet sie; das Mikrofon in der Notiz diktiert hinein. In der Zeile steht die Notiz in doppelten geschweiften Klammern vor den Tags: `Kundentermin {{Gartenplatz 3}} #facet-work`.
 
 ## Wiederholung
 

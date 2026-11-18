@@ -16,11 +16,11 @@ Give your journal a name, for example your first name, and tap *Continue*.
 
 ## Your PIN
 
-Then choose a PIN of six to twelve digits. This browser keeps your journals, their words and codes only encrypted with it and asks for it when the app opens; showing words or codes asks for it again. On a phone the app shows its own keypad for the PIN; ✓ confirms. On a computer, type it and press Enter. A forgotten PIN is no loss of data: *Forgot PIN* clears this browser, and you set it up again with your eight words.
+Then choose a PIN of six to twelve digits. This browser keeps your journals, their words and codes only encrypted with it. It asks for the PIN after the browser or the device was restarted, not each time the app opens; showing words or codes asks for it again. Under *Settings → Account → PIN* it can ask every time instead, or not at all. On a phone the app shows its own keypad for the PIN; ✓ confirms. On a computer, type it and press Enter. A forgotten PIN is no loss of data: *Forgot PIN* clears this browser, and you set it up again with your eight words.
 
 ## The first entry
 
-Type into the field at the top, or dictate, and tap *Add*:
+Type into the field at the top, or dictate with the microphone next to it (the × in the field clears it), and tap *Add*:
 
 ```
 Call the plumber

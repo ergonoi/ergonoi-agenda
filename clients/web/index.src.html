@@ -52,7 +52,9 @@
   dialog::backdrop { background:var(--veil); }
   @media (prefers-color-scheme: dark) { :root { --veil:rgba(26,26,26,.8); } }
   body { margin:0; font:17px/1.45 "IBM Plex Sans", system-ui, -apple-system, sans-serif; font-weight:400; color:var(--fg); background:var(--bg); -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:100%; }
-  button { font:inherit; color:var(--fg); background:transparent; border:.5px solid var(--line); border-radius:6px; min-height:var(--bm); padding:0 14px; font-size:15px; cursor:pointer; }
+  /* No double-tap zoom on controls (iOS zooms on quick repeated taps); pinch zoom stays. */
+  html { touch-action:manipulation; }
+  button { touch-action:manipulation; font:inherit; color:var(--fg); background:transparent; border:.5px solid var(--line); border-radius:6px; min-height:var(--bm); padding:0 14px; font-size:15px; cursor:pointer; }
   header { position:sticky; top:0; z-index:5; background:var(--aqua); border-bottom:.5px solid #1A1A1A; }
   /* Header on Pearl Aqua keeps dark text in both colour schemes. */
   header { --fg:#1A1A1A; --fg2:#1A1A1A; --muted:#4A4646; color:#1A1A1A; }
@@ -94,6 +96,11 @@
   #viewSettings { padding:4px 16px 40px; }
   #viewSettings h3 { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); font-weight:500; margin:22px 0 4px; }
   #viewSettings hr { border:0; border-top:.5px solid var(--line); margin:24px 0 0; }
+  /* Settings in four tabs (ui.md 4.12): Data, Account, Device, System; the last one open is kept. */
+  .stabs { display:flex; flex-wrap:wrap; border-bottom:.5px solid var(--line); margin:4px 0 6px; }
+  .stabs button.tab { min-height:var(--tap); font-size:17px; padding:0 14px; }
+  .stabs button.tab:first-child { padding-left:0; }
+  #viewSettings section.stoff { display:none; }
   #viewSettings .hint { margin:10px 0 0; }
   #viewSettings label.check { display:flex; align-items:flex-start; gap:12px; margin:8px 0 0; font-size:15px; line-height:1.45; color:var(--fg); }
   #viewSettings label.check input { flex:none; width:18px; height:18px; min-height:0; margin:2px 0 0; padding:0; border:revert; accent-color:var(--amethyst); }
@@ -160,11 +167,15 @@
   #status .dot.ok { background:var(--teal); } #status .dot.pending { background:var(--amber); }
   main { max-width:720px; margin:0 auto; padding:0 0 80px; overflow-x:hidden; }
   #add { display:flex; gap:6px; padding:14px 16px; border-bottom:.5px solid var(--line); }
+  #add .qwrap { flex:1; display:flex; align-items:center; position:relative; min-width:0; }
+  #addLine { padding-right:28px !important; }
   #add input, #searchQ { flex:1; min-width:0; font:inherit; min-height:var(--tap); padding:0 2px; border:0; border-bottom:.5px solid var(--line); border-radius:0; background:transparent; color:var(--fg); outline:none; }
   #add input:focus, #searchQ:focus { border-bottom-color:var(--fg); }
   #add button[type=submit], #add > button:last-child { background:var(--amethyst); border-color:var(--amethyst); color:#fff; }
   #btnMic { border:0; min-width:var(--tap); padding:0 8px; }
-  #btnMic.rec { color:var(--scarlet); }
+  #btnMic.rec, #noteMic.rec { color:var(--scarlet); }
+  /* Dictation into the note: the microphone sits below the clear button, inside the field. */
+  #noteMic { position:absolute; right:2px; top:40px; border:0; background:none; min-height:0; padding:6px; line-height:0; color:var(--fg2); }
   section h2 { margin:0; padding:22px 16px 8px; font-size:11px; font-weight:600; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); }
   .more { display:block; width:100%; text-align:left; border:0; border-bottom:.5px solid var(--line); border-radius:0; padding:0 16px; color:var(--fg2); font-size:15px; }
   .item { -webkit-user-select:none; -webkit-touch-callout:none; }
@@ -560,7 +571,7 @@
 
   <div id="viewAgenda">
     <form id="add">
-      <input id="addLine" placeholder="New item — talk or type" autocomplete="off">
+      <span class="qwrap"><input id="addLine" placeholder="New item — talk or type" autocomplete="off"><button type="button" id="addClear" class="qclear hidden" aria-label="Clear the line"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round"/></svg></button></span>
       <button type="button" id="btnMic" class="hidden" title="Dictate"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg></button>
       <button>Add</button>
     </form>
@@ -578,7 +589,10 @@
   <div id="viewSettings" class="hidden">
     <div id="setMode" class="hint"></div>
     <div id="exRow" class="exrow hidden"><span>Example tags and entries</span><span class="btns"><button type="button" class="warn" id="exDelete">Delete</button><button type="button" class="ghost" id="exKeep">Keep</button></span></div>
-    <section id="journalSection">
+    <nav class="stabs" id="setTabs" aria-label="Settings">
+      <button type="button" class="tab" data-stab="data">Data</button><button type="button" class="tab" data-stab="account">Account</button><button type="button" class="tab" data-stab="device">Device</button><button type="button" class="tab" data-stab="system">System</button>
+    </nav>
+    <section id="journalSection" data-st="data">
       <h3>Journals</h3>
       <div id="journalList"></div>
       <div class="btnrow">
@@ -587,41 +601,7 @@
       </div>
       <p class="hint">Each journal has its own facets. Wherever you choose a facet, the name of its journal stands next to it; choosing a facet of another journal writes or moves the entry there.</p>
     </section>
-    <hr>
-    <section>
-      <h3>Account</h3>
-      <div id="acctLocal">
-        <label id="acctLabel">Account ID</label>
-        <div class="acct" id="acctId"></div>
-        <div class="btnrow"><button type="button" class="sec" id="btnCopyId">Copy account ID</button></div>
-      </div>
-      <p class="hint" id="acctHint">The words, codes and account ID of your default journal are in its dialog, under Journals above.</p>
-      <label for="cfgServer">Server URL</label>
-      <input id="cfgServer" placeholder="https://agenda.example.org" autocomplete="off" autocapitalize="none" spellcheck="false">
-      <div class="hint hidden" id="cfgServerMsg"></div>
-      <div id="phraseLocal">
-        <div class="btnrow">
-          <button type="button" class="sec" id="btnShowPhrase">Show phrase</button>
-          <button type="button" class="sec" id="btnShowQr">Show QR code</button>
-        </div>
-        <div id="phraseBox" class="phrase hidden"></div>
-        <div id="qrBox" class="qr hidden"></div>
-      </div>
-      <label>PIN</label>
-      <div class="hint" id="pinState"></div>
-      <div class="btnrow">
-        <button type="button" class="sec" id="btnPinChange">Change PIN</button>
-        <button type="button" class="sec" id="btnPinOff">Turn off the PIN</button>
-        <button type="button" class="sec" id="btnPinOn">Set a PIN</button>
-      </div>
-      <p class="hint">This browser keeps the words and a copy of your journals, with a PIN encrypted. Clearing removes them, the settings, the PIN and unsent changes; the journals on the server are not touched.</p>
-      <div class="btnrow">
-        <button type="button" id="cfgReset" class="danger">Clear data in this browser</button>
-        <button type="button" id="btnDeleteAccount" class="danger">Delete account on server</button>
-      </div>
-    </section>
-    <hr>
-    <section>
+    <section data-st="data">
       <h3>Import and export</h3>
       <div class="btnrow">
         <button type="button" class="sec" id="btnImportSettings">Import entries</button>
@@ -634,23 +614,59 @@
         <div class="btnrow"><button type="button" class="ghost" id="exportCancel">Cancel</button><button type="button" class="primary" id="exportDownload">Download</button></div>
       </div>
     </section>
-    <hr>
-    <section>
-      <h3>Work locally</h3>
+    <section data-st="data">
+      <h3>Local journal and print</h3>
       <div class="btnrow">
         <button type="button" class="sec" id="btnOpenFile">Open local journal</button>
         <button type="button" class="sec" id="btnPrint">Print</button>
       </div>
     </section>
-    <hr>
-    <section>
-      <h3>Experimental</h3>
+    <section data-st="account">
+      <h3>Account</h3>
+      <div id="acctLocal">
+        <label id="acctLabel">Account ID</label>
+        <div class="acct" id="acctId"></div>
+        <div class="btnrow"><button type="button" class="sec" id="btnCopyId">Copy account ID</button></div>
+      </div>
+      <p class="hint" id="acctHint">The words, codes and account ID of your default journal are in its dialog, under Data → Journals.</p>
+      <label for="cfgServer">Server URL</label>
+      <input id="cfgServer" placeholder="https://agenda.example.org" autocomplete="off" autocapitalize="none" spellcheck="false">
+      <div class="hint hidden" id="cfgServerMsg"></div>
+      <div id="phraseLocal">
+        <div class="btnrow">
+          <button type="button" class="sec" id="btnShowPhrase">Show phrase</button>
+          <button type="button" class="sec" id="btnShowQr">Show QR code</button>
+        </div>
+        <div id="phraseBox" class="phrase hidden"></div>
+        <div id="qrBox" class="qr hidden"></div>
+      </div>
+      <p class="hint">Deleting the account removes your default journal and its clipboard from the server, for every device. Journals of others you take part in are not touched.</p>
+      <div class="btnrow">
+        <button type="button" id="btnDeleteAccount" class="danger">Delete account on server</button>
+      </div>
+    </section>
+    <section data-st="device">
+      <h3>PIN</h3>
+      <div class="tog" id="pinLevel" role="radiogroup" aria-label="When the PIN is asked for"></div>
+      <div class="hint" id="pinState"></div>
+      <div class="btnrow">
+        <button type="button" class="sec" id="btnPinChange">Change PIN</button>
+      </div>
+      <p class="hint">This browser keeps the words and a copy of your journals, with a PIN encrypted. Clearing removes them, the settings, the PIN and unsent changes; the journals on the server are not touched.</p>
+      <div class="btnrow">
+        <button type="button" id="cfgReset" class="danger">Clear data in this browser</button>
+      </div>
+    </section>
+    <section data-st="device">
+      <h3>Display</h3>
       <label class="check"><input type="checkbox" id="cfgCompact"><span>Compact layout: smaller type and buttons, entries with the time on the left, a quiet surface for the input area. This device only.</span></label>
       <label class="check"><input type="checkbox" id="cfgMinimal"><span>Minimal colours: colour only where it points to something (facets, overdue, now, danger); a white header and grey buttons. This device only.</span></label>
+    </section>
+    <section data-st="system">
+      <h3>Experimental</h3>
       <label class="check"><input type="checkbox" id="cfgFu"><span>Order the facet bar by how you use the facets: given to entries, set as filter, seen in <i>Today</i> and <i>Tomorrow</i>. Recent use counts more; the order changes at most once a day. The state is kept in one line of your journal and applies on all your devices. Switching it on also switches on the log below, where its decisions are written so that it can be checked.</span></label>
     </section>
-    <hr>
-    <section>
+    <section data-st="system">
       <h3 id="logLabel">Log</h3>
       <label class="check"><input type="checkbox" id="cfgLog"><span>Write a log in this browser to trace faults. It records syncs, errors and changes to the journal list, never entries or phrases.</span></label>
       <div class="hint hidden" id="logMsg" style="color:var(--scarlet)"></div>
@@ -1002,7 +1018,7 @@
   <form method="dialog">
     <strong>Note</strong>
     <div class="hint" id="noteFor" style="margin:4px 0 0"></div>
-    <div style="position:relative"><textarea id="noteText" rows="8" maxlength="500" autocomplete="off" style="padding-right:30px"></textarea><button type="button" id="noteClear" class="qclear hidden" style="top:8px; transform:none" aria-label="Clear the note"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>
+    <div style="position:relative"><textarea id="noteText" rows="8" maxlength="500" autocomplete="off" style="padding-right:30px"></textarea><button type="button" id="noteMic" class="hidden" title="Dictate" aria-label="Dictate"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg></button><button type="button" id="noteClear" class="qclear hidden" style="top:8px; transform:none" aria-label="Clear the note"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>
     <div class="hint" id="noteCount" style="text-align:right; margin:4px 0 0"></div>
     <p class="hint" style="margin:4px 0 0">Closing keeps what is written; an empty note is removed. <i>Undo</i> takes it back.</p>
   </form>
@@ -3697,42 +3713,86 @@ document.addEventListener("click", ev => {
 // Dictation for the add field (Web Speech API, where available)
 // ---------------------------------------------------------------------------
 
-(function () {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) return;
-  $("btnMic").classList.remove("hidden");
-  // One recognition session per tap. Interim results are shown while speaking and
-  // kept if the session ends without a final result (Safari often ends that way
-  // when stopped by hand). The text already in the field is kept in front.
-  let rec = null, base = "", heard = "";
-  const join = (a, b) => (a && b ? a + " " + b : a || b);
-  const finish = () => {
-    $("addLine").value = join(base, heard.trim());
-    rec = null;
-    $("btnMic").classList.remove("rec");
-    $("addLine").focus();
+// The × in the add field: shown while the line holds something, clears it.
+function addClearShow() { $("addClear").classList.toggle("hidden", !$("addLine").value); }
+$("addLine").addEventListener("input", addClearShow);
+$("addClear").onclick = () => { $("addLine").value = ""; addClearShow(); $("addLine").focus(); };
+
+// One dictation per tap on a microphone button, into a field: the add line, or the note
+// (inserted where the cursor is). Safari answers a second continuous session with silence,
+// so the app listens in short sessions and starts a new one after each pause until the
+// button is tapped again. Each session is a new object; before one starts, the last one is
+// ended. Stopping that hangs is aborted after a second, and the button is reset after
+// another; results that arrive after that are dropped. Going to the background stops.
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+function dictation(btn, field, onChange) {
+  if (!SR) return null;
+  btn.classList.remove("hidden");
+  let on = false, cur = null, before = "", after = "", done = "", interim = "", gen = 0, guard = null;
+  const show = () => {
+    const mid = (done + " " + interim).replace(/\s+/g, " ").trim();
+    const pre = before && mid && !/\s$/.test(before) ? before + " " : before;
+    const post = after && mid && !/^\s/.test(after) ? " " + after : after;
+    field.value = pre + mid + post;
+    const pos = (pre + mid).length; try { field.setSelectionRange(pos, pos); } catch {}
+    if (onChange) onChange();
   };
-  $("btnMic").onclick = () => {
-    if (rec) { try { rec.stop(); } catch { finish(); } return; }
-    base = $("addLine").value.trim();
-    heard = "";
-    const r = new SR();
-    r.lang = "de-DE"; r.interimResults = true; r.continuous = true;
+  const reset = () => { on = false; cur = null; clearTimeout(guard); btn.classList.remove("rec"); btn.setAttribute("aria-pressed", "false"); };
+  const session = () => {
+    const my = ++gen, r = new SR();
+    r.lang = "de-DE"; r.interimResults = true; r.continuous = false;
     r.onresult = ev => {
-      let text = "";
-      for (const res of ev.results) text += res[0].transcript + " ";
-      heard = text.replace(/\s+/g, " ").trim();
-      $("addLine").value = join(base, heard);
+      if (my !== gen) return;
+      let fin = "", tmp = "";
+      for (let i = ev.resultIndex; i < ev.results.length; i++) (ev.results[i].isFinal ? (fin += ev.results[i][0].transcript + " ") : (tmp += ev.results[i][0].transcript + " "));
+      if (fin) done = (done + " " + fin).trim();
+      interim = tmp.trim();
+      show();
     };
-    r.onend = () => { if (rec === r) finish(); };
     r.onerror = ev => {
-      if (ev.error !== "no-speech" && ev.error !== "aborted") { addNotice("Dictation failed: " + ev.error); renderNotices(); }
+      if (my !== gen) return;
+      if (ev.error === "no-speech" || ev.error === "aborted") return;
+      log("dictation error: " + ev.error);
+      addNotice("Dictation failed: " + ev.error); renderNotices();
+      on = false;
     };
-    rec = r;
-    $("btnMic").classList.add("rec");
-    try { r.start(); } catch (err) { addNotice("Dictation could not start: " + err.message); renderNotices(); finish(); }
+    r.onend = () => {
+      if (my !== gen) return;
+      if (interim) { done = (done + " " + interim).trim(); interim = ""; show(); }
+      cur = null;
+      if (on) { setTimeout(() => { if (on && my === gen) session(); }, 250); return; } // next section
+      reset(); field.focus();
+    };
+    cur = r;
+    try { r.start(); } catch (err) { log("dictation start: " + err.message); addNotice("Dictation could not start: " + err.message); renderNotices(); reset(); }
   };
-})();
+  const stop = () => {
+    if (!on && !cur) return;
+    on = false;
+    const r = cur;
+    if (interim) { done = (done + " " + interim).trim(); interim = ""; show(); }
+    if (!r) { gen++; reset(); field.focus(); return; } // between two sections: nothing to stop
+    try { r && r.stop(); } catch {}
+    clearTimeout(guard);
+    guard = setTimeout(() => {
+      try { r && r.abort(); } catch {}
+      guard = setTimeout(() => { gen++; reset(); }, 1000);
+    }, 1000);
+  };
+  btn.onclick = () => {
+    if (on || cur) { stop(); return; }
+    const a = field.selectionStart ?? field.value.length, b = field.selectionEnd ?? a;
+    before = field.value.slice(0, a); after = field.value.slice(b);
+    if (field === $("addLine")) { before = field.value.replace(/\s+$/, ""); after = ""; }
+    done = ""; interim = ""; on = true;
+    btn.classList.add("rec"); btn.setAttribute("aria-pressed", "true");
+    session();
+  };
+  document.addEventListener("visibilitychange", () => { if (document.hidden) stop(); });
+  return { stop };
+}
+const addDictation = dictation($("btnMic"), $("addLine"), addClearShow);
+const noteDictation = dictation($("noteMic"), $("noteText"), () => noteCount());
 
 function render() {
   clipShow();
@@ -3996,7 +4056,7 @@ function addLine(v, jForce) {
   if (e && (!passesFacet(e, f) || !passesOther(e, f))) addNotice("The new item is hidden by the filter: " + e.text);
   withJ(t, () => { S.wc = (S.wc ? S.wc + "\n" : "") + v; });
   if (e) for (const fv of facetsOf(e)) fuSignal("assign", fv, t);
-  $("addLine").value = "";
+  $("addLine").value = ""; addClearShow();
   render();
   sync();
 }
@@ -4174,6 +4234,15 @@ function disarm() {
 
 // Settings are a view like the filter (ui.md 4.11); its sub-dialogs open on top of it.
 $("btnSettings").onclick = () => setView(view === "settings" ? "agenda" : "settings");
+// The settings tabs; the last one open is kept in this browser (plain, a display setting).
+function settingsTab(t) {
+  if (!["data", "account", "device", "system"].includes(t)) t = "data";
+  try { localStorage.setItem("agenda.stab", t); } catch {}
+  for (const b of $("setTabs").querySelectorAll("[data-stab]")) b.setAttribute("aria-pressed", String(b.dataset.stab === t));
+  for (const sec of $("viewSettings").querySelectorAll("section[data-st]")) sec.classList.toggle("stoff", sec.dataset.st !== t);
+}
+$("setTabs").addEventListener("click", ev => { const b = ev.target.closest("[data-stab]"); if (b) settingsTab(b.dataset.stab); });
+settingsTab(localStorage.getItem("agenda.stab"));
 function prepSettings() { withJ("", () => {
   const c = S.cfg;
   renderJournalList();
@@ -4464,9 +4533,11 @@ function saveNote(v) {
   render(); scheduleSync();
 }
 $("noteClear").onclick = () => { $("noteText").value = ""; noteCount(); $("noteText").focus(); };
+$("noteText").addEventListener("input", noteCount);
 // Closing the dialog (×, Escape, outside) keeps the text (ui.md 4.9); a note without
 // visible characters is removed from the entry; nothing is written if it is unchanged.
 $("dlgNote").addEventListener("close", () => {
+  if (noteDictation) noteDictation.stop();
   uiBusy = false;
   if (noteRef === null) return;
   const t = $("noteText").value.replace(/\r/g, "").trim();
@@ -4594,29 +4665,48 @@ $("btnOpenFile").onclick = () => { openLocalFile(withJ("", () => S.phrase)); };
 // The PIN (architecture 8.13): chosen once an account exists; it can be changed, and
 // switched off on purpose, with a plain statement of what that means.
 async function ensurePin() { if (Vault.mode === "") { await pinDialog("choose"); log("PIN " + (Vault.mode === "on" ? "set" : "not used")); renderPinRow(); } }
+// Three levels (ui.md 4.12a): no PIN; once per session (the default: asked after the browser
+// or the device was restarted); every time (on each opening and after five minutes away).
+const PIN_LEVELS = [["off", "No PIN"], ["session", "Once per session"], ["strict", "Every time"]];
+function pinLevelNow() { return Vault.mode === "on" ? Vault.level() : Vault.mode === "off" ? "off" : ""; }
 function renderPinRow() {
-  const on = Vault.mode === "on";
-  $("pinState").textContent = on ? "On. This browser keeps your journals, their words and codes encrypted, and asks for the PIN when the app opens."
-    : Vault.mode === "off" ? "Off. This browser keeps your journals, their words and codes unencrypted; whoever uses this device can read them."
-    : "Not chosen yet.";
-  $("btnPinChange").classList.toggle("hidden", !on);
-  $("btnPinOff").classList.toggle("hidden", !on);
-  $("btnPinOn").classList.toggle("hidden", on);
+  const cur = pinLevelNow();
+  $("pinLevel").innerHTML = PIN_LEVELS.map(([v, label]) => `<button type="button" data-v="${v}" role="radio" aria-checked="${v === cur}" class="${v === cur ? "" : "off"}"><span class="ck" aria-hidden="true">✓</span>${label}</button>`).join("");
+  $("pinState").textContent = {
+    off: "This browser keeps your journals, their words and codes unencrypted; whoever uses this device can read them.",
+    session: "Your journals, their words and codes are kept encrypted. The PIN is asked for after the browser or the device was restarted, not each time the app opens.",
+    strict: "Your journals, their words and codes are kept encrypted. The PIN is asked for each time the app opens, and after five minutes in the background.",
+    "": "Not chosen yet."
+  }[cur];
+  $("btnPinChange").classList.toggle("hidden", Vault.mode !== "on");
 }
+$("pinLevel").addEventListener("click", async ev => {
+  const b = ev.target.closest("[data-v]"); if (!b) return;
+  const to = b.dataset.v, from = pinLevelNow();
+  if (to === from) return;
+  if (to === "off") {
+    Vault.shownAt = 0;
+    if (!(await pinGate())) { renderPinRow(); return; }
+    await Vault.disable(); log("PIN turned off");
+  } else if (from === "off" || from === "") {
+    if ((await pinDialog("set")) !== "set") { renderPinRow(); return; }
+    Vault.setLevel(to); log("PIN set, " + to);
+  } else {
+    // A weaker level needs the PIN; a stronger one does not.
+    if (to === "session") { Vault.shownAt = 0; if (!(await pinGate())) { renderPinRow(); return; } }
+    Vault.setLevel(to); log("PIN level " + to);
+  }
+  renderPinRow();
+});
 $("btnPinChange").onclick = async () => {
   Vault.shownAt = 0;
   if (!(await pinGate())) return;
   if ((await pinDialog("change")) === "set") { log("PIN changed"); addNotice("The PIN is changed."); render(); }
 };
-twoTap($("btnPinOff"), "Turn off the PIN", () => "Tap again: keep everything in this browser unencrypted", async () => {
-  Vault.shownAt = 0;
-  if (!(await pinGate())) { renderPinRow(); return; }
-  await Vault.disable(); log("PIN turned off"); renderPinRow();
-});
-$("btnPinOn").onclick = async () => { if ((await pinDialog("set")) === "set") { log("PIN set"); renderPinRow(); } };
 // Everything this browser keeps, encrypted or not, and the PIN with it.
 function clearThisBrowser(keepLog) {
   clearTimeout(Vault.timer); Vault.mem = null; Vault.key = null; Vault.mode = "";
+  try { sessionStorage.removeItem(PIN_SKEY); } catch {}
   for (const k of Object.keys(localStorage)) if (k.startsWith("agenda.") || k.startsWith(VAULT)) localStorage.removeItem(k);
   if (keepLog != null) { localStorage.setItem("agenda.logOn", "1"); localStorage.setItem("agenda.log", keepLog); log("data in this browser cleared"); }
   location.reload();
@@ -6734,10 +6824,11 @@ if (!S.keys) {
 // Display preferences stay plain so that the page looks right before the PIN is entered.
 // The storage layer is the one place a native app would replace (with a hardware keystore).
 // ---------------------------------------------------------------------------
-const PIN_PLAIN = new Set(["agenda.compact", "agenda.minimal", "agenda.month", "agenda.fbar.open", "agenda.pin", "agenda.pinWait"]);
+const PIN_PLAIN = new Set(["agenda.compact", "agenda.minimal", "agenda.month", "agenda.fbar.open", "agenda.stab", "agenda.pin", "agenda.pinWait"]);
 const VAULT = "agv:";          // prefix of the encrypted entries in localStorage
 const PIN_ITER = 600000;       // PBKDF2 rounds: about half a second on a phone
-const PIN_IDLE = 15 * 60e3;    // locked again after this long in the background
+const PIN_IDLE = 5 * 60e3;     // "every time": locked again after this long in the background
+const PIN_SKEY = "agenda.vk";  // "once per session": the key in sessionStorage, which the browser drops on restart
 const pinB64 = u => { let s = ""; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
 const pinUnb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 const Vault = {
@@ -6746,7 +6837,36 @@ const Vault = {
   cfg() { try { return JSON.parse(localStorage.getItem("agenda.pin") || "null"); } catch { return null; } },
   async derive(pin, salt) {
     const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pin), "PBKDF2", false, ["deriveKey"]);
-    return crypto.subtle.deriveKey({ name: "PBKDF2", hash: "SHA-256", salt, iterations: PIN_ITER }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+    return crypto.subtle.deriveKey({ name: "PBKDF2", hash: "SHA-256", salt, iterations: PIN_ITER }, base, { name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
+  },
+  level() { const c = this.cfg(); return c && c.level === "strict" ? "strict" : "session"; },
+  async setLevel(l) {
+    const c = this.cfg(); if (!c || c.mode !== "on") return;
+    c.level = l; localStorage.setItem("agenda.pin", JSON.stringify(c));
+    await this.keepSession();
+  },
+  // Once per session: the key stays in sessionStorage until the browser ends the session.
+  async keepSession() {
+    try {
+      if (this.mode === "on" && this.key && this.level() === "session") sessionStorage.setItem(PIN_SKEY, pinB64(new Uint8Array(await crypto.subtle.exportKey("raw", this.key))));
+      else sessionStorage.removeItem(PIN_SKEY);
+    } catch { /* no sessionStorage: asked each time */ }
+  },
+  async load(key) {
+    const c = this.cfg();
+    try { if (await this.open(key, c.check) !== "agenda-vault") throw 0; } catch { return false; }
+    const mem = new Map();
+    for (const k of Object.keys(localStorage)) if (k.startsWith(VAULT)) mem.set(k.slice(VAULT.length), await this.open(key, localStorage.getItem(k)));
+    this.key = key; this.mem = mem; this.mode = "on";
+    return true;
+  },
+  // Opens without asking when this session already holds the key.
+  async resume() {
+    if (this.level() !== "session") { try { sessionStorage.removeItem(PIN_SKEY); } catch {} return false; }
+    let raw = null; try { raw = sessionStorage.getItem(PIN_SKEY); } catch {}
+    if (!raw) return false;
+    try { const key = await crypto.subtle.importKey("raw", pinUnb64(raw), { name: "AES-GCM" }, true, ["encrypt", "decrypt"]); return await this.load(key); }
+    catch { return false; }
   },
   // Text is compressed before it is encrypted where the browser can (journals compress well,
   // and localStorage is small); the first byte says which.
@@ -6770,10 +6890,9 @@ const Vault = {
   async unlock(pin) {
     const c = this.cfg();
     const key = await this.derive(pin, pinUnb64(c.salt));
-    try { if (await this.open(key, c.check) !== "agenda-vault") throw 0; } catch { return false; }
-    const mem = new Map();
-    for (const k of Object.keys(localStorage)) if (k.startsWith(VAULT)) mem.set(k.slice(VAULT.length), await this.open(key, localStorage.getItem(k)));
-    this.key = key; this.mem = mem; this.mode = "on"; this.shownAt = Date.now();
+    if (!(await this.load(key))) return false;
+    this.shownAt = Date.now();
+    await this.keepSession();
     return true;
   },
   // Sets a PIN (first time, or a new one): everything this browser keeps is encrypted under it
@@ -6787,9 +6906,11 @@ const Vault = {
     for (const [k, v] of mem) sealed.push([k, await this.seal(key, v)]);
     for (const k of Object.keys(localStorage)) if (k.startsWith(VAULT)) localStorage.removeItem(k);
     for (const [k, v] of sealed) localStorage.setItem(VAULT + k, v);
-    localStorage.setItem("agenda.pin", JSON.stringify({ v: 1, mode: "on", salt: pinB64(salt), check: await this.seal(key, "agenda-vault") }));
+    const level = this.cfg() && this.cfg().level === "strict" ? "strict" : "session";
+    localStorage.setItem("agenda.pin", JSON.stringify({ v: 1, mode: "on", level, salt: pinB64(salt), check: await this.seal(key, "agenda-vault") }));
     for (const k of Object.keys(localStorage)) if (k.startsWith("agenda.") && !PIN_PLAIN.has(k)) localStorage.removeItem(k);
     this.key = key; this.mem = mem; this.mode = "on"; this.shownAt = Date.now();
+    await this.keepSession();
   },
   // Switched off on purpose: the data goes back to plain localStorage.
   async disable() {
@@ -6798,6 +6919,7 @@ const Vault = {
     for (const k of Object.keys(localStorage)) if (k.startsWith(VAULT)) localStorage.removeItem(k);
     localStorage.setItem("agenda.pin", JSON.stringify({ v: 1, mode: "off" }));
     this.key = null; this.mem = null; this.mode = "off";
+    try { sessionStorage.removeItem(PIN_SKEY); } catch {}
   },
   flushSoon() { clearTimeout(this.timer); this.timer = setTimeout(() => this.flush(), 150); },
   async flush() {
@@ -6839,8 +6961,8 @@ function pinDialog(mode) {
   $p("pinText").textContent = {
     unlock: "This browser keeps your journals encrypted with your PIN.",
     confirm: "Words and codes are shown only after the PIN.",
-    set: "Six to twelve digits. This browser then keeps your journals, their words and codes only encrypted, and asks for the PIN when the app opens.",
-    choose: "Six to twelve digits. This browser then keeps your journals, their words and codes only encrypted, and asks for the PIN when the app opens.",
+    set: "Six to twelve digits. This browser then keeps your journals, their words and codes only encrypted, and asks for the PIN after the browser or the device was restarted.",
+    choose: "Six to twelve digits. This browser then keeps your journals, their words and codes only encrypted, and asks for the PIN after the browser or the device was restarted. Settings can make it stricter.",
     change: "Six to twelve digits.",
   }[mode];
   $p("pin1").value = ""; $p("pin2").value = ""; $p("pinMsg").textContent = "";
@@ -6925,13 +7047,13 @@ async function pinGate() { return Vault.recent() || (await pinDialog("confirm"))
 let pinHiddenAt = 0;
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) { pinHiddenAt = Date.now(); Vault.flush(); return; }
-  if (Vault.mode === "on" && pinHiddenAt && Date.now() - pinHiddenAt > PIN_IDLE) location.reload();
+  if (Vault.mode === "on" && Vault.level() === "strict" && pinHiddenAt && Date.now() - pinHiddenAt > PIN_IDLE) location.reload();
 });
 addEventListener("pagehide", () => Vault.flush());
 (async () => {
   const c = Vault.cfg();
   Vault.mode = c ? c.mode : "";
-  if (Vault.mode === "on") await pinDialog("unlock");
+  if (Vault.mode === "on" && !(await Vault.resume())) await pinDialog("unlock");
   const s = document.createElement("script");
   s.textContent = document.getElementById("appMain").textContent;
   document.body.appendChild(s);

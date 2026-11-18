@@ -34,7 +34,7 @@ The complete list, with the tags the app writes itself, is in *Reference*.
 
 ## Notes
 
-An entry can carry a note of up to 500 characters: an address, a phone number, an agenda. The note button next to `+` opens it. In the line, the note stands in double braces before the tags: `Meet the client {{Garden Square 3}} #facet-work`.
+An entry can carry a note of up to 500 characters: an address, a phone number, an agenda. The note button next to `+` opens it; the microphone in the note dictates into it. In the line, the note stands in double braces before the tags: `Meet the client {{Garden Square 3}} #facet-work`.
 
 ## Repetition
 
