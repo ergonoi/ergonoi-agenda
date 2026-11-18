@@ -3458,6 +3458,7 @@ function renameView(oldName, name) {
   checkpoint("View renamed: " + name);
   withJ("", () => { const ls = S.wc.split("\n"), e = parse(ls[v.idx]); e.text = viewText(name, { on: v.on, hide: v.hide }); ls[v.idx] = toLine(e); S.wc = ls.join("\n"); });
   if (LS.getItem("agenda.view") === oldName) LS.setItem("agenda.view", name);
+  if (vEdit === oldName) vEdit = name;
   render(); scheduleSync();
 }
 function deleteView(name) {

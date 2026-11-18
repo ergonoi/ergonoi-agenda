@@ -18,7 +18,7 @@ export default async function ({ svc, b }) {
   check(!/Tag definition|Journal name|Journal key|An old meta line/.test(txt), "no meta line in the list, also with Show all");
   check(!/A phone number/.test(txt), "no memo in the list");
   const panel = await A.evaluate(() => document.getElementById("fpanel").textContent);
-  check(!/empty1|empty2/.test(panel), "facets with only a definition are not in the panel");
+  check(/empty1/.test(panel) && /empty2/.test(panel), "facets with only a definition are in the panel, with 0 entries (since 0.9.27)");
 
   await A.evaluate(() => openJournal("")); await sleep(300);
   const smalls = await A.evaluate(() => [...document.querySelectorAll("#jRmFacets button")].map(x => x.textContent));

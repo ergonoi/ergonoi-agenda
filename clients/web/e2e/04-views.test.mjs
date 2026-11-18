@@ -52,6 +52,7 @@ export default async function ({ b }) {
   check(await p.evaluate(j => valuesOf("facet").filter(k => k && keyJ(k) === j).every(k => filterState().facet.includes(k)), j0), "tapping a journal heading switches its facets off");
   // edit: rename and delete
   await p.evaluate(() => { panelEdit = true; renderPanel(); }); await sleep(200);
+  await p.evaluate(() => document.querySelector('#fpanel [data-vsel="Everything"]').click()); await sleep(300);
   await p.evaluate(() => { const i = document.querySelector('#fpanel [data-vren="Everything"]'); i.value = "All"; i.dispatchEvent(new Event("change", { bubbles: true })); }); await sleep(300);
   check(await p.evaluate(() => !!viewByName("All") && !viewByName("Everything")), "rename");
   await p.evaluate(() => document.querySelector('#fpanel [data-vdel="All"]').click()); await sleep(300);
