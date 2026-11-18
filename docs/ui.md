@@ -512,7 +512,7 @@ Left border 3 px Amber Flame, padding 8 px 12 px, 15 px; *dismiss* button. Used 
 
 ### 5.2 Swipe left
 
-- Starts anywhere on an item except chips, inputs and the chevron.
+- Starts anywhere on an item except chips, inputs and the chevron; the same with a finger and with the mouse on desktops.
 - Direction is decided after 8 px of movement: mostly vertical → the gesture is left to scrolling; rightward → the panel (5.2a); leftward → the item follows the finger (`translateX`, no transition while dragging). Until 0.9.24 the item was swiped to the right.
 - A hint "← done / reschedule" in Scarlet Fire appears to the right of the item while dragging.
 - Release beyond **30 % of the item width or 100 px** (whichever is smaller) opens the done/reschedule sheet; otherwise the item springs back (0.15 s).

@@ -34,5 +34,10 @@ export default async function ({ svc, b }) {
   const before = await D.evaluate(() => document.getElementById("fpanel").classList.contains("open"));
   await swipe(D, first, 160); await sleep(300);
   check(await D.evaluate(b => document.getElementById("fpanel").classList.contains("open") === b && document.getElementById("sheet").classList.contains("hidden"), before), "desktop: rightward changes nothing");
+  await swipe(D, first, -160, "mouse"); await sleep(300);
+  check(await D.evaluate(() => !document.getElementById("sheet").classList.contains("hidden")), "desktop: dragging an entry to the left with the mouse opens Done / reschedule");
+  await D.evaluate(() => closeSheet()); await sleep(200);
+  await swipe(D, first, 160, "mouse"); await sleep(300);
+  check(await D.evaluate(() => document.getElementById("sheet").classList.contains("hidden")), "desktop: to the right it does not");
   check(!P.errors.length && !D.errors.length, "no page errors " + P.errors.concat(D.errors).join(" | "));
 }
