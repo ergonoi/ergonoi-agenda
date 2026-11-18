@@ -302,6 +302,13 @@
   #pinPad.hidden { display:none; }
   #pinPad button { min-height:56px; font-size:22px; }
   #dlgPin input.padactive { border-bottom-color:var(--teal); }
+  /* Below the PIN: the way out on the left (forgot, without PIN), cancel and confirm on the
+     right; the side actions as quiet text, so that only the confirmation stands out. */
+  #dlgPin .pinfoot { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:16px; }
+  #dlgPin .pinfoot > div { display:flex; align-items:center; gap:16px; }
+  #dlgPin .pinlink { border:0; background:transparent; padding:0; min-height:var(--tap); font-size:15px; color:var(--fg2); }
+  #dlgPin .pinlink.hidden { display:none; }
+  #dlgPin .pinlink:hover { color:var(--fg); text-decoration:underline; }
   #btnClip.over, #dlgClip.over { outline:2px dashed var(--teal); outline-offset:-2px; }
   #clipPreview { margin:10px 0; min-height:48px; display:flex; align-items:center; justify-content:center; border:.5px solid var(--line); border-radius:6px; padding:8px; overflow:hidden; }
   #clipPreview img { max-width:100%; max-height:40vh; display:block; }
@@ -901,11 +908,9 @@
     </div>
     <p class="hint hidden" id="pinWithoutWarn">Without a PIN, this browser keeps all your journals, their words and codes unencrypted: whoever uses this device can read them and pass them on. Sensible on a shared device that holds only guest or ally codes. Tap again to continue without a PIN.</p>
     <p class="hint hidden" id="pinForgotWarn">This clears all data in this browser. The journals on the server are not touched; changes not yet sent are lost. Then set up again with your words. Tap again to clear.</p>
-    <div class="btnrow" style="justify-content:flex-end">
-      <button type="button" class="sec hidden" id="pinForgot">Forgot PIN</button>
-      <button type="button" class="sec hidden" id="pinWithout">Use without PIN</button>
-      <button type="button" class="sec hidden" id="pinCancel">Cancel</button>
-      <button type="button" class="primary" id="pinOk">Unlock</button>
+    <div class="pinfoot">
+      <div><button type="button" class="pinlink hidden" id="pinForgot">Forgot PIN</button><button type="button" class="pinlink hidden" id="pinWithout">Use without PIN</button></div>
+      <div><button type="button" class="pinlink hidden" id="pinCancel">Cancel</button><button type="button" class="primary" id="pinOk">Unlock</button></div>
     </div>
   </form>
 </dialog>

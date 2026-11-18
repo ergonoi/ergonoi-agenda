@@ -25,8 +25,9 @@ const freePort = () => new Promise(res => { const s = createServer(); s.listen(0
 // The service binary, built once from the working tree.
 function binary() {
   const bin = join(tmpdir(), "agenda-e2e-service");
-  const src = join(ROOT, "server/main.go");
-  if (!existsSync(bin) || statSync(bin).mtimeMs < statSync(src).mtimeMs || process.env.REBUILD)
+  // Rebuilt when the service or the embedded client is newer than the binary.
+  const newest = Math.max(...["server/main.go", "server/relay.go", "server/auth.go", "clients/web/index.html"].map(f => statSync(join(ROOT, f)).mtimeMs));
+  if (!existsSync(bin) || statSync(bin).mtimeMs < newest || process.env.REBUILD)
     execFileSync("go", ["build", "-o", bin, "./server"], { cwd: ROOT, stdio: "inherit" });
   return bin;
 }
