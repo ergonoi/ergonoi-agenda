@@ -666,7 +666,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.7.0</span>
+    <span class="ver">v0.7.1</span>
     <a href="#" id="aboutLink">About</a>
     <a href="https://outheis-labs.github.io/outheis-agenda/" target="_blank" rel="noopener">Documentation <svg width="7" height="7" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
   </footer>
@@ -696,7 +696,7 @@
     <strong>οὐθείς Agenda</strong>
     <p>οὐθείς Agenda is an <b>ergonoi</b> project:</p>
     <p style="margin-top:14px">Technology is potential. Accessibility makes it matter.</p>
-    <p class="hint">Version 0.7.0 · outheis-labs</p>
+    <p class="hint">Version 0.7.1 · outheis-labs</p>
     <div class="btnrow" style="justify-content:flex-end"><button class="primary">Close</button></div>
   </form>
 </dialog>
@@ -791,6 +791,15 @@
         <div class="valbtns" id="jOv"></div>
         <p class="hint">One of your own facets; tap it again for none. The others don't see it; new entries get it too.</p>
       </div>
+      <div id="jDefaultRow">
+        <div class="btnrow"><button type="button" class="sec" id="jMakeDefault">Make this my default journal</button></div>
+        <p class="hint">Your default journal is your account: its words set up a device, and it keeps the codes of your other journals. They move here; the present default journal stays one of your own. Your other devices follow at their next synchronisation; set up new devices with the words of this journal.</p>
+      </div>
+      <div id="jAddFacetRow">
+        <label for="jNewFacet">Add a facet to this journal</label>
+        <div style="display:flex; gap:8px; align-items:center"><label class="pfx" style="font-size:17px; min-height:44px; flex:1"><span>#facet-</span><input id="jNewFacet" placeholder="new facet" autocapitalize="none" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done"></label><button type="button" class="sec" id="jAddFacet">Add</button></div>
+        <p class="hint" id="jFacetMsg">Everyone who shares the journal sees it; it can be chosen at once, before any entry uses it.</p>
+      </div>
       <label class="check" id="jTypeRow"><input type="checkbox" id="jType"><span>Fixed dates by default — for birthdays, holidays and the like: entries keep their dates and pass without asking, also for everyone who shares the journal. An entry's own #anchor still decides for that entry; more entries can be added as usual.</span></label>
         <div class="btnrow"><button type="button" class="sec" id="jMig">Pass facets</button><button type="button" class="sec" id="jExport">Export journal file</button></div>
       </div>
@@ -803,7 +812,8 @@
       <div id="jV1Row" class="hidden">
         <label>The former journal of version 1</label>
         <div class="hint" id="jV1Members"></div>
-        <div class="btnrow"><button type="button" class="danger" id="jV1Delete">Delete the version 1 journal on server</button></div>
+        <div class="btnrow"><button type="button" class="danger" id="jV1Remove">Remove it from my journals</button><button type="button" class="danger" id="jV1Delete">Delete the version 1 journal on server</button></div>
+        <p class="hint">Removing takes the old journal out of your journals on all your devices; it stays on the server for whoever still uses its words, and what they write there no longer reaches this journal.</p>
       </div>
       <label class="check" id="jOwnRow"><input type="checkbox" id="jOwn"><span>I created this journal. Only its owner deletes it on the server; whoever only shares it removes it from their own journals.</span></label>
       </div>
@@ -1239,7 +1249,7 @@ const DEF_RE = /^(Tag definition|Tag overlay|Journal overlay|Journal id|Journal 
 const COMMENT_RE = /^> /;
 // Lines that concern the owner alone (architecture 8.11e): in a version 2 journal they are
 // encrypted with the owner's private key, so that allies and guests cannot read them.
-const PRIVATE_RE = /^(Journal key|Journal alias|Tag overlay|Journal overlay|Addon function|Journal handover):/;
+const PRIVATE_RE = /^(Journal key|Journal alias|Tag overlay|Journal overlay|Addon function|Journal handover|Default journal moved):/;
 
 const TE = new TextEncoder(), TD = new TextDecoder();
 
@@ -2315,6 +2325,7 @@ async function sync() {
     // Journals added or removed on another device of this account (architecture 8.11a);
     // only on the basis of a default journal that was just read from the server.
     if (S.cfg.mode !== "local" && !defaultFailed && await adoptJournals()) resyncWanted = true;
+    if (S.cfg.mode !== "local" && !defaultFailed && followDefaultMove()) resyncWanted = true;
     if (S.cfg.mode !== "local" && !defaultFailed) cleanOverlays();
     if (S.cfg.mode !== "local" && !errors.length) { restoreWrongTombstones(); healMoves(); }
     serverState = errors.length
@@ -5031,7 +5042,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.7.0, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.7.1, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -5231,7 +5242,7 @@ $("dlgNote").addEventListener("close", () => { uiBusy = false; });
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.7.0";
+const APP_VERSION = "0.7.1";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
@@ -5587,6 +5598,30 @@ $("migGo").onclick = async () => {
   finally { $("migGo").disabled = false; }
 };
 $("jMig").onclick = () => openMigrate(jEditing);
+// A facet added explicitly (ui.md 4.10): its Tag definition in this journal.
+function jAddFacet() {
+  const v = $("jNewFacet").value.trim().toLowerCase().replace(/^#?facet-/, "");
+  if (!RE_FACET.test(v)) { $("jFacetMsg").textContent = FACET_HINT; return; }
+  const j = jEditing;
+  const exists = withJ(j, () => parseLines(S.wc).some(e => !has(e, "done") && e.tags.some(t => t.dim === "facet" && t.val === v)));
+  if (exists) { $("jFacetMsg").textContent = "#facet-" + v + " exists in this journal already."; return; }
+  writeDefinition(j, "facet", v);
+  $("jNewFacet").value = "";
+  $("jFacetMsg").textContent = "#facet-" + v + " added to " + journalName(j) + ".";
+  render(); scheduleSync();
+}
+$("jAddFacet").onclick = jAddFacet;
+twoTap($("jMakeDefault"), "Make this my default journal", () => "Tap again: make " + journalName(jEditing) + " your default journal", async () => {
+  const j = jEditing;
+  $("jMsg").textContent = "Moving your account …";
+  try {
+    await makeDefault(j);
+    $("dlgJournal").close();
+    addNotice("Your default journal is now " + journalName("") + ". Set up new devices with its words.", "default-moved");
+    render(); sync();
+  } catch (err) { $("jMsg").textContent = "Failed: " + err.message; disarm(); }
+});
+$("jNewFacet").onkeydown = ev => { if (ev.key === "Enter") { ev.preventDefault(); jAddFacet(); } };
 
 let jEditing = null; // journal id being edited, or null when adding
 let jOvSel = ""; // facet chosen for the journal overlay in the dialog
@@ -5673,6 +5708,10 @@ function openJournal(j) {
   $("jOk").textContent = adding ? "Add" : "Save";
   // The journal's type is set by its owner (architecture 5.5).
   $("jTypeRow").classList.toggle("hidden", adding || gone || !isOwner(j));
+  $("jAddFacetRow").classList.toggle("hidden", adding || gone || readOnly(j));
+  $("jDefaultRow").classList.toggle("hidden", adding || !j || gone || !v2 || keys.level !== "owner" || S.cfg.mode === "local");
+  $("jNewFacet").value = "";
+  $("jFacetMsg").textContent = "Everyone who shares the journal sees it; it can be chosen at once, before any entry uses it.";
   $("jType").checked = !adding && journalFixed(j);
   // A whole journal in the user's own terms (architecture 8.11c).
   $("jOvRow").classList.toggle("hidden", !j || gone);
@@ -5800,6 +5839,11 @@ $("jRestore").onclick = async () => {
   try { await restoreJournal(j); $("dlgJournal").close(); }
   catch (err) { $("jMsg").textContent = "Restoring failed: " + err.message; }
 };
+twoTap($("jV1Remove"), "Remove it from my journals", () => "Tap again: remove the old journal from all your devices", () => {
+  const v1 = upgradedFrom(jEditing);
+  if (v1) { removeJournal(v1); log(jl(v1) + ": former version 1 journal removed from the account"); }
+  $("jV1Row").classList.add("hidden");
+});
 twoTap($("jRemove"), "Remove from my journals", () => "Tap again: remove from all your devices (the journal stays on the server)", () => {
   removeJournal(jEditing);
   $("dlgJournal").close();
@@ -6117,6 +6161,74 @@ function retargetJournal(oldId, newId) {
     if (f && f.includes("@" + oldId)) LS.setItem("agenda.filter", f.split("@" + oldId).join("@" + newId));
   } catch { /* storage unavailable */ }
   if (n) log(jl(oldId) + ": " + n + " reference(s) moved to " + jl(newId));
+}
+
+// ---------------------------------------------------------------------------
+// Another default journal (architecture 8.11j). The default journal is the account: its
+// words set up a device, and it holds the private lines (keys of the other journals,
+// aliases, overlays). Making journal j the default moves these lines into j (where only
+// its owner reads them), closes them in the old default and leaves there a private line
+//   Default journal moved: <journal id of j> #type-meta
+// next to the key line of j, so that the other devices, which still sign in with the old
+// words, follow at their next synchronisation. The old default stays an own journal.
+// ---------------------------------------------------------------------------
+const MOVED_RE = /^Default journal moved:\s*([0-9a-f]{12})/;
+// Swaps the default journal of this browser with journal j (no lines written).
+function swapDefault(j) {
+  const oldAcct = withJ("", () => LS.getItem(K("acct"))), oldId = oldAcct.slice(0, 12);
+  const old = withJ("", () => ({ keys: S.keys, phrase: S.phrase }));
+  const nw = withJ(j, () => ({ keys: S.keys, phrase: S.phrase, acct: LS.getItem(K("acct")) }));
+  const role = (extraJournals().find(x => x.id === j) || {}).role;
+  forgetJournal(j);
+  const metas = extraJournals().filter(x => x.id !== oldId);
+  // Former version 1 journals point to the default as "" and to others by id.
+  for (const m of metas) { if (m.upgraded === "") m.upgraded = oldId; else if (m.upgraded === j) m.upgraded = ""; }
+  metas.push({ id: oldId, role: "own" });
+  saveExtraJournals(metas);
+  withJ(oldId, () => { S.keys = old.keys; S.phrase = old.phrase; S.etag = ""; S.snap = ""; S.wc = ""; S.outbox = []; LS.setItem(K("acct"), oldAcct); });
+  withJ("", () => { S.keys = nw.keys; S.phrase = nw.phrase; S.etag = ""; S.snap = ""; S.wc = ""; S.outbox = []; LS.setItem(K("acct"), nw.acct); });
+  aesKeys.delete(""); privKeys.delete(""); aesKeys.delete(oldId); privKeys.delete(oldId); memberIds.clear();
+  // Facet keys name@journal changed their meaning; the facet bar starts with all shown.
+  try { const f = JSON.parse(LS.getItem("agenda.filter") || "null"); if (f && f.facet && f.facet.some(k => k.includes("@"))) { f.facet = f.facet.filter(k => !k.includes("@")); LS.setItem("agenda.filter", JSON.stringify(f)); } } catch { /* ignore */ }
+  log("default journal is now " + jl(j) + "; the former one (" + jl(oldId) + ") is an own journal" + (role ? "" : ""));
+  return oldId;
+}
+async function makeDefault(j) {
+  const keys = withJ(j, () => S.keys) || {};
+  if (keys.v !== KEY_V2 || keys.level !== "owner") throw new Error("only a journal of version 2 that you own can be your default journal");
+  await withJAsync("", syncOne); await withJAsync(j, syncOne);
+  if (withJ("", () => S.outbox.length) || withJ(j, () => S.outbox.length)) throw new Error("changes are not sent yet; try again when online");
+  const oldId = withJ("", () => LS.getItem(K("acct"))).slice(0, 12);
+  const oldPhrase = withJ("", () => S.phrase);
+  // The private lines of the default journal, except the key line of j itself and an
+  // earlier pointer; they get new identities in j.
+  const priv = withJ("", () => parseLines(S.wc).filter(e => !has(e, "done") && PRIVATE_RE.test(e.text) && !MOVED_RE.test(e.text)
+    && (KEY_RE.exec(e.text) || [])[1] !== j));
+  const strip = e => toLine(e).replace(/\s#(id|rev)-\S+/g, "");
+  withJ(j, () => {
+    // An old pointer in j (it was the default once) is closed, or the move would turn back.
+    const lines = S.wc.split("\n").map(l => { const e = parse(l); if (e && !has(e, "done") && MOVED_RE.test(e.text)) { addTag(e, "done", today()); return toLine(e); } return l; });
+    S.wc = lines.concat(priv.map(strip), ["Journal key: " + oldId + " own " + normCode(oldPhrase) + " #type-meta"]).filter(l => l.trim()).join("\n");
+  });
+  withJ("", () => {
+    const ids = new Set(priv.map(e => e.id));
+    const lines = S.wc.split("\n").map(l => { const e = parse(l); if (e && ids.has(e.id)) { addTag(e, "done", today()); return toLine(e); } return l; });
+    S.wc = lines.concat(["Default journal moved: " + j + " #type-meta"]).join("\n");
+  });
+  await withJAsync(j, syncOne); await withJAsync("", syncOne);
+  if (withJ("", () => S.outbox.length) || withJ(j, () => S.outbox.length)) throw new Error("the move could not be sent completely; it is finished at the next synchronisation");
+  swapDefault(j);
+  await withJAsync("", async () => { await fetchJournal(); rebuildWorkingCopy(); });
+  log(jl(oldId) + " handed its private lines (" + priv.length + ") to the new default journal");
+}
+// On another device: the default journal says it moved. Its key line gives the words.
+function followDefaultMove() {
+  const target = withJ("", () => { for (const e of parseLines(S.wc)) { const m = !has(e, "done") && MOVED_RE.exec(e.text); if (m) return m[1]; } return ""; });
+  if (!target) return false;
+  if (!extraJournals().some(x => x.id === target) || !withJ(target, () => S.keys)) return false; // added first, then followed
+  swapDefault(target);
+  addNotice("Your default journal is now " + journalName("") + "; set up new devices with its words.", "default-moved");
+  return true;
 }
 
 async function stopSharing(j) {
@@ -7135,6 +7247,7 @@ restoreJournal = only(restoreJournal);
 restoreMissing = only(restoreMissing);
 applyCode = only(applyCode);
 migrateFacets = only(migrateFacets);
+makeDefault = only(makeDefault);
 log("start; " + appInfo() + "; " + journals().length + " journal(s)");
 // A notice that the default journal was upgraded elsewhere is void once it is of version 2
 // here; notices of earlier versions carried no cause and are recognised by their text.

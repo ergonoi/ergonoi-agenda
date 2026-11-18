@@ -19,6 +19,14 @@ Die Journale, die du hinzufügst, gehören zu deinem Konto: Deine anderen Gerät
 
 Das entscheidet die Facette. Jede Facette gehört zu einem Journal; sind mehrere Journale beteiligt, zeigt die Facettenauswahl den Namen des Journals klein hinter der Facette (`family · Home`). Wer sie wählt, schreibt den Eintrag in dieses Journal. Um einen Eintrag zu verschieben, tippst du auf seine Facette und wählst eine Facette des anderen Journals. Nichts wird ohne deine Wahl verschoben, und *Undo* nimmt ein Verschieben zurück.
 
+## Dein Default-Journal
+
+Dein Default-Journal ist dein Konto: Mit seinen Wörtern richtest du ein Gerät ein, und es hält die Codes deiner anderen Journale. Jedes Journal der Version 2, dessen Owner du bist, kann seinen Platz einnehmen: in seinem Dialog *Make this my default journal*. Die Codes ziehen dorthin um, das bisherige Default-Journal bleibt eines deiner Journale, und deine anderen Geräte folgen bei ihrer nächsten Synchronisation. Neue Geräte richtest du mit den Wörtern des neuen Default-Journals ein.
+
+## Eine Facette hinzufügen
+
+Eine Facette besteht, sobald ein Eintrag sie verwendet. Um sie schon vorher zu haben, öffne den Dialog des Journals und verwende *Add a facet to this journal*.
+
 ## Name und Alias
 
 Ein Journal benennt sich selbst mit einer Zeile `Journal name: …`; alle, die es teilen, sehen diesen Namen. Im Dialog des Journals (*Settings → Journals*, *Edit*) kannst du ihn ändern, oder einem Journal von jemand anderem einen *Alias* geben, den nur du siehst.

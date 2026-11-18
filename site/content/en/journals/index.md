@@ -19,6 +19,14 @@ The journals you add belong to your account: your other devices show them after 
 
 The facet decides. Every facet belongs to one journal; wherever several journals are involved, the facet choice shows the journal's name in small letters after the facet (`family · Home`). Choosing it writes the entry into that journal. To move an entry, tap its facet and choose a facet of the other journal. Nothing moves without your choice, and *Undo* takes a move back.
 
+## Your default journal
+
+Your default journal is your account: its words set up a device, and it keeps the codes of your other journals. Any journal of version 2 that you own can take its place: in its dialog, *Make this my default journal*. The codes move there, the former default stays one of your journals, and your other devices follow at their next synchronisation. Set up new devices with the words of the new default journal.
+
+## Adding a facet
+
+A facet exists as soon as an entry uses it. To have it before, open the journal's dialog and use *Add a facet to this journal*.
+
 ## Name and alias
 
 A journal names itself with a line `Journal name: …`; everybody who shares it sees this name. In the journal's dialog (*Settings → Journals*, tap *Edit*) you can change it, or give a journal of someone else an *alias* that only you see.

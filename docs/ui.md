@@ -441,6 +441,10 @@ Values that arrive in typed lines, the text view or an import get no definition.
 
 A round `?` button (32 px, 0.5 px border) next to every field for a new facet or topic (facet choice, tag popover) opens a short dialog: a new value exists once an entry with it is saved; it disappears after the retention period once no open entry carries it; a *Tag definition* line keeps it; how to remove it (rename or close its entries, delete the definition line); facets of shared journals belong to that journal. It links to the guide.
 
+### 4.12b Journal dialog: facets and default journal
+
+Under *Content*, journals the user may write offer *Add a facet to this journal*: a field with the prefix `#facet-`, *Add*, and a hint. It writes a Tag definition into this journal; an existing name or an invalid one is answered in the hint. Journals of version 2 that the user owns (not the default) offer *Make this my default journal* (two taps, architecture 8.11j). In the dialog of a version 2 journal that replaced one of version 1, the former journal can be removed from one's own journals (*Remove it from my journals*) or deleted on the server.
+
 ### 4.12a PIN
 
 The PIN dialog (`#dlgPin`, without the close button of other dialogs) has four uses: *Enter your PIN* at the start (*Unlock*, *Forgot PIN*), *Enter your PIN* before words or codes are shown (*OK*, *Cancel*), *Choose a PIN* once an account exists (*Set PIN*, *Use without PIN*, which warns first and asks for a second tap) and *Choose a new PIN* (*Set PIN*, *Cancel*). The field is a numeric password field, six to twelve digits. *Settings → Account → PIN* shows the state and offers *Change PIN* and *Turn off the PIN* (two taps, then the PIN), or *Set a PIN* when it is off.

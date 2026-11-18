@@ -937,6 +937,16 @@ Owner is whoever knows the words of a journal of version 2; whoever only passes 
 - **Withdrawing.** Until it is taken, a handover can be withdrawn: the handover line is closed, and a confirmation written with its secret is no longer looked for. The code given out remains an ally code of the journal until *Stop sharing*.
 - **Others.** Allies and guests of the old journal lose access with its deletion; the new owner gives them new codes. A journal of version 1 is upgraded first (8.11h). The default journal is not offered for handing over.
 
+### 8.11j Another default journal
+
+The default journal is the account: its words set up a device, and it holds the private lines (`Journal key`, `Journal alias`, `Journal overlay`, `Tag overlay`, `Addon function`, `Journal handover`). Any journal of version 2 that the user owns can take its place (*Make this my default journal*):
+
+- The client sends both journals, copies the open private lines of the default into the chosen journal under new identities (except its own key line), adds a key line for the former default (`own`) and closes any earlier pointer there.
+- In the former default it closes these lines and appends the private line `Default journal moved: <journal id> #type-meta`; the key line of the new default stays open beside it.
+- This browser then swaps the two: the former default becomes an own journal of the list; former version 1 journals that pointed to the default point to it by id; facet keys `name@journal` in the facet filter are dropped.
+- Another device, which still signs in with the old words, finds the pointer at its next synchronisation and swaps the same way, with a notice. A device set up later with the old words follows likewise, as long as the former default exists.
+- Only the owner of a journal of version 2 can make it the default: its private lines would otherwise be readable by everyone who shares it.
+
 ### 8.12 Bots: proposals, comments, learned rules
 
 A *bot* is a program that reads a journal and writes to it on its own, typically once a night: a language model behind the command-line or MCP client (8.6), started by cron or by the scheduler of the host that runs it. Rule-based tidying (duplicates, order, compaction) is not a bot; every client does it (8.5).

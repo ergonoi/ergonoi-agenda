@@ -183,7 +183,7 @@ const DEF_RE = /^(Tag definition|Tag overlay|Journal overlay|Journal id|Journal 
 const COMMENT_RE = /^> /;
 // Lines that concern the owner alone (architecture 8.11e): in a version 2 journal they are
 // encrypted with the owner's private key, so that allies and guests cannot read them.
-const PRIVATE_RE = /^(Journal key|Journal alias|Tag overlay|Journal overlay|Addon function|Journal handover):/;
+const PRIVATE_RE = /^(Journal key|Journal alias|Tag overlay|Journal overlay|Addon function|Journal handover|Default journal moved):/;
 
 const TE = new TextEncoder(), TD = new TextDecoder();
 
