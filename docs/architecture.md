@@ -656,6 +656,10 @@ Every browser keeps the same rotation of its own, once a day for each journal, a
 
 When a journal is deleted, its backups go with it: on the server after the 7 days, in every browser as soon as it learns of the deletion.
 
+### 8.4d Further servers
+
+The owner can name further servers for a journal, one meta line each: `Server: <https address> #type-meta` (decisions 6.4, stage 1). Adding one in the journal dialog tests it (`GET /health`), copies the whole journal there with `PUT /journal`, and then writes the line, so that every member's device learns of it at its next synchronisation. Every device that may write appends each new line to every further server after the main server took it; lines a server did not take wait in a queue per server, kept in the browser, and are sent at the next synchronisation. After a compaction or a restored backup the owner's device copies the whole file again. Deleting a journal and undoing that reach every server. The servers know nothing of each other; the client alone decides where the data goes. Reading stays with the main server; reading from another one when the main server fails is stage 2. Removing a server closes its line; the copy there stays until its owner deletes it there.
+
 ### 8.4a Members of a journal
 
 Everyone who shares a journal uses its token, so the service cannot tell people apart. To give whoever holds a journal an idea of who else uses it, every request carries a member ID:

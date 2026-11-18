@@ -307,6 +307,9 @@
   /* The clipboard has no symbol of its own (0.9.15): a ring around the sync dot shows that it holds something. */
   header #btnClip { display:none !important; }
   #status .dot[data-clip] { cursor:pointer; }
+  .srvlist .srv { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:4px 0; border-bottom:.5px solid var(--line); font-size:14px; overflow-wrap:anywhere; }
+  .srvadd { display:flex; gap:8px; align-items:center; margin-top:8px; }
+  .srvadd input { flex:1; min-width:0; }
   .bklist .bk { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:4px 0; border-bottom:.5px solid var(--line); font-size:14px; }
   .bklist .bkb { display:flex; gap:4px; flex:none; }
   .jr.undo .meta { color:var(--scarlet); }
@@ -1103,6 +1106,14 @@
         <textarea id="jCode" rows="2" autocapitalize="none" autocomplete="off" spellcheck="false"></textarea>
         <div class="btnrow"><button type="button" class="sec" id="jCodeScan">Scan QR code</button><button type="button" class="sec" id="jCodeOk">Use this code</button></div>
       </div>
+        <div id="jSrvRow">
+          <label>Servers</label>
+          <div id="jSrvList" class="srvlist"></div>
+          <div id="jSrvAdd">
+            <div class="srvadd"><input id="jSrvInput" type="url" placeholder="https://" autocapitalize="none" autocomplete="off" spellcheck="false"><button type="button" class="sec" id="jSrvGo">Add server</button></div>
+          </div>
+          <p class="hint" id="jSrvMsg">A further server keeps a copy of this journal that is always up to date. Every device that may write sends each new line there too. The servers do not talk to each other.</p>
+        </div>
         <label>Account ID</label>
         <div class="acct" id="jAcct"></div>
       </div>
@@ -1137,7 +1148,7 @@
       <div id="jBkRow">
         <label>Backups</label>
         <div id="jBkList" class="bklist"></div>
-        <p class="hint" id="jBkMsg">Once a day the server and this browser each keep a copy, staggered 1, 2, 4 … days back, up to about a year. Download gives the encrypted file; open it with <i>Work locally</i>.</p>
+        <p class="hint" id="jBkMsg">Once a day the server and this browser each keep a copy, staggered 1, 2, 4 … days back, up to about a year. Download gives the encrypted file, which <i>Work locally</i> opens.</p>
       </div>
       </div>
       <div class="jsect">
@@ -1648,12 +1659,16 @@ const serverBackend = {
     if (r.status === 410) { S.gone = true; throw new Error("the journal was deleted by its owner"); }
     if (r.status === 429) noteRetryAfter(r);
     if (!r.ok) throw new Error("append failed: " + r.status);
+    // Every further server gets the same lines (decisions 6.4, stage 1).
+    mirrorQueue(lines);
   },
   async replace(lines, etag) {
     const r = await fetch(this.base() + "/journal", { method: "PUT", headers: { ...replaceHeaders(S.keys), "X-Agenda-Member": await myMemberId(CUR), "Content-Type": "text/plain", "If-Match": etag }, body: lines.join("\n") + "\n" });
     log(jl(CUR) + ": PUT /journal " + lines.length + " lines, " + r.status);
     if (r.status === 412) return false;
     if (!r.ok) throw new Error("replace failed: " + r.status);
+    // Compaction or a restored backup: the further servers need the whole file again.
+    mirrorMarkFull();
     return true;
   },
   async raw() { return (await this.get("")).text; },
@@ -1791,7 +1806,7 @@ async function sync() {
   closeIdenticalDefinitions(); // architecture 3.4: one definition per value and journal
   try {
     for (const j of journals()) {
-      try { await withJAsync(j, syncOne); }
+      try { await withJAsync(j, async () => { await syncOne(); await mirrorFlush(); }); }
       catch (err) { errors.push((j ? journalName(j) + ": " : "") + err.message); log(jl(j) + ": sync failed: " + err.message); if (!j) defaultFailed = true; }
     }
     await localBackups();
@@ -2312,6 +2327,134 @@ async function restoreMissing(j) {
   sync();
 }
 // ---------------------------------------------------------------------------
+// Further servers (decisions 6.4, stage 1: a mirror that is only written)
+// ---------------------------------------------------------------------------
+// The owner names further servers in the journal, one meta line each:
+//   Server: <https address> #type-meta
+// Every device that may write appends each new line to them as well, after the main
+// server took it; lines a further server did not take wait in a queue per server, kept
+// in this browser. After a compaction or a restored backup the owner's device copies
+// the whole file there. Reading stays with the main server. The servers know nothing of
+// each other: the client alone decides where the data goes.
+const SERVER_RE = /^Server:\s*(\S+)/;
+const cleanUrl = u => String(u || "").trim().replace(/\/+$/, "");
+function mirrorServers(j) {
+  return withJ(j === undefined ? CUR : j, () => {
+    const main = serverBackend.base(), out = [];
+    for (const e of parseLines(S.wc)) {
+      const m = !has(e, "done") ? SERVER_RE.exec(e.text) : null, u = m && cleanUrl(m[1]);
+      if (u && u !== main && !out.includes(u)) out.push(u);
+    }
+    return out;
+  });
+}
+const mirrorState = () => { try { return JSON.parse(LS.getItem(K("mirror")) || "{}"); } catch { return {}; } };
+const saveMirrorState = st => LS.setItem(K("mirror"), JSON.stringify(st));
+function mirrorQueue(lines) {
+  if (S.cfg.mode === "local" && !CUR) return;
+  const urls = mirrorServers(), st = mirrorState();
+  if (!urls.length) return;
+  for (const u of urls) { const m = st[u] || (st[u] = { q: [] }); m.q = (m.q || []).concat(lines); }
+  saveMirrorState(st);
+}
+function mirrorMarkFull() {
+  const urls = mirrorServers(), st = mirrorState();
+  for (const u of urls) { const m = st[u] || (st[u] = { q: [] }); m.full = true; m.q = []; }
+  if (urls.length) saveMirrorState(st);
+}
+async function mirrorFetch(u, path, opts) {
+  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 15000);
+  try { return await fetch(u + path, { ...opts, signal: ctl.signal, cache: "no-store" }); } finally { clearTimeout(t); }
+}
+// The whole file of the main server onto a further server (owner).
+async function mirrorCopyFull(u) {
+  const text = await serverBackend.raw(), lines = (text || "").split("\n").filter(Boolean);
+  const g = await mirrorFetch(u, "/journal", { headers: await serverBackend.auth() });
+  if (g.status === 410) throw new Error("the journal was deleted there");
+  if (!g.ok) throw new Error("GET " + g.status);
+  const etag = g.headers.get("ETag") || "";
+  await g.text();
+  const r = await mirrorFetch(u, "/journal", { method: "PUT", headers: { ...replaceHeaders(S.keys), "X-Agenda-Member": await myMemberId(CUR), "Content-Type": "text/plain", "If-Match": etag }, body: lines.join("\n") + (lines.length ? "\n" : "") });
+  log(jl(CUR) + ": full copy to " + u + ": " + lines.length + " lines, " + r.status);
+  if (!r.ok) throw new Error("PUT " + r.status);
+}
+// Sends what waits for each further server; in the context of one journal.
+async function mirrorFlush() {
+  if (S.cfg.mode === "local" && !CUR) return;
+  if (!S.keys || S.gone || !canWrite(S.keys)) return;
+  const urls = mirrorServers(), st = mirrorState();
+  let changed = false;
+  for (const u of Object.keys(st)) if (!urls.includes(u)) { delete st[u]; changed = true; }
+  for (const u of urls) {
+    const m = st[u] || (st[u] = { q: [] });
+    try {
+      if (m.full && canReplace(S.keys)) { await mirrorCopyFull(u); m.full = false; m.q = []; }
+      else if (m.q && m.q.length) {
+        const r = await mirrorFetch(u, "/append", { method: "POST", headers: { ...(await serverBackend.auth()), "Content-Type": "text/plain" }, body: m.q.join("\n") + "\n" });
+        log(jl(CUR) + ": POST /append on " + u + " " + m.q.length + " lines, " + r.status);
+        if (!r.ok) throw new Error("append " + r.status);
+        m.q = [];
+      }
+      m.err = ""; m.ok = new Date().toISOString();
+    } catch (err) { m.err = err.name === "AbortError" ? "no answer" : err.message; }
+    changed = true;
+  }
+  if (changed) saveMirrorState(st);
+}
+// The owner adds a further server: test it, copy the whole journal there, then name it
+// in the journal so that every member's device writes there too.
+async function addMirror(j, url) {
+  const u = cleanUrl(url);
+  if (!/^https:\/\/[^/\s]+/.test(u) && !/^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(u)) throw new Error("the address must start with https://");
+  if (u === serverBackend.base()) throw new Error("that is the main server");
+  if (mirrorServers(j).includes(u)) throw new Error("that server is already in the list");
+  const h = await mirrorFetch(u, "/health", {});
+  const info = h.ok ? await h.json().catch(() => ({})) : {};
+  if (info.service !== "outheis-agenda") throw new Error("no journal service answers there");
+  await withJAsync(j, async () => {
+    await mirrorCopyFull(u);
+    const st = mirrorState(); st[u] = { q: [], ok: new Date().toISOString() }; saveMirrorState(st);
+    S.wc = (S.wc.trim() ? S.wc + "\n" : "") + "Server: " + u + " #type-meta";
+  });
+  log(jl(j) + ": further server added: " + u);
+  scheduleSync();
+}
+function removeMirror(j, u) {
+  withJ(j, () => {
+    S.wc.split("\n").forEach((l, i) => { const e = parse(l), m = e && !has(e, "done") ? SERVER_RE.exec(e.text) : null; if (m && cleanUrl(m[1]) === u) updateLine(j + "|" + i, x => addTag(x, "done", today())); });
+    const st = mirrorState(); delete st[u]; saveMirrorState(st);
+  });
+  log(jl(j) + ": further server removed: " + u);
+  scheduleSync();
+}
+function renderServers(j) {
+  const keys = withJ(j, () => S.keys), owner = canReplace(keys), local = S.cfg.mode === "local" && !j;
+  $("jSrvRow").classList.toggle("hidden", local);
+  if (local) return;
+  const urls = mirrorServers(j), st = withJ(j, mirrorState), host = u => u.replace(/^https?:\/\//, "");
+  const state = u => { const m = st[u] || {}; return m.err ? "not reached: " + m.err : m.full ? "full copy pending" : (m.q || []).length ? m.q.length + " lines waiting" : m.ok ? "up to date" : "not yet written"; };
+  $("jSrvList").innerHTML = `<div class="srv"><span><b>${esc(host(serverBackend.base()))}</b> · main server</span></div>` +
+    urls.map(u => `<div class="srv"><span>${esc(host(u))} · ${esc(state(u))}</span>${owner ? `<button type="button" class="ghost" data-srvrm="${esc(u)}">Remove</button>` : ""}</div>`).join("");
+  $("jSrvAdd").classList.toggle("hidden", !owner);
+}
+$("jSrvGo").addEventListener("click", async () => {
+  const j = jEditing, u = $("jSrvInput").value;
+  if (j === null || !u.trim()) return;
+  $("jSrvGo").disabled = true; $("jSrvMsg").textContent = "Testing the server and copying the journal …";
+  try { await addMirror(j, u); $("jSrvInput").value = ""; $("jSrvMsg").textContent = "Added. Every device that may write sends new lines there too, from its next synchronisation on."; }
+  catch (err) { $("jSrvMsg").textContent = "Not added: " + err.message; }
+  $("jSrvGo").disabled = false; renderServers(j);
+});
+$("jSrvList").addEventListener("click", ev => {
+  const b = ev.target.closest("[data-srvrm]"), j = jEditing;
+  if (!b || j === null) return;
+  if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = "Tap again: stop writing there"; return; }
+  removeMirror(j, b.dataset.srvrm);
+  $("jSrvMsg").textContent = "Removed from the list. The copy on that server stays until its owner deletes it there.";
+  renderServers(j);
+});
+
+// ---------------------------------------------------------------------------
 // Deleted journals and backups (architecture 8.4b, 8.4c)
 // ---------------------------------------------------------------------------
 
@@ -2347,8 +2490,9 @@ const saveUndo = l => { if (l.length) LS.setItem(UNDO_KEY, JSON.stringify(l)); e
 async function undoDelete(u) {
   const r = await fetch(serverBackend.base() + "/undelete", { method: "POST", headers: { ...u.dh, "X-Agenda-Member": "0".repeat(64) } });
   log("undo deletion of " + u.name + ": POST /undelete " + r.status);
-  if (r.status === 410) throw new Error("too late: the journal is deleted for good");
+  if (r.status === 410) throw new Error("too late, the journal is deleted for good");
   if (!r.ok) throw new Error(String(r.status));
+  for (const m of u.mirrors || []) { try { await fetch(m + "/undelete", { method: "POST", headers: { ...u.dh, "X-Agenda-Member": "0".repeat(64) } }); } catch {} }
   saveUndo(undoList().filter(x => x.acct !== u.acct));
   const e = await joinJournal(u.phrase);
   if (e) throw new Error(e);
@@ -5387,7 +5531,7 @@ twoTap($("cfgReset"), "Clear data in this browser", () => "Tap again to clear (u
   // A running log survives, so that what happened before and after can be compared.
   clearThisBrowser(logOn() ? LS.getItem("agenda.log") : null);
 });
-twoTap($("btnDeleteAccount"), "Delete account on server", () => "Tap again: delete your account on the server; for 7 days your words can restore it", async () => {
+twoTap($("btnDeleteAccount"), "Delete account on server", () => "Tap again: delete your account on the server. For 7 days your words can restore it", async () => {
   try {
     // With the delete token of the owner (a version 2 account refuses anything else).
     await deleteOnServer("");
@@ -5832,6 +5976,8 @@ function openJournal(j) {
   }
   if (!adding) showMembers(j);
   $("jBkRow").classList.toggle("hidden", adding || gone);
+  $("jSrvRow").classList.toggle("hidden", adding || gone);
+  if (!adding && !gone) renderServers(j);
   if (!adding && !gone) renderBackups(j);
   if (!adding) withJ(j, () => { $("jAcct").textContent = "…"; acctOf(S.keys).then(id => { $("jAcct").textContent = id; }); });
   uiBusy = true;
@@ -5944,6 +6090,11 @@ async function deleteOnServer(j) {
   const r = await fetch(serverBackend.base() + "/journal", { method: "DELETE", headers: { ...dh, "X-Agenda-Member": await myMemberId(j) } });
   log(jl(j) + ": DELETE /journal " + r.status);
   if (!r.ok) throw new Error(String(r.status));
+  // The deletion reaches every further server too (decisions 6.4).
+  for (const u of mirrorServers(j)) {
+    try { const m = await fetch(u + "/journal", { method: "DELETE", headers: { ...dh, "X-Agenda-Member": await myMemberId(j) } }); log(jl(j) + ": DELETE /journal on " + u + " " + m.status); }
+    catch (err) { log(jl(j) + ": DELETE /journal on " + u + " failed: " + err.message); }
+  }
 }
 // ---------------------------------------------------------------------------
 // Upgrade to version 2 (architecture 8.11h). The owner's client copies a journal of
@@ -6545,10 +6696,10 @@ twoTap($("jStop"), "Stop sharing for anybody", () => "Tap again: new words for t
     sync();
   } catch (err) { $("jMsg").textContent = "Stopping failed: " + err.message; log(jl(j) + ": stop sharing failed: " + err.message); disarm(); }
 });
-twoTap($("jDelete"), "Delete on server", () => "Tap again: delete it; nobody can open it any more, and you can undo it for 7 days", async () => {
+twoTap($("jDelete"), "Delete on server", () => "Tap again: delete it. Nobody can open it any more, and you can undo it for 7 days", async () => {
   const j = jEditing;
   try {
-    const keys = withJ(j, () => S.keys), u = { name: journalName(j), acct: await acctOf(keys), phrase: withJ(j, () => S.phrase), dh: deleteHeaders(keys), until: new Date(Date.now() + 7 * 86400000).toISOString() };
+    const keys = withJ(j, () => S.keys), u = { name: journalName(j), acct: await acctOf(keys), phrase: withJ(j, () => S.phrase), dh: deleteHeaders(keys), mirrors: mirrorServers(j), until: new Date(Date.now() + 7 * 86400000).toISOString() };
     await deleteOnServer(j);
     if (u.dh && u.phrase) saveUndo(undoList().filter(x => x.acct !== u.acct).concat([u]));
     await BK.drop(u.acct).catch(() => {});
@@ -7147,7 +7298,7 @@ $("setupOk").onclick = async () => {
       const dh = deleteHeaders(peek.keys);
       if (peek.deleted.restorable && dh && setupUndoFor !== $("phraseInput").value) {
         setupUndoFor = $("phraseInput").value;
-        $("setupMsg").textContent = "This account was deleted on " + fmtDay(peek.deleted.deleted) + ". Continue to undo that; it comes back as it was.";
+        $("setupMsg").textContent = "This account was deleted on " + fmtDay(peek.deleted.deleted) + ". Continue to undo that, and it comes back as it was.";
         return;
       }
       if (peek.deleted.restorable && dh) {
