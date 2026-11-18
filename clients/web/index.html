@@ -137,8 +137,8 @@
   @media (max-width: 600px) {
     /* The icons of the header share one centre line (menu, tray, magnifier, sync dot). */
     header .hbtns { display:flex; align-items:center; }
-    header #btnClip:not(.hidden), header #btnSearch { display:inline-flex !important; align-items:center; justify-content:center; height:var(--tap); border:0 !important; padding-top:0 !important; padding-bottom:0 !important; }
-    #btnClip svg, #btnSearch svg { display:block; }
+    header #btnClip:not(.hidden), header #btnMemo, header #btnSearch { display:inline-flex !important; align-items:center; justify-content:center; height:var(--tap); border:0 !important; padding-top:0 !important; padding-bottom:0 !important; }
+    #btnClip svg, #btnMemo svg, #btnSearch svg { display:block; }
     #btnClip svg { transform:translateY(-1px); } /* the tray is drawn low in its box */
     :root { --bn:64px; }
     header .row { flex-wrap:nowrap; min-height:56px; padding:0 4px; gap:0; }
@@ -185,6 +185,10 @@
   #detail { display:none; }
   @media (min-width: 1440px) {
     html main, html header .row { margin-left:280px; margin-right:400px; max-width:none; }
+    /* The sync block stands over the right column, its dot flush with the column's text; view tabs and
+       symbols close the middle column on the right (ui.md 1a). */
+    header #status { position:absolute; left:calc(100% + 24px); top:0; bottom:0; width:352px; padding:0 0 0 16px; align-content:center; flex:none; row-gap:0; line-height:1.35; }
+    header .row .vtabs { margin:0 40px 0 auto; }
     #detail { display:block; position:fixed; z-index:4; top:var(--hh, 61px); right:0; bottom:0; width:400px; overflow:auto; padding:0 24px 24px; background:var(--side, var(--bg)); border-left:.5px solid var(--line); }
     #detail .dhead { display:flex; align-items:center; justify-content:space-between; min-height:52px; border-bottom:.5px solid var(--line); margin-bottom:12px; font:500 13px "Inter", var(--font, sans-serif); color:var(--muted); letter-spacing:.4px; }
     #detail .dx { border:0; background:transparent; font-size:24px; min-height:var(--tap); padding:0 4px; color:var(--fg2); }
@@ -256,7 +260,7 @@
   html.searching header h1, html.searching header #status, html.searching header .vtabs { display:none !important; }
   @media (max-width: 600px) {
     html.searching #add { display:none !important; }
-    html.searching #btnMenu, html.searching #btnClip, html.searching #btnSearch, html.searching #tabFilter, html.searching #hdot { display:none !important; }
+    html.searching #btnMenu, html.searching #btnClip, html.searching #btnMemo, html.searching #btnSearch, html.searching #tabFilter, html.searching #hdot { display:none !important; }
   }
   /* Clears the search field in one tap, as search fields on most systems do. */
   .qclear { position:absolute; right:0; top:50%; transform:translateY(-50%); border:0; background:none; padding:6px; min-height:0; color:var(--muted); cursor:pointer; line-height:0; }
@@ -294,9 +298,18 @@
     header .row { gap:0; padding-right:4px; }
     button.tab { padding:0 5px; }
     #tabFilter { padding:0 5px !important; }
-    #btnClip, #btnSearch, #btnSync, #btnSettings { padding:0 4px !important; min-width:38px !important; }
+    #btnClip, #btnMemo, #btnSearch, #btnSync, #btnSettings { padding:0 4px !important; min-width:38px !important; }
   }
-  #btnClip, #btnSearch, #btnSync, #btnSettings { border:0; min-width:var(--tap); padding:0 10px; color:var(--fg2); }
+  #btnClip, #btnMemo, #btnSearch, #btnSync, #btnSettings { border:0; min-width:var(--tap); padding:0 10px; color:var(--fg2); }
+  /* Shown memos: the bookmark in Amethyst, not filled (Teal is too weak on Pearl Aqua). */
+  #btnMemo[aria-pressed="true"] { color:var(--amethyst); }
+  #btnMemo[aria-pressed="true"] svg { stroke-width:2; }
+  /* The clipboard has no symbol of its own (0.9.15): a ring around the sync dot shows that it holds something. */
+  header #btnClip { display:none !important; }
+  #status .dot[data-clip] { cursor:pointer; }
+  #status .dot.filled, #hdot.filled .dot { box-shadow:0 0 0 2.5px var(--blue); }
+  #status.over, #hdot.over { outline:2px dashed var(--teal); outline-offset:2px; }
+
   /* The clipboard (ui.md 4.16): grey when empty, Teal with a light fill when it holds something. */
   #btnClip.filled { color:var(--blue); }
   /* The keypad of the PIN dialog on touch devices (ui.md 4.12a): iOS opens no keyboard
@@ -350,7 +363,9 @@
   #add input, #searchQ { flex:1; min-width:0; font:inherit; min-height:var(--tap); padding:0 2px; border:0; border-bottom:.5px solid var(--line); border-radius:0; background:transparent; color:var(--fg); outline:none; }
   #add input:focus, #searchQ:focus { border-bottom-color:var(--fg); }
   #add button[type=submit], #add > button:last-child { background:var(--amethyst); border-color:var(--amethyst); color:#fff; }
-  #btnMic { border:0; min-width:var(--tap); padding:0 8px; }
+  #btnMic { border:0; min-width:var(--tap); padding:0 8px; align-self:center; display:inline-flex; align-items:center; justify-content:center; }
+  #btnMic.hidden { display:none; }
+  #btnMic svg { display:block; }
   #btnMic.rec, #noteMic.rec { color:var(--scarlet); }
   /* Dictation into the note: the microphone sits below the clear button, inside the field. */
   /* The note (ui.md): clear inside the field, top right, clear of the frame; dictation below
@@ -778,6 +793,11 @@
   html.minimal #demoBar button { background:transparent; border-color:currentColor; }
   html.minimal button.tab { min-height:28px; padding:0 10px; font-size:14px; border:1px solid var(--btn); border-radius:6px; color:var(--fg); margin-left:4px; }
   html.minimal button.tab[aria-pressed="true"] { border-color:var(--fg); }
+  /* The view tabs in the header are tabs, not buttons (ui.md 1a): symbol and name as in the phone's
+     bottom bar, in the dark of the header's symbols; the chosen one bold and underlined; no frame, no fill. */
+  header .vtabs button.tab, html.minimal header .vtabs button.tab { display:inline-flex; align-items:center; gap:6px; min-height:var(--tap); margin:0; padding:0 10px; border:0; border-bottom:2px solid transparent; border-radius:0; background:transparent; font-size:14px; font-weight:400; color:var(--fg2); }
+  header .vtabs button.tab svg { width:18px; height:18px; flex:none; }
+  header .vtabs button.tab[aria-pressed="true"], html.minimal header .vtabs button.tab[aria-pressed="true"] { color:var(--fg); font-weight:600; border:0; border-bottom:2px solid var(--fg); }
   html.minimal .stabs button.tab:first-child { padding-left:10px; margin-left:0; } /* a filled tab keeps its inner space; only the underlined tabs start flush */
   html.minimal #tabFilter { border:0; border-radius:0; margin:0; min-height:var(--tap); border-bottom:2px solid transparent; }
   html.minimal #tabFilter[aria-pressed="true"] { border:0; border-bottom:2px solid var(--fg); }
@@ -797,9 +817,10 @@
     <div id="hsearch" class="hidden"><button type="button" id="searchBack" aria-label="Close the search" title="Close the search"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><span class="qwrap"><input id="searchQ" type="text" inputmode="search" placeholder="Search text, notes, #tags" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="search"><button type="button" id="searchClear" class="qclear hidden" aria-label="Clear the search"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round"/></svg></button></span></div>
     <div id="viewMenu" class="hidden" role="menu"></div>
     <div id="status"></div>
-    <span class="vtabs"><button class="tab" id="tabAgenda" aria-pressed="true">List</button><button class="tab" id="tabMonth" aria-pressed="false">Month</button><button class="tab" id="tabText" aria-pressed="false">Text</button></span>
+    <span class="vtabs"><button class="tab" id="tabAgenda" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>List</button><button class="tab" id="tabMonth" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Month</button><button class="tab" id="tabText" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 6h14M5 10h14M5 14h10M5 18h8"/></svg>Text</button></span>
     <span class="hbtns">
     <button id="btnClip" class="hidden" title="Clipboard: move a picture, a file or a text to your other devices" draggable="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path class="fill" fill="none" d="M3.5 13.5l2.5-7h12l2.5 7v5a1.5 1.5 0 0 1-1.5 1.5h-14a1.5 1.5 0 0 1-1.5-1.5z"/><path d="M3.5 13.5h5l1 2h5l1-2h5"/></svg></button>
+    <button id="btnMemo" title="Memos" aria-pressed="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6.5 3.5h11v17l-5.5-4-5.5 4z"/></svg></button>
     <button id="btnSearch" title="Search" aria-pressed="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5.5 5.5"/></svg></button>
     <button class="tab" id="tabFilter" aria-pressed="false" title="Filter"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3.5 5h17l-6.5 7.5V19l-4 1.5v-8z"/></svg></button>
     <button id="hdot" title="Sync" aria-label="Sync"><span class="dot"></span></button>
@@ -910,7 +931,7 @@
     <section data-st="system">
       <h3>About</h3>
       <div class="about">
-        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.14</p>
+        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.15</p>
         <p class="am"><span id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project: </span><span class="one">Technology is potential. Accessibility makes it matter.</span></p>
         <p class="al"><a href="https://ergonoi.github.io/ergonoi-agenda/" target="_blank" rel="noopener">Documentation <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://github.com/ergonoi/ergonoi-agenda" target="_blank" rel="noopener">Source code on GitHub <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://ergonoi.com" target="_blank" rel="noopener">ergonoi.com <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
       </div>
@@ -945,7 +966,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.9.14</span>
+    <span class="ver">v0.9.15</span>
   </footer>
 </main>
 <nav id="bnav" aria-label="View">
@@ -2913,6 +2934,8 @@ function fmtTime(t) {
   return "⏱ " + t;
 }
 
+// What the clipboard holds, for the line in the sync block: null when not usable (set by clipShow).
+let clipLabel = null;
 function renderStatus() {
   let pending = 0;
   const all = [];
@@ -2925,7 +2948,7 @@ function renderStatus() {
   const nt = newest ? snowTime(newest) : null;
   const dot = pending ? "pending" : /in sync/.test(serverState) ? "ok" : "";
   const parts = [
-    `<span><span class="dot ${dot}"></span>${esc(serverState)}</span>`,
+    `<span><span class="dot ${dot}${clipLabel ? " filled" : ""}"${clipLabel !== null ? ` data-clip="1" title="${clipLabel ? "Clipboard: " + esc(clipLabel) + " · click to open" : "Clipboard: empty · click to open, or drop a file here"}"` : ""}></span>${esc(serverState)}</span>`,
     `<span>${pending ? pending + " pending" : "nothing pending"}</span>`,
     ...(ME ? [`<span>text edit not saved</span>`] : []),
     `<span>last change ${nt ? nt.toLocaleString([], { dateStyle: "short", timeStyle: "short" }) : "–"}</span>`,
@@ -2933,7 +2956,8 @@ function renderStatus() {
   $("status").innerHTML = parts.join("");
   // the dot in the phone header: the same state, the text as its title
   $("hdot").querySelector(".dot").className = "dot " + dot;
-  $("hdot").title = serverState + " · " + (pending ? pending + " pending" : "nothing pending") + " · tap to sync";
+  $("hdot").title = serverState + " · " + (pending ? pending + " pending" : "nothing pending") + " · tap to sync" + (clipLabel !== null ? ", hold for the clipboard" : "");
+  $("hdot").classList.toggle("filled", !!clipLabel);
 }
 
 function renderNotices() {
@@ -4147,7 +4171,7 @@ $("sline").addEventListener("change", ev => { if (ev.target.closest("[data-sdone
 
 function renderAgenda() {
   if (uiBusy) return;
-  if (monthMode && !searchTerms().length) { renderMonth(); return; }
+  if (monthMode && !memoMode && !searchTerms().length) { renderMonth(); return; }
   facetColorCache = null; facetJournalsCache = null;
   const groups = Object.fromEntries(GROUPS.map(g => [g.key, []]));
   const t0 = today(), t1 = addDays(t0, 1), t7 = addDays(t0, 7), t30 = addDays(t0, 30);
@@ -4156,7 +4180,7 @@ function renderAgenda() {
   renderFilters();
   refIndex = null;
   const ovs = overlayMap();
-  const terms = searchTerms(), searching = terms.length > 0;
+  const terms = searchTerms(), searching = terms.length > 0, memos = memoMode && !searching;
   const nowD = new Date(), nowHM = String(nowD.getHours()).padStart(2, "0") + ":" + String(nowD.getMinutes()).padStart(2, "0");
   let hits = 0, hiddenHits = 0;
   groups.done = []; groups.memo = [];
@@ -4170,6 +4194,7 @@ function renderAgenda() {
       if (isMeta(e) || (searching && COMMENT_RE.test(e.text))) return;
       const closed = has(e, "done");
       if (closed && !(searching && SEARCH.done)) return;
+      if (memos && !isMemo(e)) return;
       e._j = j;
       e._ck = contentKey(e); // before the overlay tags are added
       applyOverlay(e, j, ovs);
@@ -4218,13 +4243,14 @@ function renderAgenda() {
   });
   if (!searching && fuOn()) for (const g of ["today", "tomorrow"]) for (const it of groups[g]) for (const fv of facetsOf(it.e)) fuSignal("seen", fv, it.j);
   let html = "";
-  const groupList = searching ? GROUPS.concat([{ key: "memo", title: "Memos", limit: Infinity }, { key: "done", title: "Done", limit: Infinity }]) : GROUPS;
+  const groupList = memos ? [{ key: "memo", title: "Memos", limit: Infinity }] : searching ? GROUPS.concat([{ key: "memo", title: "Memos", limit: Infinity }, { key: "done", title: "Done", limit: Infinity }]) : GROUPS;
   for (const { key: g, title, limit } of groupList) {
     if (g === "beyond" && !showBeyond && !searching) continue;
     // By day first (groups over several days run by date, as on paper); within a day the
     // agenda order. Items carried into Today count as today.
     const day = it => g === "today" ? t0 : it.d;
     const items = groups[g].sort((a, b) => {
+      if (g === "memo") return (facetsOf(a.e)[0] || "\uffff").localeCompare(facetsOf(b.e)[0] || "\uffff") || a.e.text.localeCompare(b.e.text);
       const da = day(a), db = day(b);
       if (da !== db) return da.localeCompare(db);
       const ka = orderKey(a), kb = orderKey(b);
@@ -4250,6 +4276,7 @@ function renderAgenda() {
     else if (expanded && counted > limit) html += `<button class="more" data-group="${g}">Show fewer</button>`;
     html += `</section>`;
   }
+  if (memos) { $("sline").classList.add("hidden"); $("agenda").innerHTML = /class="item/.test(html) ? html : `<p class="hint">No open memos${flt.facet.length || otherActive(flt) ? " match the filter" : ""}. A memo is an entry without a date: the bookmark when adding, or <code>#type-memo</code>.</p>`; return; }
   if (!searching && !showBeyond && beyondCount) html += `<button class="more" data-beyond="1">Show all (${beyondCount})</button>`;
   else if (!searching && showBeyond) html += `<button class="more" data-beyond="0">Hide items after 30 days</button>`;
   $("sline").classList.toggle("hidden", !searching);
@@ -5097,7 +5124,11 @@ function render() {
 // Events
 // ---------------------------------------------------------------------------
 
+// The memos (ui.md 4.2b, architecture 5.6): the bookmark in the header shows them instead of the
+// list, grouped by facet; any view tab leaves them.
+let memoMode = false;
 function setView(v) {
+  memoMode = false;
   if (v === "month" || v === "agenda") {
     monthMode = v === "month";
     try { LS.setItem("agenda.month", monthMode ? "1" : "0"); } catch {}
@@ -5110,6 +5141,7 @@ function setView(v) {
   $("viewSettings").classList.toggle("hidden", v !== "settings");
   $("btnSettings").setAttribute("aria-pressed", String(v === "settings"));
   $("btnSearch").setAttribute("aria-pressed", String(SEARCH.open && v === "agenda"));
+  $("btnMemo").setAttribute("aria-pressed", "false");
   if (v === "settings") { prepSettings(); window.scrollTo(0, 0); } else disarm();
   $("tabAgenda").setAttribute("aria-pressed", v === "agenda" && !monthMode);
   $("tabMonth").setAttribute("aria-pressed", v === "agenda" && monthMode);
@@ -5121,6 +5153,17 @@ function setView(v) {
 }
 
 $("tabAgenda").onclick = () => setView("agenda");
+$("btnMemo").onclick = () => {
+  const on = !memoMode;
+  if (SEARCH.open) openSearch(false);
+  if (view !== "agenda") setView(monthMode ? "month" : "agenda");
+  if (!on) { setView(monthMode ? "month" : "agenda"); return; }
+  memoMode = true;
+  $("btnMemo").setAttribute("aria-pressed", "true");
+  // The memos are not one of the views: no view tab is chosen while they are shown.
+  for (const b of document.querySelectorAll(".vtabs .tab, #bnav [data-bv]")) b.setAttribute("aria-pressed", "false");
+  render(); window.scrollTo(0, 0);
+};
 $("tabMonth").onclick = () => setView("month");
 $("tabText").onclick = () => setView("text");
 $("btnSync").onclick = () => sync();
@@ -5667,7 +5710,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.9.14, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.15, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -5875,7 +5918,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.9.14";
+const APP_VERSION = "0.9.15";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
@@ -6968,7 +7011,9 @@ const clipUsable = () => S.cfg.mode !== "local" && withJ("", () => S.keys && can
 async function clipKey() { return withJAsync("", async () => (await privKey()) || await key()); }
 async function clipHeaders() { return withJAsync("", async () => ({ ...replaceHeaders(S.keys), "X-Agenda-Member": await myMemberId("") })); }
 function clipShow() {
-  $("btnClip").classList.toggle("hidden", !clipUsable());
+  clipLabel = !clipUsable() ? null : CLIP.filled ? (CLIP.meta ? CLIP.meta.name : "an item") : "";
+  renderStatus();
+  $("btnClip").classList.add("hidden"); // no symbol of its own since 0.9.15
   $("btnClip").classList.toggle("filled", CLIP.filled);
   $("btnClip").setAttribute("draggable", CLIP.filled && CLIP.blob ? "true" : "false");
   $("btnClip").title = CLIP.filled ? "Clipboard: " + (CLIP.meta ? CLIP.meta.name : "an item") + " — click to copy, drag out to save" : "Clipboard: move a picture, a file or a text to your other devices";
@@ -7088,7 +7133,42 @@ for (const el of [$("btnClip"), $("dlgClip")]) {
   el.addEventListener("dragleave", () => el.classList.remove("over"));
   el.addEventListener("drop", ev => { el.classList.remove("over"); if (!clipUsable()) return; ev.preventDefault(); if (el.id === "btnClip") openClip(); clipFrom(ev.dataTransfer); });
 }
-document.addEventListener("paste", ev => { if ($("dlgClip").open && ev.clipboardData) { ev.preventDefault(); clipFrom(ev.clipboardData); } });
+document.addEventListener("paste", ev => {
+  if (!ev.clipboardData) return;
+  if ($("dlgClip").open) { ev.preventDefault(); clipFrom(ev.clipboardData); return; }
+  // Outside any field and dialog, Ctrl/Cmd+V puts into the clipboard (ui.md 4.16).
+  const t = ev.target, field = t && t.closest && t.closest("input, textarea, [contenteditable], dialog");
+  if (field || !clipUsable() || document.querySelector("dialog[open]")) return;
+  ev.preventDefault(); openClip(); clipFrom(ev.clipboardData);
+});
+// Dropping a file anywhere in the window, or a file or text on the sync block, puts it into the
+// clipboard (ui.md 4.16); fields and open dialogs keep their own drops.
+const dropFiles = ev => ev.dataTransfer && [...ev.dataTransfer.types].includes("Files");
+const dropOwn = ev => !!(ev.target.closest && ev.target.closest("input, textarea, dialog"));
+document.addEventListener("dragover", ev => {
+  if (!clipUsable() || dropOwn(ev)) return;
+  const onStatus = ev.target.closest && ev.target.closest("#status, #hdot");
+  if (!onStatus && !dropFiles(ev)) return;
+  ev.preventDefault();
+  for (const id of ["status", "hdot"]) $(id).classList.add("over");
+});
+document.addEventListener("dragleave", ev => { if (!ev.relatedTarget) for (const id of ["status", "hdot"]) $(id).classList.remove("over"); });
+document.addEventListener("drop", ev => {
+  for (const id of ["status", "hdot"]) $(id).classList.remove("over");
+  if (!clipUsable() || dropOwn(ev)) return;
+  const onStatus = ev.target.closest && ev.target.closest("#status, #hdot");
+  if (!onStatus && !dropFiles(ev)) return;
+  ev.preventDefault(); openClip(); clipFrom(ev.dataTransfer);
+});
+$("status").addEventListener("click", ev => { if (ev.target.closest("[data-clip]")) openClip(); });
+// On the phone: holding the sync dot opens the clipboard; a tap still syncs.
+{
+  let t = 0, held = false;
+  $("hdot").addEventListener("pointerdown", () => { held = false; clearTimeout(t); t = setTimeout(() => { if (clipUsable()) { held = true; openClip(); } }, 550); });
+  for (const e of ["pointerup", "pointerleave", "pointercancel"]) $("hdot").addEventListener(e, () => clearTimeout(t));
+  $("hdot").addEventListener("click", ev => { if (held) { held = false; ev.stopImmediatePropagation(); ev.preventDefault(); } }, true);
+  $("hdot").addEventListener("contextmenu", ev => ev.preventDefault());
+}
 $("clipPaste").onclick = async () => {
   try {
     if (navigator.clipboard.read) {
