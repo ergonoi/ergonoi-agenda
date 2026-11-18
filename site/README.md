@@ -1,6 +1,6 @@
 # User documentation
 
-The documentation site of οὐθείς Agenda. Structure, templates and build follow
+The documentation site of ergonoi Agenda. Structure, templates and build follow
 [outheis-docs](https://github.com/outheis-labs/outheis-docs); the content is its own.
 
 ```

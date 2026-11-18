@@ -1,8 +1,8 @@
-# οὐθείς Agenda
+# ergonoi Agenda
 
 Appointments, tasks and notes in one place, as in a paper notebook – but rearranged and moved to another day with a simple swipe. On every device, in any browser, readable only by you and by those you share it with.
 
-**οὐθείς Agenda is a planning journal that is light enough to understand completely: one encrypted text file per journal, a small server that cannot read it, and an app that runs in the browser.**
+**ergonoi Agenda is a planning journal that is light enough to understand completely: one encrypted text file per journal, a small server that cannot read it, and an app that runs in the browser.**
 
 ---
 
@@ -28,7 +28,7 @@ A journal can be shared with anyone, whatever device or system they use: you giv
 
 ## Open
 
-οὐθείς Agenda is free software. The code, the file format and the documentation are public, and anyone can run their own server.
+ergonoi Agenda is free software. The code, the file format and the documentation are public, and anyone can run their own server.
 
 ## Read more
 

@@ -1,4 +1,8 @@
-# outheis-agenda
+# ergonoi Agenda
+
+![](docs/key-visual.png)
+
+*An open planning journal. Documentation: https://ergonoi.github.io/ergonoi-agenda/*
 
 ### Journal and agenda in plain text
 

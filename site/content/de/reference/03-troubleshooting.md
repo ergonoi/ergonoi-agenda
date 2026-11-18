@@ -30,7 +30,7 @@ Verschwinden Zeilen eines Journals vom Server, sagt die App das und bietet an, s
 
 Für alle, die wissen wollen, wie es funktioniert, oder selbst einen Server betreiben (auf Englisch):
 
-- [Architecture](https://github.com/outheis-labs/outheis-agenda/blob/main/docs/architecture.md): Dateiformat, Verschlüsselung, Server, Synchronisation
-- [Interface](https://github.com/outheis-labs/outheis-agenda/blob/main/docs/ui.md): jede Ansicht und jeder Dialog
-- [Decisions](https://github.com/outheis-labs/outheis-agenda/blob/main/docs/decisions.md): was entschieden wurde, und warum
-- [Running a server](https://github.com/outheis-labs/outheis-agenda/blob/main/deploy/DEPLOY.md)
+- [Architecture](https://github.com/ergonoi/ergonoi-agenda/blob/main/docs/architecture.md): Dateiformat, Verschlüsselung, Server, Synchronisation
+- [Interface](https://github.com/ergonoi/ergonoi-agenda/blob/main/docs/ui.md): jede Ansicht und jeder Dialog
+- [Decisions](https://github.com/ergonoi/ergonoi-agenda/blob/main/docs/decisions.md): was entschieden wurde, und warum
+- [Running a server](https://github.com/ergonoi/ergonoi-agenda/blob/main/deploy/DEPLOY.md)

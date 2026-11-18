@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Builds the user documentation of οὐθείς Agenda from site/content/ into site/html/.
+Builds the user documentation of ergonoi Agenda from site/content/ into site/html/.
 
 The structure and the templates follow outheis-docs (https://outheis.com):
 directories are sections, numbered files are pages, index.md of a section comes
@@ -24,8 +24,8 @@ OUT = SITE / "html"
 VERSION = (SITE.parent / "VERSION").read_text(encoding="utf-8").strip()
 
 LANGS = ["en", "de"]
-SITE_TITLE = "οὐθείς Agenda"
-BASE_URL = "https://outheis-labs.github.io/outheis-agenda/"
+SITE_TITLE = "ergonoi Agenda"
+BASE_URL = "https://ergonoi.github.io/ergonoi-agenda/"
 
 # Section order and labels; the pages come from the file tree.
 SECTIONS = [
@@ -37,13 +37,13 @@ SECTIONS = [
 
 TEXT = {
     "en": {"contents": "Contents", "prev": "Previous", "next": "Next",
-           "footer": "οὐθείς Agenda " + VERSION + " · an ergonoi project",
+           "footer": "ergonoi Agenda " + VERSION,
            "hero_subtitle": "An open and lightweight planning journal",
            "untranslated": "",
            "description": "Appointments, tasks and notes in one place. Encrypted on your device, shared by codes, in any browser.",
            "locale": "en_US"},
     "de": {"contents": "Inhalt", "prev": "Zurück", "next": "Weiter",
-           "footer": "οὐθείς Agenda " + VERSION + " · ein ergonoi-Projekt",
+           "footer": "ergonoi Agenda " + VERSION,
            "hero_subtitle": "Ein offenes und leichtgewichtiges Planungsjournal",
            "untranslated": "<p class=\"subtitle\">Diese Seite ist noch nicht übersetzt; es folgt der englische Text.</p>",
            "description": "Termine, Aufgaben und Notizen an einem Ort. Auf dem Gerät verschlüsselt, mit Codes geteilt, in jedem Browser.",

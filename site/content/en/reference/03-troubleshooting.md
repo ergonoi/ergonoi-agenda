@@ -30,7 +30,7 @@ If lines of a journal disappear from the server, the app says so and offers to r
 
 For those who want to know how it works, or run a server themselves:
 
-- [Architecture](https://github.com/outheis-labs/outheis-agenda/blob/main/docs/architecture.md): file format, encryption, server, synchronisation
-- [Interface](https://github.com/outheis-labs/outheis-agenda/blob/main/docs/ui.md): every view and dialog
-- [Decisions](https://github.com/outheis-labs/outheis-agenda/blob/main/docs/decisions.md): what was decided, and why
-- [Running a server](https://github.com/outheis-labs/outheis-agenda/blob/main/deploy/DEPLOY.md)
+- [Architecture](https://github.com/ergonoi/ergonoi-agenda/blob/main/docs/architecture.md): file format, encryption, server, synchronisation
+- [Interface](https://github.com/ergonoi/ergonoi-agenda/blob/main/docs/ui.md): every view and dialog
+- [Decisions](https://github.com/ergonoi/ergonoi-agenda/blob/main/docs/decisions.md): what was decided, and why
+- [Running a server](https://github.com/ergonoi/ergonoi-agenda/blob/main/deploy/DEPLOY.md)
