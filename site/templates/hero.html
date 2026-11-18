@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><!-- TITLE --></title>
-  <meta name="description" content="Multi-agent AI assistant. Your cognitive infrastructure belongs to you.">
+  <!-- META -->
   <link rel="icon" type="image/png" href="<!-- ASSETS -->assets/favicon-32.png" sizes="32x32">
   <link rel="apple-touch-icon" sizes="180x180" href="<!-- ASSETS -->assets/apple-touch-icon.png">
   <style>
@@ -249,52 +249,6 @@
       margin-top: 0.75rem;
     }
 
-    /* Agents */
-    .agents-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin-top: 1rem;
-      max-width: 600px;
-    }
-
-    .agent {
-      padding: 0.75rem 1rem;
-      text-align: center;
-      flex: 0 0 calc(33.333% - 0.667rem);
-      border-radius: 2px;
-    }
-
-    .agent-ou { background: #218380; }
-    .agent-zeno { background: #97EAD2; }
-    .agent-cato { background: #FF2E00; }
-    .agent-hiro { background: #FFB400; }
-    .agent-rumi { background: #460A46; }
-    .agent-alan { background: #C490D1; }
-
-    .agent-name {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 14px;
-      font-weight: 600;
-      color: #fff;
-    }
-    
-    .agent-zeno .agent-name,
-    .agent-hiro .agent-name {
-      color: #1a1a1a;
-    }
-
-    .agent-role {
-      font-size: 11px;
-      color: rgba(255,255,255,0.8);
-      margin-top: 0.15rem;
-    }
-    
-    .agent-zeno .agent-role,
-    .agent-hiro .agent-role {
-      color: rgba(0,0,0,0.6);
-    }
-
     /* Links list */
     .links-list {
       list-style: none;
@@ -469,10 +423,6 @@
 
       .hero-text .subtitle {
         font-size: 16px;
-      }
-
-      .agents-grid {
-        flex-direction: column;
       }
     }
     /* Agenda: grid items may shrink, so that code and tables scroll instead of widening the page. */

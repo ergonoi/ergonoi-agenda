@@ -25,6 +25,7 @@ VERSION = (SITE.parent / "VERSION").read_text(encoding="utf-8").strip()
 
 LANGS = ["en", "de"]
 SITE_TITLE = "οὐθείς Agenda"
+BASE_URL = "https://outheis-labs.github.io/outheis-agenda/"
 
 # Section order and labels; the pages come from the file tree.
 SECTIONS = [
@@ -38,11 +39,15 @@ TEXT = {
     "en": {"contents": "Contents", "prev": "Previous", "next": "Next",
            "footer": "οὐθείς Agenda " + VERSION + " · an ergonoi project",
            "hero_subtitle": "An open and lightweight planning journal",
-           "untranslated": ""},
+           "untranslated": "",
+           "description": "Appointments, tasks and notes in one place. Encrypted on your device, shared by codes, in any browser.",
+           "locale": "en_US"},
     "de": {"contents": "Inhalt", "prev": "Zurück", "next": "Weiter",
            "footer": "οὐθείς Agenda " + VERSION + " · ein ergonoi-Projekt",
            "hero_subtitle": "Ein offenes und leichtgewichtiges Planungsjournal",
-           "untranslated": "<p class=\"subtitle\">Diese Seite ist noch nicht übersetzt; es folgt der englische Text.</p>"},
+           "untranslated": "<p class=\"subtitle\">Diese Seite ist noch nicht übersetzt; es folgt der englische Text.</p>",
+           "description": "Termine, Aufgaben und Notizen an einem Ort. Auf dem Gerät verschlüsselt, mit Codes geteilt, in jedem Browser.",
+           "locale": "de_DE"}
 }
 
 
@@ -122,6 +127,25 @@ def lang_switch(lang: str, page_url: str, depth_root: str) -> str:
     return " · ".join(out)
 
 
+def meta(lang: str, title: str, desc: str, url: str) -> str:
+    """Description and link-preview tags; the image needs an absolute address."""
+    e = lambda x: x.replace("&", "&amp;").replace('"', "&quot;")
+    full = BASE_URL + ("" if lang == "en" else lang + "/") + (url if url != "index.html" else "")
+    tags = [f'<meta name="description" content="{e(desc)}">',
+            f'<meta property="og:type" content="website">',
+            f'<meta property="og:site_name" content="{SITE_TITLE}">',
+            f'<meta property="og:title" content="{e(title)}">',
+            f'<meta property="og:description" content="{e(desc)}">',
+            f'<meta property="og:url" content="{full}">',
+            f'<meta property="og:locale" content="{TEXT[lang]["locale"]}">',
+            f'<meta property="og:image" content="{BASE_URL}assets/og.jpg">',
+            '<meta property="og:image:width" content="1200">',
+            '<meta property="og:image:height" content="630">',
+            '<meta name="twitter:card" content="summary_large_image">',
+            f'<link rel="canonical" href="{full}">']
+    return "\n  ".join(tags)
+
+
 def fill(tpl: str, **kv) -> str:
     for k, v in kv.items():
         tpl = tpl.replace(f"<!-- {k} -->", v)
@@ -161,6 +185,7 @@ def build_lang(lang: str, default_tpl: str, hero_tpl: str):
         page = fill(default_tpl, ROOT=root, ASSETS=assets, TITLE=f'{p["title"]} · {SITE_TITLE}', PAGE_TITLE=p["title"],
                     SUBTITLE=sub, BREADCRUMB=crumb, SECTION_ANCHOR="#" + p["section"],
                     LANG_SWITCH=lang_switch(lang, p["url"], root), CONTENT=wrap_sections(md_to_html(md)),
+                    META=meta(lang, f'{p["title"]} · {SITE_TITLE}', p["desc"] or t["description"], p["url"]),
                     BOOK_NAV=book, **common)
         dst = out_root / p["url"]
         dst.parent.mkdir(parents=True, exist_ok=True)
@@ -178,7 +203,8 @@ def build_lang(lang: str, default_tpl: str, hero_tpl: str):
     root, assets = roots("contents.html")
     page = fill(default_tpl, ROOT=root, ASSETS=assets, TITLE=f'{t["contents"]} · {SITE_TITLE}', PAGE_TITLE=t["contents"],
                 SUBTITLE="", BREADCRUMB="", SECTION_ANCHOR="", LANG_SWITCH=lang_switch(lang, "contents.html", root),
-                CONTENT=wrap_sections(md_to_html("\n".join(md))), BOOK_NAV="", **common)
+                CONTENT=wrap_sections(md_to_html("\n".join(md))), BOOK_NAV="",
+                META=meta(lang, f'{t["contents"]} · {SITE_TITLE}', t["description"], "contents.html"), **common)
     (out_root / "contents.html").write_text(page, encoding="utf-8")
 
     # Landing page: the lead is the text before the first ---.
@@ -190,7 +216,8 @@ def build_lang(lang: str, default_tpl: str, hero_tpl: str):
     lead_html = re.sub(r"(<br><br>)+$", "", lead_html.strip())
     page = fill(hero_tpl, ROOT="", ASSETS="" if lang == "en" else "../", TITLE=SITE_TITLE, PAGE_TITLE=SITE_TITLE,
                 HERO_SUBTITLE=t["hero_subtitle"], HERO_LEAD=lead_html, LANG_SWITCH=lang_switch(lang, "index.html", ""),
-                CONTENT=wrap_sections(md_to_html(rest)), **common)
+                CONTENT=wrap_sections(md_to_html(rest)),
+                META=meta(lang, SITE_TITLE, t["description"], "index.html"), **common)
     (out_root / "index.html").write_text(page, encoding="utf-8")
     print(f"  {lang}: {len(flat)} pages, {sum(1 for p in flat if not p['translated'])} untranslated")
 
