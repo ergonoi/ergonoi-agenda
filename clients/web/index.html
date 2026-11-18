@@ -699,10 +699,9 @@
      the plain surface (ui.md 2.10). */
   html.minimal header { background:#E2C8E8; border-bottom:.5px solid var(--line); --fg:#1A1A1A; --fg2:#4A4646; --muted:#7A7676; }
   @media (prefers-color-scheme: dark) { html.minimal header { background:var(--bg); --fg:#f0f0f0; --fg2:#a0a0a0; --muted:#707070; } }
-  html.minimal header h1 { font-family:inherit; font-weight:500; }
-  /* The ergonoi wordmark as on ergonoi.com: Mona Sans Mono, 700, tracking 0.025 em. */
-  html.minimal header h1 .brand { font-family:"Mona Sans Mono", ui-monospace, monospace; font-weight:700; letter-spacing:.025em; }
-  @media (max-width: 600px) { html.minimal header h1 .brand { font-size:18px; } }
+  /* The title keeps the size and the Inter of οὐθείς Agenda; only the word ergonoi is set as
+     on ergonoi.com: Mona Sans Mono, 700, tracking 0.025 em. */
+  .brand .bw { font-family:"Mona Sans Mono", ui-monospace, monospace; font-weight:700; letter-spacing:.025em; }
   :where(html.minimal) button { background:var(--btn); border-color:var(--btn); }
   html.minimal header button:not(.tab), html.minimal #tabFilter, html.minimal #btnMic, html.minimal .fold, html.minimal .more, html.minimal .noteic, html.minimal #pop .opt, html.minimal #pop .x, html.minimal #pop .ok, html.minimal #facetSheet .when .x { background:transparent; border-color:transparent; }
   html.minimal button.sec, html.minimal .chip.plus, html.minimal .chip.notebtn, html.minimal #sheet .sheetpick { background:var(--btn); border:.5px solid var(--btn); color:var(--fg); }
@@ -5515,7 +5514,7 @@ function applyBrand() {
   const n = brandName(), ergo = n.startsWith("ergonoi");
   document.title = n;
   document.querySelector('meta[name="apple-mobile-web-app-title"]').content = n;
-  for (const el of document.querySelectorAll(".brand, #aboutName")) el.textContent = n;
+  for (const el of document.querySelectorAll(".brand, #aboutName")) el.innerHTML = ergo ? '<span class="bw">ergonoi</span> Agenda' : esc(n);
   $("aboutProject").classList.toggle("hidden", ergo);
 }
 applyBrand();
