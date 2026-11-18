@@ -8,7 +8,7 @@
 Call the plumber #facet-home #date-2026-11-20 #time-08:00
 ```
 
-You rarely type tags yourself. Write the text, tap *Add*, choose the facet; date and time are set with the calendar and clock buttons. Everything else can be added later with the `+` next to an entry's tags. But every entry is this line, and in the *Text* view you see it as such.
+You rarely type tags yourself. Write the text, tap *Add*, choose the facet; date and time are set with the calendar and clock buttons. Everything else can be added later with the `+` next to an entry's tags; the `−` beside it removes a tag. But every entry is this line, and in the *Text* view you see it as such.
 
 ## The tags
 

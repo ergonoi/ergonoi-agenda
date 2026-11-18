@@ -26,6 +26,10 @@ Der Text nach dem Doppelpunkt sagt, wofür die Facette steht. Solche Zeilen ersc
 
 *Settings → Rename tag* benennt eine Facette oder ein Thema in den gewählten Journalen um. Eine Vorschau sagt je Journal, wie viele Einträge sich ändern; gibt es den neuen Namen schon, werden beide zusammengeführt.
 
+## Entfernen
+
+Im Dialog eines Journals nimmt *Remove a facet from this journal* eine Facette aus diesem Journal. Tragen noch offene Einträge sie, wählst du, welche andere Facette des Journals sie stattdessen bekommen; danach wird die Definition der Facette geschlossen. Kein Eintrag wird dabei geschlossen.
+
 ## Derselbe Name in mehreren Journalen
 
 Zwei Journale können beide eine Facette `sport` haben. Es sind verschiedene Facetten: Wo der Name mehr als einmal vorkommt, folgt ihm der Name des Journals (`sport · Anna`), jede hat ihre eigene Farbe, und beim Hinzufügen eines Eintrags fragt die App, welche gemeint ist. In der Facettenleiste schaltet eine Schaltfläche den Namen in allen Journalen; *Facets by journal* im Filter wählt einzelne.

@@ -26,6 +26,10 @@ The text after the colon says what the facet stands for. Such lines never appear
 
 *Settings → Rename tag* renames a facet or topic in the journals you choose. A preview tells per journal how many entries change; if the new name exists already, both are merged.
 
+## Removing
+
+In a journal's dialog, *Remove a facet from this journal* takes a facet out of that journal. If open entries still carry it, you choose which other facet of the journal they get instead; then the facet's definition is closed. No entry is closed by this.
+
 ## The same name in several journals
 
 Two journals may both have a facet `sport`. They are different facets: wherever the name occurs more than once, the journal's name follows it (`sport · Anna`), each has its own colour, and when you add an entry the app asks which one you mean. In the facet bar, one button switches the name in all journals; *Facets by journal* in the filter tab chooses single ones.

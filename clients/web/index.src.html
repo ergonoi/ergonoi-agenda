@@ -838,6 +838,16 @@
         <div style="display:flex; gap:8px; align-items:center"><label class="pfx" style="font-size:17px; min-height:44px; flex:1"><span>#facet-</span><input id="jNewFacet" placeholder="new facet" autocapitalize="none" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done"></label><button type="button" class="sec" id="jAddFacet">Add</button></div>
         <p class="hint" id="jFacetMsg">Everyone who shares the journal sees it; it can be chosen at once, before any entry uses it.</p>
       </div>
+      <div id="jRmFacetRow">
+        <label>Remove a facet from this journal</label>
+        <div class="valbtns" id="jRmFacets"></div>
+        <div id="jRmTargetRow" class="hidden">
+          <p class="hint" id="jRmCount"></p>
+          <div class="valbtns" id="jRmTargets"></div>
+        </div>
+        <div class="btnrow"><button type="button" class="sec hidden" id="jRmGo">Remove</button></div>
+        <p class="hint" id="jRmMsg">Its entries keep their place: they get another facet of this journal first.</p>
+      </div>
       <label class="check" id="jTypeRow"><input type="checkbox" id="jType"><span>Fixed dates by default — for birthdays, holidays and the like: entries keep their dates and pass without asking, also for everyone who shares the journal. An entry's own #anchor still decides for that entry; more entries can be added as usual.</span></label>
         <div class="btnrow"><button type="button" class="sec" id="jMig">Pass facets</button><button type="button" class="sec" id="jExport">Export journal file</button></div>
       </div>
@@ -882,7 +892,7 @@
       <li>A value entered in this field is kept: the app writes a line <code>Tag definition: … #type-meta</code> for it. You can add a description to that line in the <i>Text</i> view.</li>
       <li>With several journals, the app asks which journal a new facet belongs to (entries with it are written there), and in which journals a new topic is kept.</li>
       <li>Values that only appear in typed or imported text have no such line; they disappear <span id="helpRet">90</span> days after the last entry carrying them is closed.</li>
-      <li>To remove it: give its entries another value (<i>Settings → Rename tag</i>; if the other value exists, both are merged) or close them, and delete its <i>Tag definition</i> line in the <i>Text</i> view.</li>
+      <li>To remove a facet: the journal's dialog, <i>Remove a facet from this journal</i>; its entries get another facet first. A topic: give its entries another value (<i>Settings → Rename tag</i>; if the other value exists, both are merged) or close them, and delete its <i>Tag definition</i> line in the <i>Text</i> view. A tag of one entry: the <i>−</i> next to its <i>+</i>.</li>
       <li>A facet declared by a shared journal belongs to that journal: entries with it are written there, and it is renamed or removed there.</li>
     </ul>
     <p class="hint">More in the <a href="@@DOCS_URL@@using/02-facets.html" target="_blank" rel="noopener">documentation</a>.</p>
@@ -3081,7 +3091,8 @@ function itemHtml({ e, idx, j, d, local, overdue, closed, carried, snapId }, g) 
     return `<button class="chip ${cls}" data-line="${idx}" data-ti="${ti}"${own}>${sw}${esc(t.dim)}:<b>${esc(t.val || "")}</b></button>`;
   });
   // + and the note button stay together when the chips wrap; the note button opens the note editor (ui.md 4.9a).
-  chips.push(`<span class="cbtns">` + (ADDABLE.some(d => !has(e, d)) ? `<button class="chip plus" data-line="${idx}" data-plus="1" title="Add tag">+</button>` : ""));
+  chips.push(`<span class="cbtns">` + (ADDABLE.some(d => !has(e, d)) ? `<button class="chip plus" data-line="${idx}" data-plus="1" title="Add tag">+</button>` : "")
+    + (removableTags(e).length ? `<button class="chip plus" data-line="${idx}" data-minus="1" title="Remove a tag" aria-label="Remove a tag">−</button>` : ""));
   chips.push(`<button class="chip notebtn" data-note="${idx}" title="${e.note ? "Edit note" : "Add note"}" aria-label="${e.note ? "Edit note" : "Add note"}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg></button></span>`);
   if (local) chips.push(`<span class="chip local">not synced</span>`);
   const bar = facetColor(facetKey(get(e, "facet"), j)) || "transparent";
@@ -3388,10 +3399,30 @@ function valueMenu(pop, dim, cur, setVal, remove, ref) {
   if (remove) { sep(pop); opt(pop, "Remove tag", () => { remove(); closePop(); }, "danger"); }
 }
 
+// Tags the − of an entry offers (ui.md 4.4): all shown as chips except the one facet an
+// entry must keep and the tags the user gave a whole journal (removed in its dialog).
+function removableTags(e) {
+  const own = e.tags.filter(t => !t.ov && t.dim === "facet").length;
+  return e.tags.filter(t => t.dim !== "cal" && t.ov !== "journal" && !(t.dim === "facet" && !t.ov && own < 2));
+}
 function onChipClick(btn) {
   const idx = btn.dataset.line;
   const e = entryAt(idx);
   if (!e) return;
+  if (btn.dataset.minus) {
+    const j = lineRef(idx).j;
+    openPop(btn, pop => {
+      for (const t of removableTags(e)) {
+        const label = t.dim === "ref" ? "ref: " + ((refTarget(t.val) || {}).e?.text || t.val) : t.dim + ": " + (t.val || "") + (t.ov ? " (only you)" : "");
+        opt(pop, label, () => {
+          if (t.ov) removeOverlayTag(j, e.id, t.dim, t.val);
+          else updateLine(idx, x => { const i = x.tags.findIndex(u => u.dim === t.dim && u.val === t.val); if (i >= 0) x.tags.splice(i, 1); });
+          closePop();
+        }, "danger");
+      }
+    }, "Remove tag");
+    return;
+  }
   if (btn.dataset.plus) {
     // Facets and topics added to an entry of another journal go into the user's own
     // Tag overlay (architecture 8.11c), so the others do not see them.
@@ -4816,9 +4847,60 @@ function jAddFacet() {
   writeDefinition(j, "facet", v);
   $("jNewFacet").value = "";
   $("jFacetMsg").textContent = "#facet-" + v + " added to " + journalName(j) + ".";
+  renderJRm();
   render(); scheduleSync();
 }
 $("jAddFacet").onclick = jAddFacet;
+// Removing a facet from a journal (ui.md 4.10): its open entries get another facet of
+// the journal first, then its Tag definition lines are closed. No entry is closed.
+const JRM = { f: "", to: "" };
+function jFacetsOf(j) {
+  const m = new Map();
+  for (const f of declaredFacets(j)) m.set(f, 0);
+  return withJ(j, () => {
+    for (const e of parseLines(S.wc)) if (!has(e, "done") && !DEF_RE.test(e.text)) for (const t of e.tags) if (t.dim === "facet" && t.val) m.set(t.val, (m.get(t.val) || 0) + 1);
+    return m;
+  });
+}
+function renderJRm() {
+  const j = jEditing, m = jFacetsOf(j);
+  if (!m.has(JRM.f)) JRM.f = "";
+  if (JRM.to === JRM.f || !m.has(JRM.to)) JRM.to = "";
+  const fs = [...m.keys()].sort((a, b) => a.localeCompare(b));
+  const btn = (v, attr, sel) => `<button type="button" ${attr}="${esc(v)}" aria-pressed="${v === sel}"><span class="ln" style="background:${facetColor(facetKey(v, j)) || "var(--line)"}"></span>${esc(v)}</button>`;
+  $("jRmFacets").innerHTML = fs.map(v => btn(v, "data-rmf", JRM.f)).join("") || `<p class="hint">This journal has no facets.</p>`;
+  const n = JRM.f ? m.get(JRM.f) : 0, others = fs.filter(v => v !== JRM.f);
+  $("jRmTargetRow").classList.toggle("hidden", !JRM.f || !n);
+  $("jRmCount").textContent = !n ? "" : n + (n === 1 ? " open entry carries" : " open entries carry") + " #facet-" + JRM.f + (others.length ? ". Which facet should " + (n === 1 ? "it" : "they") + " get instead?" : ". Add another facet to this journal first, to give " + (n === 1 ? "it" : "them") + " instead.");
+  $("jRmTargets").innerHTML = others.map(v => btn(v, "data-rmt", JRM.to)).join("");
+  $("jRmGo").classList.toggle("hidden", !JRM.f || (n > 0 && !JRM.to));
+  disarm();
+}
+$("jRmFacets").addEventListener("click", ev => { const b = ev.target.closest("[data-rmf]"); if (b) { JRM.f = JRM.f === b.dataset.rmf ? "" : b.dataset.rmf; JRM.to = ""; renderJRm(); } });
+$("jRmTargets").addEventListener("click", ev => { const b = ev.target.closest("[data-rmt]"); if (b) { JRM.to = b.dataset.rmt; renderJRm(); } });
+twoTap($("jRmGo"), "Remove", () => "Tap again: remove #facet-" + JRM.f + (JRM.to ? ", its entries get #facet-" + JRM.to : ""), () => {
+  const j = jEditing, f = JRM.f, to = JRM.to;
+  if (!f) return;
+  checkpoint("Removed #facet-" + f);
+  const t0 = today(); let moved = 0;
+  withJ(j, () => {
+    const lines = S.wc.split("\n");
+    lines.forEach((l, i) => {
+      const e = parse(l);
+      if (!e || !e.tags.some(t => t.dim === "facet" && t.val === f)) return;
+      if (/^Tag definition:/.test(e.text)) { if (!has(e, "done")) { addTag(e, "done", t0); lines[i] = toLine(e); } return; }
+      if (DEF_RE.test(e.text) || has(e, "done") || !to) return;
+      const hasTo = e.tags.some(t => t.dim === "facet" && t.val === to);
+      e.tags = hasTo ? e.tags.filter(t => !(t.dim === "facet" && t.val === f)) : e.tags.map(t => t.dim === "facet" && t.val === f ? { dim: "facet", val: to } : t);
+      lines[i] = toLine(e); moved++;
+    });
+    S.wc = lines.join("\n");
+  });
+  log("removed a facet from a journal (" + moved + " entries given another)");
+  $("jRmMsg").textContent = "#facet-" + f + " removed from " + journalName(j) + (moved ? "; " + moved + (moved === 1 ? " entry has" : " entries have") + " #facet-" + to + " now." : ".");
+  JRM.f = ""; JRM.to = "";
+  renderJRm(); render(); scheduleSync();
+});
 twoTap($("jMakeDefault"), "Make this my default journal", () => "Tap again: make " + journalName(jEditing) + " your default journal", async () => {
   const j = jEditing;
   $("jMsg").textContent = "Moving your account …";
@@ -4917,6 +4999,10 @@ function openJournal(j) {
   // The journal's type is set by its owner (architecture 5.5).
   $("jTypeRow").classList.toggle("hidden", adding || gone || !isOwner(j));
   $("jAddFacetRow").classList.toggle("hidden", adding || gone || readOnly(j));
+  $("jRmFacetRow").classList.toggle("hidden", adding || gone || readOnly(j));
+  JRM.f = ""; JRM.to = "";
+  $("jRmMsg").textContent = "Its entries keep their place: they get another facet of this journal first.";
+  if (!adding && !gone && !readOnly(j)) renderJRm();
   $("jDefaultRow").classList.toggle("hidden", adding || !j || gone || !v2 || keys.level !== "owner" || S.cfg.mode === "local");
   $("jNewFacet").value = "";
   $("jFacetMsg").textContent = "Everyone who shares the journal sees it; it can be chosen at once, before any entry uses it.";

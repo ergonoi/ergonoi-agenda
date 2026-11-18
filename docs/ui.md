@@ -150,7 +150,7 @@ Line icons, 20 × 20 px, `stroke: currentColor`, stroke width 1.5, no fill. No e
 
 Fields: text in every input, text area and select is at least 16 px on phones; iOS Safari zooms the page into a field with a smaller font when it gets the focus, and the page then stays zoomed and shifted.
 
-Text glyphs: `+` (add tag), `×` (close), `✓` (apply), `⏱` (duration in the time line).
+Text glyphs: `+` (add tag), `−` (remove a tag), `×` (close), `✓` (apply), `⏱` (duration in the time line).
 
 ---
 
@@ -305,7 +305,7 @@ Same as collapsed, without the marker line, plus the tag chips:
 
 - Chip row starts at **one third of the item width** (`margin-left: 33.333%`), gap 4 px, wraps.
 - Chips in canonical tag order (architecture 3.2: `facet date time recurring rank size action topic done review`); `#id` and `#rev` are never shown.
-- The `+` chip comes last; it is omitted when all addable dimensions are present.
+- The `+` chip comes last; it is omitted when all addable dimensions are present. After it a `−` chip of the same kind (Wisteria filled, `--bs`) opens *Remove tag*: one option per tag of the entry, in danger style, a tap removes it. Not offered: the only facet of the entry (every entry keeps one), `#cal`, and a facet the user gave a whole journal (removed in the journal's dialog); tags of the user's own overlay are marked *(only you)* and removed from the overlay. The `−` is omitted when nothing is left to remove. Tapping a chip and *Remove tag* there stays as before.
 - In expanded state the `not synced` label appears after the chips.
 - Expanded state is kept per item (by `#id`) while the page is open; not persisted.
 
@@ -445,7 +445,7 @@ A round `?` button (32 px, 0.5 px border) next to every field for a new facet or
 
 ### 4.12b Journal dialog: facets and default journal
 
-Under *Content*, journals the user may write offer *Add a facet to this journal*: a field with the prefix `#facet-`, *Add*, and a hint. It writes a Tag definition into this journal; an existing name or an invalid one is answered in the hint. Journals of version 2 that the user owns (not the default) offer *Make this my default journal* (two taps, architecture 8.11j). In the dialog of a version 2 journal that replaced one of version 1, the former journal can be removed from one's own journals (*Remove it from my journals*) or deleted on the server.
+Under *Content*, journals the user may write offer *Add a facet to this journal*: a field with the prefix `#facet-`, *Add*, and a hint. It writes a Tag definition into this journal; an existing name or an invalid one is answered in the hint. Below it, *Remove a facet from this journal*: the journal's facets (declared ones and those of open entries) in the style of the facet bar. Choosing one that open entries still carry names their number and asks which facet they get instead, again as a facet choice of the journal's other facets; without another facet the hint says to add one first. *Remove* (two taps) gives those entries the chosen facet (an entry that already has it just loses the old one), then closes the facet's Tag definition lines. Closed entries keep their old facet; no entry is closed. *Undo* takes it back. Journals of version 2 that the user owns (not the default) offer *Make this my default journal* (two taps, architecture 8.11j). In the dialog of a version 2 journal that replaced one of version 1, the former journal can be removed from one's own journals (*Remove it from my journals*) or deleted on the server.
 
 ### 4.16 Clipboard
 

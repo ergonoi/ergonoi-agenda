@@ -8,7 +8,7 @@
 Installateur anrufen #facet-home #date-2026-11-20 #time-08:00
 ```
 
-Tags tippt man selten selbst. Du schreibst den Text, tippst auf *Add* und wählst die Facette; Datum und Uhrzeit setzen die Kalender- und Uhr-Schaltflächen. Alles Weitere lässt sich später mit dem `+` neben den Tags eines Eintrags ergänzen. Jeder Eintrag ist aber diese Zeile, und in der Ansicht *Text* siehst du ihn auch so.
+Tags tippt man selten selbst. Du schreibst den Text, tippst auf *Add* und wählst die Facette; Datum und Uhrzeit setzen die Kalender- und Uhr-Schaltflächen. Alles Weitere lässt sich später mit dem `+` neben den Tags eines Eintrags ergänzen; das `−` daneben entfernt ein Tag. Jeder Eintrag ist aber diese Zeile, und in der Ansicht *Text* siehst du ihn auch so.
 
 ## Die Tags
 
