@@ -6,7 +6,8 @@
 
 The list groups what is coming: *Today* (with what is overdue), *Tomorrow*, *Next 7 days*, *Later* (up to 30 days). Each group shows a limited number of entries; *more* shows the rest. Entries of other journals carry the journal's name.
 
-- **Swipe right** on an entry: *Done*, or move it by a day, two days, a week, a month, or to a date you choose.
+- **Swipe left** on an entry: *Done*, or move it by a day, two days, a week, a month, or to a date you choose.
+- **Swipe right** anywhere in the list: the menu with views and facets (phones and tablets).
 - **Tap the text** to change it, **tap a tag** to change it, **`+`** to add one.
 - *Undo* appears for a moment after every change.
 

@@ -510,15 +510,21 @@ Left border 3 px Amber Flame, padding 8 px 12 px, 15 px; *dismiss* button. Used 
 | Sync icon | sync now |
 | Settings icon | settings view |
 
-### 5.2 Swipe right
+### 5.2 Swipe left
 
 - Starts anywhere on an item except chips, inputs and the chevron.
-- Direction is decided after 8 px of movement: mostly vertical → the gesture is left to scrolling; leftward → ignored; rightward → the item follows the finger (`translateX`, no transition while dragging).
-- A hint "→ done / reschedule" in Scarlet Fire appears to the left of the item while dragging.
+- Direction is decided after 8 px of movement: mostly vertical → the gesture is left to scrolling; rightward → the panel (5.2a); leftward → the item follows the finger (`translateX`, no transition while dragging). Until 0.9.24 the item was swiped to the right.
+- A hint "← done / reschedule" in Scarlet Fire appears to the right of the item while dragging.
 - Release beyond **30 % of the item width or 100 px** (whichever is smaller) opens the done/reschedule sheet; otherwise the item springs back (0.15 s).
 - Every end of a gesture (release, system cancel) resets the item; no item may remain offset.
 - Items set `touch-action: pan-y`, and disable text selection and the iOS callout.
 - Rescheduling shifts all `#date` tags of the item by the same number of days (multi-day spans keep their length).
+
+### 5.2a Swipe right: the panel
+
+- On touch screens where the panel is a drawer (below 1240 px), a rightward swipe that starts anywhere in the list, on an item or between items, opens the panel once it has gone 60 px. It need not start at the edge of the screen, which the browser or the system keep for going back.
+- A leftward swipe of 60 px on the open drawer closes it.
+- With a mouse, and where the panel is a column, there is no such swipe; the panel is opened by the menu symbol.
 
 ### 5.3 Editing and sync
 

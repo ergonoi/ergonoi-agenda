@@ -465,7 +465,8 @@
   .item.flash { box-shadow:inset 0 0 0 2px var(--teal); }
   .chip.notebtn { min-width:var(--bs); width:var(--bs); padding:0; display:inline-flex; align-items:center; justify-content:center; background:transparent; border:1px solid var(--teal); color:var(--teal); }
   .chip.local { display:inline-flex; align-items:center; border:0; color:var(--amber); cursor:default; padding:0 4px; }
-  .swipehint { position:absolute; left:-110px; top:0; bottom:0; width:100px; display:flex; align-items:center; justify-content:flex-end; color:var(--scarlet); font-size:14px; opacity:0; }
+  #agenda, #fpanel { touch-action:pan-y; }
+  .swipehint { position:absolute; right:-110px; top:0; bottom:0; width:100px; display:flex; align-items:center; justify-content:flex-start; color:var(--scarlet); font-size:14px; opacity:0; }
   .item.dragging .swipehint { opacity:1; }
   @media (max-width: 600px) {
     .item .when:empty { display:none; }
@@ -4058,7 +4059,7 @@ function itemHtml({ e, idx, j, d, local, overdue, closed, carried, snapId }, g) 
   if (has(e, "review")) marks.push(`<span class="mk review">review</span>`);
   if (local) marks.push(`<span class="mk review">not synced</span>`);
   return `<div class="item${overdue ? " overdue" : ""}${open ? " open" : ""}${closed ? " isdone" : ""}"${ro ? ' data-ro="1"' : ""}${snapId && !ro ? ` data-reopen="${esc(j)}|${esc(snapId)}"` : ""} data-line="${idx}" data-key="${esc(key)}" style="border-left-color:${bar}">
-    <div class="swipehint">→ done / reschedule</div>
+    <div class="swipehint">← done / reschedule</div>
     <div class="when${implied && !time ? " onlywide" : ""}">${whenHtml}</div>
     <div class="body"><div class="text" data-line="${idx}">${esc(e.text)}${get(e, "recurring") ? `<span class="recic" title="Recurring: ${esc(get(e, "recurring"))}" aria-label="Recurring"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v4.5h-4.5"/></svg></span>` : ""}${e.note ? `<button class="noteic" data-note="${idx}" title="Note" aria-label="Note"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg></button>` : ""}${j ? `<span class="jtag">${esc(journalName(j))}</span>` : ""}</div>
       ${open ? "" : `<div class="marks">${marks.join("")}</div>`}
@@ -4564,13 +4565,16 @@ $("sheetDate").addEventListener("blur", () => { if (sheetDateOpen) { sheetDateOp
 // own calendar symbol, which is hidden here; touch browsers open it by themselves.
 $("sheetDate").addEventListener("click", ev => { ev.stopPropagation(); try { if (matchMedia("(pointer: fine)").matches && $("sheetDate").showPicker) $("sheetDate").showPicker(); } catch {} });
 
-// Swipe right on an item. Direction is decided after a few pixels: vertical movement
-// hands the gesture back to scrolling; horizontal movement moves the item.
-// Every end of a gesture (up, cancel, lost capture) resets the item.
+// Swipes in the list (ui.md 5.2). Direction is decided after a few pixels: vertical movement
+// hands the gesture back to scrolling. Leftward on an item: the item follows the finger and
+// opens Done / reschedule. Rightward anywhere in the list, on touch screens where the panel is
+// a drawer: the panel (ui.md 5.2a). Every end of a gesture (up, cancel) resets the item.
 function endSwipe(open) {
   if (!swipe) return;
-  const { item, dx } = swipe;
+  const { item, dx, dir } = swipe;
   swipe = null;
+  if (dir === "menu") { if (open && dx > 60) openPanel(true); return; }
+  if (!item) return;
   item.classList.remove("dragging");
   item.style.transform = "";
   lastDrag = dx;
@@ -4578,22 +4582,39 @@ function endSwipe(open) {
 }
 $("agenda").addEventListener("pointerdown", ev => {
   if (ev.pointerType === "mouse" && ev.button !== 0) return;
-  const item = ev.target.closest(".item");
-  if (!item || uiBusy || ev.target.closest(".chip, input, .fold")) return;
-  swipe = { item, x: ev.clientX, y: ev.clientY, dx: 0, id: ev.pointerId, dir: null };
+  if (uiBusy || ev.target.closest(".chip, input, textarea, .fold, #detail")) return;
+  swipe = { item: ev.target.closest(".item"), x: ev.clientX, y: ev.clientY, dx: 0, id: ev.pointerId, dir: null, touch: ev.pointerType !== "mouse" };
 });
 window.addEventListener("pointermove", ev => {
   if (!swipe || ev.pointerId !== swipe.id) return;
   const dx = ev.clientX - swipe.x, dy = ev.clientY - swipe.y;
   if (!swipe.dir) {
     if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
-    if (Math.abs(dy) >= Math.abs(dx) || dx < 0) { swipe = null; return; } // scrolling or left swipe
-    swipe.dir = "right";
-    swipe.item.classList.add("dragging");
+    if (Math.abs(dy) >= Math.abs(dx)) { swipe = null; return; } // scrolling
+    if (dx > 0) {
+      // The panel only where it is a drawer, and only by touch.
+      if (!swipe.touch || panelDocked() || $("fpanel").classList.contains("open")) { swipe = null; return; }
+      swipe.dir = "menu";
+    } else {
+      if (!swipe.item) { swipe = null; return; }
+      swipe.dir = "left";
+      swipe.item.classList.add("dragging");
+    }
   }
-  swipe.dx = Math.max(0, dx);
-  swipe.item.style.transform = `translateX(${swipe.dx}px)`;
+  if (swipe.dir === "menu") { swipe.dx = Math.max(0, dx); return; }
+  swipe.dx = Math.max(0, -dx);
+  swipe.item.style.transform = `translateX(${-swipe.dx}px)`;
 });
+// Leftward on the open drawer closes it.
+{
+  let p = null;
+  $("fpanel").addEventListener("pointerdown", ev => { p = ev.pointerType === "mouse" || panelDocked() ? null : { x: ev.clientX, y: ev.clientY, id: ev.pointerId }; });
+  window.addEventListener("pointerup", ev => {
+    if (!p || ev.pointerId !== p.id) return;
+    const dx = ev.clientX - p.x, dy = ev.clientY - p.y; p = null;
+    if (dx < -60 && Math.abs(dy) < Math.abs(dx)) openPanel(false);
+  });
+}
 window.addEventListener("pointerup", ev => { if (swipe && ev.pointerId === swipe.id) endSwipe(true); });
 window.addEventListener("pointercancel", ev => { if (swipe && ev.pointerId === swipe.id) endSwipe(false); });
 

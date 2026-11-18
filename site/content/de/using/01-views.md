@@ -6,7 +6,8 @@
 
 Die Liste gruppiert, was ansteht: *Today* (mit dem Überfälligen), *Tomorrow*, *Next 7 days*, *Later* (bis 30 Tage). Jede Gruppe zeigt eine begrenzte Zahl von Einträgen; *more* zeigt den Rest. Einträge anderer Journale tragen den Namen ihres Journals.
 
-- **Nach rechts wischen:** *Done*, oder verschieben um einen Tag, zwei Tage, eine Woche, einen Monat oder auf ein gewähltes Datum.
+- **Nach links wischen:** *Done*, oder verschieben um einen Tag, zwei Tage, eine Woche, einen Monat oder auf ein gewähltes Datum.
+- **Nach rechts wischen,** irgendwo in der Liste: das Menü mit Ansichten und Facetten (Telefon und Tablet).
 - **Auf den Text tippen**, um ihn zu ändern, **auf ein Tag tippen**, um es zu ändern, **`+`**, um eines hinzuzufügen.
 - Nach jeder Änderung erscheint kurz *Undo*.
 
