@@ -462,6 +462,7 @@
      on very wide screens fixed at the bottom left of the side area. */
   #appfoot { display:flex; flex-direction:column; gap:2px; padding:28px 16px 8px; }
   #appfoot .ver { font-size:11px; color:var(--muted); }
+  .about p { margin:0 0 8px; } .about .am { font-weight:600; } .about .al { display:flex; flex-wrap:wrap; gap:6px 18px; } .about .al a { display:inline-flex; align-items:center; gap:4px; color:var(--fg2); text-underline-offset:2px; } .about .am .one { display:block; white-space:nowrap; font-size:min(14px, calc((100vw - 32px) / 25.5)); }
   #appfoot a { font-size:12px; color:var(--muted); text-decoration:none; display:inline-flex; align-items:center; gap:3px; }
   #appfoot a:hover { color:var(--fg); }
   @media (min-width: 1500px) { #appfoot { position:fixed; left:0; bottom:0; padding:0 20px 16px; } }
@@ -904,6 +905,12 @@
       <label class="check"><input type="checkbox" id="cfgMinimal"><span><span class="lt">ergonoi theme</span><span class="ld">the name ergonoi Agenda with its wordmark; colour only where it points to something (facets, overdue, now, danger), a light Wisteria header and grey buttons. This device only.</span></span></label>
     </section>
     <section data-st="system">
+      <h3>About</h3>
+      <div class="about">
+        <p><strong id="aboutName">οὐθείς Agenda</strong> · version 0.9.13</p>
+        <p class="am"><span id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project: </span><span class="one">Technology is potential. Accessibility makes it matter.</span></p>
+        <p class="al"><a href="https://outheis-labs.github.io/outheis-agenda/" target="_blank" rel="noopener">Documentation <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://github.com/outheis-labs/outheis-agenda" target="_blank" rel="noopener">Source code on GitHub <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://ergonoi.com" target="_blank" rel="noopener">ergonoi.com <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
+      </div>
       <h3 id="logLabel">Log</h3>
       <label class="check"><input type="checkbox" id="cfgLog"><span><span class="lt">Diagnostic log</span><span class="ld">written in this browser to trace faults. It records syncs, errors and changes to the journal list, never entries or phrases.</span></span></label>
       <div class="hint hidden" id="logMsg" style="color:var(--scarlet)"></div>
@@ -935,9 +942,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.9.12</span>
-    <a href="#" id="aboutLink">About</a>
-    <a href="https://outheis-labs.github.io/outheis-agenda/" target="_blank" rel="noopener">Documentation <svg width="7" height="7" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <span class="ver">v0.9.13</span>
   </footer>
 </main>
 <nav id="bnav" aria-label="View">
@@ -987,15 +992,6 @@
       <button type="button" class="sec hidden" id="clipDownload">Download</button>
       <button type="button" class="danger hidden" id="clipClear">Clear</button>
     </div>
-  </form>
-</dialog>
-<dialog id="dlgAbout">
-  <form method="dialog">
-    <strong id="aboutName">οὐθείς Agenda</strong>
-    <p id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project:</p>
-    <p style="margin-top:14px">Technology is potential. Accessibility makes it matter.</p>
-    <p class="hint">Version 0.9.12 · outheis-labs</p>
-    <div class="btnrow" style="justify-content:flex-end"><button class="primary">Close</button></div>
   </form>
 </dialog>
 <div id="pop" class="hidden"></div>
@@ -5596,7 +5592,6 @@ for (const d of document.querySelectorAll("dialog")) {
   };
   d.append(b); // last, so that opening the dialog does not focus it
 }
-$("aboutLink").onclick = ev => { ev.preventDefault(); $("dlgAbout").showModal(); };
 $("btnShowPhrase").onclick = async () => { if ($("phraseBox").classList.contains("hidden") && !(await pinGate())) return; $("phraseBox").textContent = withJ("", () => S.phrase); $("phraseBox").classList.toggle("hidden"); };
 $("btnShowQr").onclick = async () => { if ($("qrBox").classList.contains("hidden") && !(await pinGate())) return; toggleQr($("qrBox"), withJ("", () => S.phrase)); };
 $("cfgCompact").onchange = () => {
@@ -5656,7 +5651,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.9.12, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.13, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -5864,7 +5859,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.9.12";
+const APP_VERSION = "0.9.13";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)

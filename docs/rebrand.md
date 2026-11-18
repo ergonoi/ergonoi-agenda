@@ -7,7 +7,8 @@ That switch is the preview: whatever a clone would show can be tried here first.
 A clone that is to show *ergonoi Agenda* by default:
 
 1. Clone or fork the repository into the ergonoi organisation.
-2. In `clients/web/brand.json` set `"default": "ergonoi"`.
+2. In `clients/web/brand.json` set `"default": "ergonoi"`, and `"docs"` and `"repo"` to the
+   clone's documentation site and repository (linked under *About* in the settings).
 3. `python3 clients/web/build.py`: page title, wordmark, colours, manifest name and theme
    colour follow, and the ergonoi icons (`icon-src/icons/ergonoi-*`) become
    `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`, `favicon-32.png` and
@@ -23,5 +24,5 @@ What stays the same, on purpose:
 - The switch in Settings: users of the clone can still choose the outheis look.
 
 Changes to the app are made here and taken over by the clone with a pull or merge; the
-clone should carry no other change than the one line in `brand.json` (and, if wanted, the
+clone should carry no other change than these lines in `brand.json` (and, if wanted, the
 optional files above), so that merging stays trivial.
