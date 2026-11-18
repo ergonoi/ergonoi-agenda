@@ -7,15 +7,15 @@ export default async function ({ svc, b }) {
   const A = await device(b, { width: 1600, height: 900 });
   await newAccount(A, svc.url);
   await A.evaluate(() => document.documentElement.classList.add("minimal"));
-  const tab = await A.evaluate(() => { const t = getComputedStyle($("tabMonth")); return { svg: !!$("tabMonth").querySelector("svg"), border: t.borderTopWidth, bg: t.backgroundColor }; });
-  check(tab.svg && tab.border === "0px" && /rgba\(0, 0, 0, 0\)|transparent/.test(tab.bg), "view tabs with a symbol, no frame, no fill " + JSON.stringify(tab));
+  const tab = await A.evaluate(() => { const t = getComputedStyle($("tabMonth")); return { svg: !!$("tabMonth").querySelector("svg"), border: t.borderTopWidth === "0px" || t.borderTopColor === "rgba(0, 0, 0, 0)" ? "none" : t.borderTopColor + " " + t.borderTopWidth, side: t.borderLeftWidth, bg: t.backgroundColor }; });
+  check(tab.svg && tab.border === "none" && tab.side === "0px" && /rgba\(0, 0, 0, 0\)|transparent/.test(tab.bg), "view tabs with a symbol, no frame, no fill " + JSON.stringify(tab));
   const pos = await A.evaluate(() => {
     const dot = document.querySelector("#status .dot").getBoundingClientRect(), det = $("detail");
     const txt = [...det.querySelectorAll("*")].find(x => /^Choose/.test(x.textContent.trim()) && !x.children.length).getBoundingClientRect();
     return { dot: dot.left, text: txt.left, top: dot.top, hh: document.querySelector("header").getBoundingClientRect().bottom };
   });
   check(Math.abs(pos.dot - pos.text) < 2 && pos.top < pos.hh, "the sync dot stands over the right column, flush with its text " + JSON.stringify(pos));
-  const right = await A.evaluate(() => { const s = $("btnSettings").getBoundingClientRect(), a = document.querySelector("#add > button:last-child").getBoundingClientRect(); return { s: s.right, a: a.right }; });
+  const right = await A.evaluate(() => { const s = [...document.querySelectorAll("header .hbtns > button")].filter(x => x.offsetParent).pop().getBoundingClientRect(), a = document.querySelector("#add > button:last-child").getBoundingClientRect(); return { s: s.right, a: a.right }; });
   check(Math.abs(right.s - right.a) < 12, "the symbols close the middle column above Add " + JSON.stringify(right));
   await A.evaluate(() => $("btnMic").classList.remove("hidden"));
   const mic = await A.evaluate(() => { const c = r => (r.top + r.bottom) / 2; return Math.abs(c($("btnMic").querySelector("svg").getBoundingClientRect()) - c(document.querySelector("#add > button:last-child").getBoundingClientRect())); });

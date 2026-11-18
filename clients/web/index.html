@@ -285,13 +285,13 @@
   #viewSettings label.check input { flex:none; width:18px; height:18px; min-height:0; margin:2px 0 0; padding:0; border:revert; accent-color:var(--amethyst); }
   #viewSettings #logRow { align-items:center; }
   #viewSettings #logCount { margin:0 0 0 4px; }
-  #btnSettings { border-radius:0; border-bottom:2px solid transparent !important; }
+  #btnSettings { border-radius:0; border-top:2px solid transparent !important; border-bottom:2px solid transparent !important; }
   #btnSettings[aria-pressed="true"] { border-bottom-color:var(--fg) !important; }
   #tabFilter { padding:0 10px; }
   /* Views (List, Text) and the icons; on wide screens one row, the views set off from the icons. */
   header .vtabs, header .hbtns { display:flex; align-items:center; flex:none; }
   header .vtabs { margin-right:16px; }
-  #btnSearch { border-radius:0; border-bottom:2px solid transparent !important; }
+  #btnSearch { border-radius:0; border-top:2px solid transparent !important; border-bottom:2px solid transparent !important; }
   #btnSearch[aria-pressed="true"] { border-bottom-color:var(--fg) !important; }
   @media (max-width: 430px) {
     header h1 { font-size:22px; }
@@ -300,7 +300,10 @@
     #tabFilter { padding:0 5px !important; }
     #btnClip, #btnMemo, #btnSearch, #btnSync, #btnSettings { padding:0 4px !important; min-width:38px !important; }
   }
-  #btnClip, #btnMemo, #btnSearch, #btnSync, #btnSettings { border:0; min-width:var(--tap); padding:0 10px; color:var(--fg2); }
+  #btnClip, #btnMemo, #btnSearch, #btnSync, #btnSettings, #btnLock { border:0; min-width:var(--tap); padding:0 10px; color:var(--fg2); }
+  /* All symbols of the header on one centre line, that of the view tabs (ui.md 3). */
+  header .hbtns > button { display:inline-flex; align-items:center; justify-content:center; height:var(--tap); }
+  header .hbtns > button > svg { display:block; }
   /* Shown memos: the bookmark in Amethyst, not filled (Teal is too weak on Pearl Aqua). */
   #btnMemo[aria-pressed="true"] { color:var(--amethyst); }
   #btnMemo[aria-pressed="true"] svg { stroke-width:2; }
@@ -797,7 +800,14 @@
   /* A light Wisteria (50 % on white) for the header with minimal colours; dark mode keeps
      the plain surface (ui.md 2.10). */
   html.minimal header { background:#E2C8E8; border-bottom:.5px solid var(--line); --fg:#1A1A1A; --fg2:#4A4646; --muted:#7A7676; }
-  @media (prefers-color-scheme: dark) { html.minimal header { background:var(--bg); --fg:#f0f0f0; --fg2:#a0a0a0; --muted:#707070; } }
+  /* A header colour of the person's own (ui.md 4.11e): the same light tone in both themes;
+     in dark mode a stick of the colour under the plain header instead. */
+  html[data-hdr] header { background:var(--hdrbg); border-bottom:.5px solid var(--line); --fg:#1A1A1A; --fg2:#4A4646; --muted:#7A7676; color:#1A1A1A; }
+  @media (prefers-color-scheme: dark) { html.minimal header { background:var(--bg); --fg:#f0f0f0; --fg2:#a0a0a0; --muted:#707070; }
+    html[data-hdr] header { background:var(--bg); border-bottom:3px solid var(--hdrline); --fg:#f0f0f0; --fg2:#a0a0a0; --muted:#707070; color:#f0f0f0; } }
+  /* Lock (ui.md 4.12a): desktop only, at the right end, on the centre line of the icons. */
+  #btnLock.hidden { display:none !important; }
+  @media (max-width: 600px) { #btnLock { display:none !important; } }
   /* The title keeps the size and the Inter of οὐθείς Agenda; only the word ergonoi is set as
      on ergonoi.com: Mona Sans Mono, 700, tracking 0.025 em. */
   .brand .bw { font-family:"Mona Sans Mono", ui-monospace, monospace; font-weight:700; letter-spacing:.025em; margin-right:.12em; }
@@ -811,9 +821,9 @@
   html.minimal button.tab[aria-pressed="true"] { border-color:var(--fg); }
   /* The view tabs in the header are tabs, not buttons (ui.md 1a): symbol and name as in the phone's
      bottom bar, in the dark of the header's symbols; the chosen one bold and underlined; no frame, no fill. */
-  header .vtabs button.tab, html.minimal header .vtabs button.tab { display:inline-flex; align-items:center; gap:6px; min-height:var(--tap); margin:0; padding:0 10px; border:0; border-bottom:2px solid transparent; border-radius:0; background:transparent; font-size:14px; font-weight:400; color:var(--fg2); }
+  header .vtabs button.tab, html.minimal header .vtabs button.tab { display:inline-flex; align-items:center; gap:6px; min-height:var(--tap); margin:0; padding:0 10px; border:0; border-top:2px solid transparent; border-bottom:2px solid transparent; border-radius:0; background:transparent; font-size:14px; font-weight:400; color:var(--fg2); }
   header .vtabs button.tab svg { width:18px; height:18px; flex:none; }
-  header .vtabs button.tab[aria-pressed="true"], html.minimal header .vtabs button.tab[aria-pressed="true"] { color:var(--fg); font-weight:600; border:0; border-bottom:2px solid var(--fg); }
+  header .vtabs button.tab[aria-pressed="true"], html.minimal header .vtabs button.tab[aria-pressed="true"] { color:var(--fg); font-weight:600; border:0; border-top:2px solid transparent; border-bottom:2px solid var(--fg); }
   html.minimal .stabs button.tab:first-child { padding-left:10px; margin-left:0; } /* a filled tab keeps its inner space; only the underlined tabs start flush */
   html.minimal #tabFilter { border:0; border-radius:0; margin:0; min-height:var(--tap); border-bottom:2px solid transparent; }
   html.minimal #tabFilter[aria-pressed="true"] { border:0; border-bottom:2px solid var(--fg); }
@@ -842,6 +852,7 @@
     <button id="hdot" title="Sync" aria-label="Sync"><span class="dot"></span></button>
     <button id="btnSync" title="Sync"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/></svg></button>
     <button id="btnSettings" title="Settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    <button id="btnLock" class="hidden" title="Lock" aria-label="Lock"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="10.5" width="13" height="9.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/></svg></button>
     </span>
   </div>
 </header>
@@ -933,7 +944,9 @@
       <div class="hint" id="pinState"></div>
       <div class="btnrow">
         <button type="button" class="sec" id="btnPinChange">Change PIN</button>
+        <button type="button" class="sec hidden" id="btnLockNow">Lock</button>
       </div>
+      <p class="hint hidden" id="lockHint">Lock closes your journals in this browser until the PIN is entered again; with several persons the choice of person follows.</p>
       <p class="hint">Removes words, journals, settings, PIN and unsent changes from this browser. The server is not touched.</p>
       <div class="btnrow">
         <button type="button" id="cfgReset" class="danger">Clear data in this browser</button>
@@ -942,12 +955,15 @@
     <section data-st="device">
       <h3>Display</h3>
       <label class="check"><input type="checkbox" id="cfgCompact"><span><span class="lt">Compact layout</span><span class="ld">smaller type and buttons, entries with the time on the left, a quiet surface for the input area. This device only.</span></span></label>
+      <p style="margin:14px 0 0">Header colour:</p>
+      <div class="tog" id="hdrColor" role="radiogroup" aria-label="Header colour"></div>
+      <div class="hint">For you in this browser, so that it shows at a glance whose agenda is open.</div>
       <label class="check"><input type="checkbox" id="cfgMinimal"><span><span class="lt">ergonoi theme</span><span class="ld">the name ergonoi Agenda with its wordmark; colour only where it points to something (facets, overdue, now, danger), a light Wisteria header and grey buttons. This device only.</span></span></label>
     </section>
     <section data-st="system">
       <h3>About</h3>
       <div class="about">
-        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.22</p>
+        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.23</p>
         <p>Author: Markus Schatzl</p>
         <p class="am"><span id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project: </span><span class="one">Technology is potential. Accessibility makes it matter.</span></p>
         <p class="al"><a href="https://ergonoi.github.io/ergonoi-agenda/" target="_blank" rel="noopener">Documentation <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://github.com/ergonoi/ergonoi-agenda" target="_blank" rel="noopener">Source code on GitHub <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://ergonoi.com" target="_blank" rel="noopener">ergonoi.com <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
@@ -983,7 +999,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.9.22</span>
+    <span class="ver">v0.9.23</span>
   </footer>
 </main>
 <nav id="bnav" aria-label="View">
@@ -6018,6 +6034,7 @@ function prepSettings() { withJ("", () => {
   fillWordSelects();
   renderLogRow();
   $("cfgMinimal").checked = document.documentElement.classList.contains("minimal");
+  renderHdrColor();
   $("cfgCompact").checked = document.documentElement.classList.contains("compact");
   $("exportPlain").checked = false;
   $("exportBox").classList.add("hidden");
@@ -6063,10 +6080,21 @@ $("cfgCompact").onchange = () => {
   document.documentElement.classList.toggle("compact", on);
   try { LS.setItem("agenda.compact", on ? "1" : "0"); } catch {}
 };
+// Header colour per person in this browser (ui.md 4.11e); applied by the boot script.
+function renderHdrColor() {
+  const cur = PS.getItem("agenda.hdr") || "";
+  $("hdrColor").innerHTML = HDR_COLORS.map(([k, label, , line]) => `<button type="button" data-hdr="${k}" role="radio" aria-checked="${k === cur}" class="${k === cur ? "" : "off"}"><span class="ln" style="background:${line}"></span>${label}</button>`).join("");
+}
+$("hdrColor").addEventListener("click", ev => {
+  const b = ev.target.closest("[data-hdr]"); if (!b) return;
+  if (b.dataset.hdr) PS.setItem("agenda.hdr", b.dataset.hdr); else PS.removeItem("agenda.hdr");
+  applyHdr(); renderHdrColor();
+});
 $("cfgMinimal").onchange = () => {
   const on = $("cfgMinimal").checked;
   document.documentElement.classList.toggle("minimal", on);
   document.querySelector('meta[name="theme-color"]').content = on ? "#E2C8E8" : "#97EAD2";
+  applyHdr();
   try { LS.setItem("agenda.minimal", on ? "1" : "0"); } catch {}
   applyBrand();
 };
@@ -6115,7 +6143,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.9.22, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.23, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -6323,7 +6351,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.9.22";
+const APP_VERSION = "0.9.23";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
@@ -6442,7 +6470,27 @@ async function ensurePin() { if (Vault.mode !== "on" && !Vault.cfg()?.demo) { aw
 const PIN_LEVELS = [["silent", "Silent PIN"], ["session", "Once per session"], ["strict", "Every time"]];
 const PIN_RANK = { silent: 0, session: 1, strict: 2 };
 function pinLevelNow() { return Vault.mode === "on" ? Vault.level() : ""; }
+// Lock (ui.md 4.12a): offered where it closes something, with several persons or a PIN that is
+// asked for; with the silent PIN the app would open again at once.
+const lockable = () => multiPerson() || (Vault.mode === "on" && Vault.level() !== "silent");
+function renderLock() {
+  const on = lockable();
+  $("btnLock").classList.toggle("hidden", !on);
+  $("btnLockNow").classList.toggle("hidden", !on);
+  $("lockHint").classList.toggle("hidden", !on);
+  $("btnLock").title = multiPerson() ? "Lock and switch person" : "Lock";
+}
+function lockNow() {
+  log("locked");
+  Vault.flush().then(() => {
+    try { sessionStorage.removeItem(pinSkey()); if (multiPerson()) sessionStorage.setItem("agenda.person", "?"); } catch {}
+    location.reload();
+  });
+}
+$("btnLock").onclick = lockNow;
+$("btnLockNow").onclick = lockNow;
 function renderPinRow() {
+  renderLock();
   const cur = pinLevelNow();
   $("pinLevel").innerHTML = PIN_LEVELS.map(([v, label]) => `<button type="button" data-v="${v}" role="radio" aria-checked="${v === cur}" class="${v === cur ? "" : "off"}"><span class="ck" aria-hidden="true">✓</span>${label}</button>`).join("");
   $("pinState").textContent = {
@@ -8817,6 +8865,7 @@ takeFragment();
 // The account ID of the default journal is kept for the fallback name.
 if (S.keys && !LS.getItem("agenda.acct")) acctOf(S.keys).then(id => LS.setItem("agenda.acct", id));
 setView(monthMode ? "month" : "agenda");
+renderLock();
 if (!S.keys) {
   $("setupServer").value = /^https?:/.test(location.origin) ? location.origin : "";
   showSetup("start");
@@ -8893,7 +8942,18 @@ function personChooser() {
     d.showModal();
   });
 }
-const PIN_PLAIN = new Set(["agenda.compact", "agenda.minimal", "agenda.month", "agenda.fbar.open", "agenda.stab", "agenda.pin", "agenda.pinWait", "agenda.vkeep"]);
+const PIN_PLAIN = new Set(["agenda.compact", "agenda.minimal", "agenda.month", "agenda.fbar.open", "agenda.stab", "agenda.pin", "agenda.pinWait", "agenda.vkeep", "agenda.hdr"]);
+// Header colours (ui.md 4.11e): key, name, light tone (50 % on white), the colour itself.
+// Without a choice the theme's own header stays.
+const HDR_COLORS = [["", "Wisteria", "#E2C8E8", "#C490D1"], ["amethyst", "Dark Amethyst", "#A385A3", "#460A46"], ["teal", "Teal", "#90C1C0", "#218380"],
+  ["robin", "Robin", "#97E2E3", "#2EC4C6"], ["amber", "Amber", "#FFDA80", "#FFB400"], ["scarlet", "Scarlet", "#FF9780", "#FF2E00"]];
+function applyHdr() {
+  const c = HDR_COLORS.find(x => x[0] && x[0] === PS.getItem("agenda.hdr")), r = document.documentElement;
+  if (c) { r.dataset.hdr = c[0]; r.style.setProperty("--hdrbg", c[2]); r.style.setProperty("--hdrline", c[3]); }
+  else { delete r.dataset.hdr; r.style.removeProperty("--hdrbg"); r.style.removeProperty("--hdrline"); }
+  const m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.content = c ? c[2] : r.classList.contains("minimal") ? "#E2C8E8" : "#97EAD2";
+}
 const VAULT = "agv:";          // prefix of the encrypted entries in localStorage
 const PIN_ITER = 600000;       // PBKDF2 rounds: about half a second on a phone
 const PIN_IDLE = 5 * 60e3;     // "every time": locked again after this long in the background
@@ -9123,6 +9183,7 @@ addEventListener("pagehide", () => Vault.flush());
   if (!plist.some(x => x.id === who) && !Persons.list().some(x => x.id === who)) who = "";
   PFX = who ? who + "/" : "";
   Persons.set(who);
+  applyHdr();
   const c = Vault.cfg();
   Vault.mode = c ? c.mode : "";
   if (Vault.mode === "on" && !(await Vault.resume())) await pinDialog("unlock");
