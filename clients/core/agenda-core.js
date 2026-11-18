@@ -42,7 +42,7 @@ function normSnowflake(v) {
 // Inside, "\n" is a line break, "\}" a brace and "\\" a backslash; "#" starts no tag.
 // A note fits into one encrypted line with the entry (MAX_LINE, 4 KB with padding and tag);
 // lineFits() checks the bytes, as letters such as ä take two.
-const NOTE_MAX = 3500;
+const NOTE_MAX = 3000;
 function encodeNote(n) { return String(n).replace(/\r/g, "").replace(/\\/g, "\\\\").replace(/\}/g, "\\}").replace(/\n/g, "\\n"); }
 function decodeNote(s) { return s.replace(/\\(.)/g, (_, c) => c === "n" ? "\n" : c); }
 // Finds "{{…}}" followed only by tags (or nothing); returns [before, note, after] or null.

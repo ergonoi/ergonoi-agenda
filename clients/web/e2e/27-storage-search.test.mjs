@@ -15,8 +15,8 @@ export default async function ({ svc, b }) {
   await A.evaluate(() => openSearch(false)); await sleep(200);
 
   // A note too long for one encrypted line is cut to fit.
-  const fit = await A.evaluate(() => { const x = parse("Umlauts #facet-private"); const v = "ä".repeat(3500); const out = fitNoteTo(x, v); return { n: out.length, fits: lineFits(toLine({ ...x, note: out })) }; });
-  check(fit.n < 3500 && fit.fits, "a note of two-byte letters is cut to fit one line " + JSON.stringify(fit));
+  const fit = await A.evaluate(() => { const x = parse("Umlauts #facet-private"); const v = "ä".repeat(3000); const out = fitNoteTo(x, v); return { n: out.length, fits: lineFits(toLine({ ...x, note: out })) }; });
+  check(fit.n < 3000 && fit.fits, "a note of two-byte letters is cut to fit one line " + JSON.stringify(fit));
 
   // Storage: the entry with the long note comes first.
   await A.evaluate(() => { withJ("", () => { S.wc = S.wc + "\nOld meeting {{" + "x".repeat(3000) + "}} #date-2025-01-10 #facet-work"; }); render(); sync(); });
