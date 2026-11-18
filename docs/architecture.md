@@ -377,7 +377,7 @@ What happens to an item whose date has passed without `#done` depends on its **d
 
 Some entries are not due at all: a number to look up, a recipe, an address. They are memos: `#type-memo`, no date, no time, no repetition.
 
-- A memo never passes and is never due. It appears in no group of the list and not in the month; the search finds it in a group *Memos*, and filters apply to it. Its date column stays empty.
+- A memo never passes and is never due. It appears in no group of the list, not under *Show all* and not in the month; the bookmark in the header shows the memos on their own (`ui.md` 4.2b), and the search finds them in a group *Memos*. Filters apply to them. Its date column stays empty.
 - It is not exported to calendars.
 - When adding an entry, the bookmark beside date and time makes it a memo (`ui.md` 4.2); later `type` in the tag menu.
 
