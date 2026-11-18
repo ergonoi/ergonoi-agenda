@@ -14,7 +14,7 @@ Der Trichter oben öffnet die Facettenliste; auf einem breiten Bildschirm steht 
 
 Ein Tippen blendet eine Facette aus oder ein; langes Drücken zeigt nur diese eine (eine Meldung bietet *Undo*). Ein Tippen auf den Namen eines Journals schaltet alle seine Facetten; langes Drücken zeigt nur dieses Journal. *All* zeigt alle Facetten, *None* blendet alle aus. Eingeschaltete Facetten sind dunkel, ausgeschaltete hell. Dazwischen gibt es nichts.
 
-Unter den Facetten filtert *More* nach den übrigen Tags: Thema, Zustand, Wichtigkeit, Aufwand, Uhrzeit, Wiederholung. Ohne Ansicht nennt eine Zeile unter dem Eingabefeld, was ausgeblendet ist, mit *Show all*.
+Die Facetten weiterer Journale liegen eingeklappt unter *More journals*, zuerst die Allies-Journale, dann die Guest-Journale. Darunter filtert *More filters* nach den übrigen Tags: Thema, Zustand, Wichtigkeit, Aufwand, Uhrzeit, Wiederholung. Ohne Ansicht nennt eine Zeile unter dem Eingabefeld, was ausgeblendet ist, mit *Show all*.
 
 ## Eine Facette anlegen und behalten
 

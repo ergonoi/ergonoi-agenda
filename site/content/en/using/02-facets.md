@@ -14,7 +14,7 @@ The funnel at the top opens the facet panel; on a wide screen it stands beside t
 
 Tap a facet to hide or show it; press and hold to show only this one (a message offers *Undo*). Tap a journal's name to switch all its facets; press and hold to show only this journal. *All* shows all facets, *None* hides all of them. Facets that are switched on are dark, facets that are switched off are light. There is nothing in between.
 
-Below the facets, *More* filters by the other tags: topic, action, rank, size, time, repetition. Without a view, a line below the input field names what is hidden, with *Show all*.
+The facets of further journals lie folded under *More journals*, ally journals first, then guest journals. Below them, *More filters* filters by the other tags: topic, action, rank, size, time, repetition. Without a view, a line below the input field names what is hidden, with *Show all*.
 
 ## Creating and keeping a facet
 
