@@ -53,7 +53,7 @@ The journal is lines only. A header for settings or vocabulary was rejected: it 
 
 ### 3.2 Keeping tag values: Tag definitions (`#type-meta`; dated 3000-12-31 before 0.5.0)
 
-Problem: a value that no open entry uses disappears once closed entries are compacted, so rarely used facets and topics would be lost. Considered: a header (rejected, 3.1). Chosen: entries `Tag definition: <description> … #type-meta`. They live in the journal like any entry, are merged and encrypted, never appear in a view (views end three months ahead), and can be edited by hand. The date is fixed to 31 December 3000 rather than "100 years ahead" so that it never moves. The same pattern is used for `Journal name:` and `Learned Rule:`. These entries need no facet.
+Problem: a value that no open entry uses disappears once closed entries are compacted, so rarely used facets and topics would be lost. Considered: a header (rejected, 3.1). Chosen: entries `Tag definition: <description> … #type-meta`. They live in the journal like any entry, are merged and encrypted, never appear in a view, and can be edited by hand. Since *Show all* (0.9.3) lists every open entry, the views skip meta lines explicitly rather than by a horizon; the same holds for memos, which only the search finds (architecture 5.6). Meta lines and memos are also not counted in the facet panel, so a facet with only its Tag definition is not listed there (0.9.14). The date is fixed to 31 December 3000 rather than "100 years ahead" so that it never moves. The same pattern is used for `Journal name:` and `Learned Rule:`. These entries need no facet.
 
 ### 3.3 Horizon and groups (ui.md 5.4)
 

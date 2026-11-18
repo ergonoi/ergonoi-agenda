@@ -43,7 +43,7 @@
     /* Not a journal colour: only marks a filled clipboard (ui.md 4.16). */
     --blue:#2B3BD6;
     --tap:44px; --off:.45; --bs:32px; --bm:44px;
-    --veil:rgba(255,255,255,.8);
+    --veil:rgba(255,255,255,.92);
     --side:#F8F7F7; --mist:#E8E6E6;
   }
   @media (prefers-color-scheme: dark) { :root {
@@ -53,7 +53,7 @@
   * { box-sizing:border-box; }
   /* Behind dialogs and sheets: a white veil, no grey. */
   dialog::backdrop { background:var(--veil); }
-  @media (prefers-color-scheme: dark) { :root { --veil:rgba(26,26,26,.8); } }
+  @media (prefers-color-scheme: dark) { :root { --veil:rgba(26,26,26,.92); } }
   body { margin:0; font:17px/1.45 "IBM Plex Sans", system-ui, -apple-system, sans-serif; font-weight:400; color:var(--fg); background:var(--bg); -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:100%; }
   /* No double-tap zoom on controls (iOS zooms on quick repeated taps); pinch zoom stays. */
   html { touch-action:manipulation; }
@@ -678,6 +678,9 @@
   #sheet .done.series { background:transparent; border-color:var(--scarlet); color:var(--scarlet); }
   #sheet .sheettop { display:flex; gap:8px; }
   #sheet .sheettop button { flex:1; min-height:var(--bm); padding:0 8px; }
+  /* On a wide screen with a mouse both sheets open below the add field, in its width (ui.md 4.2). */
+  #sheet.anchored, #facetSheet.anchored { align-items:flex-start; justify-content:flex-start; }
+  html #sheet.anchored .panel, html #facetSheet.anchored .panel { position:absolute; left:var(--sx); top:var(--sy); width:var(--sw); max-width:none; max-height:calc(100vh - var(--sy) - 16px); overflow:auto; border:.5px solid var(--line); border-radius:0; padding-bottom:16px; }
   #facetSheet { position:fixed; inset:0; background:var(--veil); z-index:30; display:flex; align-items:flex-end; justify-content:center; }
   #facetSheet .panel { background:var(--bg); width:100%; max-width:540px; border-top:.5px solid var(--line); padding:8px 16px calc(16px + env(safe-area-inset-bottom)); }
   #facetSheet .thead { display:flex; align-items:flex-start; gap:8px; border-bottom:.5px solid var(--line); margin:6px 0 12px; }
@@ -907,7 +910,7 @@
     <section data-st="system">
       <h3>About</h3>
       <div class="about">
-        <p><strong id="aboutName">οὐθείς Agenda</strong> · version 0.9.13</p>
+        <p><strong id="aboutName">οὐθείς Agenda</strong> · version 0.9.14</p>
         <p class="am"><span id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project: </span><span class="one">Technology is potential. Accessibility makes it matter.</span></p>
         <p class="al"><a href="https://outheis-labs.github.io/outheis-agenda/" target="_blank" rel="noopener">Documentation <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://github.com/outheis-labs/outheis-agenda" target="_blank" rel="noopener">Source code on GitHub <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://ergonoi.com" target="_blank" rel="noopener">ergonoi.com <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
       </div>
@@ -942,7 +945,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.9.13</span>
+    <span class="ver">v0.9.14</span>
   </footer>
 </main>
 <nav id="bnav" aria-label="View">
@@ -1095,7 +1098,7 @@
         <p class="hint" id="jFacetMsg">Everyone who shares the journal sees it; it can be chosen at once, before any entry uses it.</p>
       </div>
       <div id="jRmFacetRow">
-        <label>Remove a facet from this journal</label>
+        <label>Remove facets from this journal</label>
         <div class="valbtns" id="jRmFacets"></div>
         <div id="jRmTargetRow" class="hidden">
           <p class="hint" id="jRmCount"></p>
@@ -3626,12 +3629,13 @@ function filterLabel(dim, v) {
   if (dim === "recurring") return v ? "recurring" : "one-off";
   return v || "without " + dim;
 }
-// Open items, the basis of all counts (no horizon since 0.9.3).
+// Open items, the basis of all counts (no horizon since 0.9.3). Meta lines and memos appear
+// in no view and are not counted, so a facet with only its Tag definition is not listed.
 function viewItems() {
   const all = [];
   const ovs = overlayMap();
   for (const j of journals()) withJ(j, () => all.push(...parseLines(S.wc).map(e => applyOverlay(Object.assign(e, { _j: j }), j, ovs))));
-  return all.filter(e => !has(e, "done"));
+  return all.filter(e => !has(e, "done") && !isMeta(e) && !isMemo(e));
 }
 function valuesOf(dim) {
   if (dim === "time" || dim === "recurring") return ["with", ""];
@@ -4162,7 +4166,8 @@ function renderAgenda() {
     S.wc.split("\n").forEach((l, idx) => {
       const e = parse(l);
       if (!e) return;
-      if (searching && (DEF_RE.test(e.text) || COMMENT_RE.test(e.text))) return; // definitions are no entries
+      // Meta lines are no entries and appear in no view, also not under Show all (decisions 3.2).
+      if (isMeta(e) || (searching && COMMENT_RE.test(e.text))) return;
       const closed = has(e, "done");
       if (closed && !(searching && SEARCH.done)) return;
       e._j = j;
@@ -4798,6 +4803,17 @@ function editText(div) {
 // ---------------------------------------------------------------------------
 
 let swipe = null, lastDrag = 0;
+// Wide screen with a mouse: the sheet as a panel below the add field (ui.md 4.2); on touch
+// screens it stays at the bottom, within reach of the thumb.
+function placeSheet(el) {
+  const wide = !matchMedia("(pointer: coarse)").matches && innerWidth >= 900;
+  el.classList.toggle("anchored", wide);
+  if (!wide) return;
+  const r = $("add").getBoundingClientRect(), hh = document.querySelector("header").getBoundingClientRect().bottom;
+  el.style.setProperty("--sx", r.left + "px");
+  el.style.setProperty("--sw", r.width + "px");
+  el.style.setProperty("--sy", Math.max(r.bottom, hh) + 8 + "px");
+}
 function openSheet(idx, pinned) {
   const e = entryAt(idx);
   if (!e) return;
@@ -4815,7 +4831,7 @@ function openSheet(idx, pinned) {
   // For an occurrence the steps count from its own date (Wednesday's session + 2 days = Friday).
   $("sheet").dataset.base = rec ? occ : "";
   $("sheetDate").value = "";
-  $("sheet").classList.remove("hidden");
+  placeSheet($("sheet")); $("sheet").classList.remove("hidden");
   sheetLock(true);
 }
 // While the sheet is open the page does not scroll: iOS scrolls a focused date field into
@@ -5431,7 +5447,7 @@ function openFacetSheet(v, only) {
     `<button class="tag" data-facet="${esc(c.f)}" data-j="${esc(c.j)}"><span class="ln" style="background:${facetColor(c.k) || "var(--line)"}"></span>${esc(c.f)}${c.label ? `<small>${esc(c.label)}</small>` : ""}</button>`).join("")
     + (only ? "" : `<div class="newf"><label class="pfx"><span>#facet-</span><input placeholder="new facet" autocapitalize="none" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done"></label><button class="qm" type="button" data-help="1" title="What happens with a new facet">?</button><button class="primary" type="button" data-ok="1">Add</button></div>`);
   if (!only) newFacetField($("facetButtons").querySelector(".newf"));
-  $("facetSheet").classList.remove("hidden");
+  placeSheet($("facetSheet")); $("facetSheet").classList.remove("hidden");
 }
 // Field for a new facet; the facet exists once the item is written.
 function newFacetField(row) {
@@ -5651,7 +5667,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.9.13, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.14, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -5859,7 +5875,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.9.13";
+const APP_VERSION = "0.9.14";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
@@ -6251,54 +6267,66 @@ function jAddFacet() {
   render(); scheduleSync();
 }
 $("jAddFacet").onclick = jAddFacet;
-// Removing a facet from a journal (ui.md 4.10): its open entries get another facet of
-// the journal first, then its Tag definition lines are closed. No entry is closed.
-const JRM = { f: "", to: "" };
+// Removing facets from a journal (ui.md 4.10): one or several at once. Their open entries
+// get another facet of the journal first, then their Tag definition lines are closed. No
+// entry is closed.
+const JRM = { fs: new Set(), to: "" };
 function jFacetsOf(j) {
   const m = new Map();
   for (const f of declaredFacets(j)) m.set(f, 0);
   return withJ(j, () => {
-    for (const e of parseLines(S.wc)) if (!has(e, "done") && !DEF_RE.test(e.text)) for (const t of e.tags) if (t.dim === "facet" && t.val) m.set(t.val, (m.get(t.val) || 0) + 1);
+    for (const e of parseLines(S.wc)) if (!has(e, "done") && !isMeta(e)) for (const t of e.tags) if (t.dim === "facet" && t.val) m.set(t.val, (m.get(t.val) || 0) + 1);
     return m;
   });
 }
+// Open entries of the journal carrying at least one of the chosen facets.
+function jRmCarried(j, fs) {
+  return withJ(j, () => parseLines(S.wc).filter(e => !has(e, "done") && !isMeta(e) && e.tags.some(t => t.dim === "facet" && fs.has(t.val))).length);
+}
 function renderJRm() {
   const j = jEditing, m = jFacetsOf(j);
-  if (!m.has(JRM.f)) JRM.f = "";
-  if (JRM.to === JRM.f || !m.has(JRM.to)) JRM.to = "";
+  for (const f of [...JRM.fs]) if (!m.has(f)) JRM.fs.delete(f);
+  if (JRM.fs.has(JRM.to) || !m.has(JRM.to)) JRM.to = "";
   const fs = [...m.keys()].sort((a, b) => a.localeCompare(b));
-  const btn = (v, attr, sel) => `<button type="button" ${attr}="${esc(v)}" aria-pressed="${v === sel}"><span class="ln" style="background:${facetColor(facetKey(v, j)) || "var(--line)"}"></span>${esc(v)}</button>`;
-  $("jRmFacets").innerHTML = fs.map(v => btn(v, "data-rmf", JRM.f)).join("") || `<p class="hint">This journal has no facets.</p>`;
-  const n = JRM.f ? m.get(JRM.f) : 0, others = fs.filter(v => v !== JRM.f);
-  $("jRmTargetRow").classList.toggle("hidden", !JRM.f || !n);
-  $("jRmCount").textContent = !n ? "" : n + (n === 1 ? " open entry carries" : " open entries carry") + " #facet-" + JRM.f + (others.length ? ". Which facet should " + (n === 1 ? "it" : "they") + " get instead?" : ". Add another facet to this journal first, to give " + (n === 1 ? "it" : "them") + " instead.");
-  $("jRmTargets").innerHTML = others.map(v => btn(v, "data-rmt", JRM.to)).join("");
-  $("jRmGo").classList.toggle("hidden", !JRM.f || (n > 0 && !JRM.to));
+  const btn = (v, attr, on, count) => `<button type="button" ${attr}="${esc(v)}" aria-pressed="${on}"><span class="ln" style="background:${facetColor(facetKey(v, j)) || "var(--line)"}"></span><span>${esc(v)}</span>${count ? `<small>${m.get(v) || "definition only"}</small>` : ""}</button>`;
+  $("jRmFacets").innerHTML = fs.map(v => btn(v, "data-rmf", JRM.fs.has(v), true)).join("") || `<p class="hint">This journal has no facets.</p>`;
+  const n = JRM.fs.size ? jRmCarried(j, JRM.fs) : 0, others = fs.filter(v => !JRM.fs.has(v));
+  const names = [...JRM.fs].sort().map(v => "#facet-" + v).join(", ");
+  $("jRmTargetRow").classList.toggle("hidden", !n);
+  $("jRmCount").textContent = !n ? "" : n + (n === 1 ? " open entry carries " : " open entries carry ") + names + (others.length ? ". Which facet should " + (n === 1 ? "it" : "they") + " get instead?" : ". Add another facet to this journal first, to give " + (n === 1 ? "it" : "them") + " instead.");
+  $("jRmTargets").innerHTML = others.map(v => btn(v, "data-rmt", v === JRM.to, false)).join("");
+  $("jRmGo").classList.toggle("hidden", !JRM.fs.size || (n > 0 && !JRM.to));
   disarm();
 }
-$("jRmFacets").addEventListener("click", ev => { const b = ev.target.closest("[data-rmf]"); if (b) { JRM.f = JRM.f === b.dataset.rmf ? "" : b.dataset.rmf; JRM.to = ""; renderJRm(); } });
+$("jRmFacets").addEventListener("click", ev => { const b = ev.target.closest("[data-rmf]"); if (!b) return; const v = b.dataset.rmf; if (JRM.fs.has(v)) JRM.fs.delete(v); else JRM.fs.add(v); JRM.to = ""; renderJRm(); });
 $("jRmTargets").addEventListener("click", ev => { const b = ev.target.closest("[data-rmt]"); if (b) { JRM.to = b.dataset.rmt; renderJRm(); } });
-twoTap($("jRmGo"), "Remove", () => "Tap again: remove #facet-" + JRM.f + (JRM.to ? ", its entries get #facet-" + JRM.to : ""), () => {
-  const j = jEditing, f = JRM.f, to = JRM.to;
-  if (!f) return;
-  checkpoint("Removed #facet-" + f);
+const jRmNames = () => [...JRM.fs].sort().map(v => "#facet-" + v).join(", ");
+twoTap($("jRmGo"), "Remove", () => "Tap again: remove " + jRmNames() + (JRM.to ? ", their entries get #facet-" + JRM.to : ""), () => {
+  const j = jEditing, fs = new Set(JRM.fs), to = JRM.to, names = jRmNames();
+  if (!fs.size) return;
+  checkpoint("Removed " + names);
   const t0 = today(); let moved = 0;
   withJ(j, () => {
     const lines = S.wc.split("\n");
     lines.forEach((l, i) => {
       const e = parse(l);
-      if (!e || !e.tags.some(t => t.dim === "facet" && t.val === f)) return;
+      if (!e || !e.tags.some(t => t.dim === "facet" && fs.has(t.val))) return;
       if (/^Tag definition:/.test(e.text)) { if (!has(e, "done")) { addTag(e, "done", t0); lines[i] = toLine(e); } return; }
-      if (DEF_RE.test(e.text) || has(e, "done") || !to) return;
-      const hasTo = e.tags.some(t => t.dim === "facet" && t.val === to);
-      e.tags = hasTo ? e.tags.filter(t => !(t.dim === "facet" && t.val === f)) : e.tags.map(t => t.dim === "facet" && t.val === f ? { dim: "facet", val: to } : t);
+      if (isMeta(e) || has(e, "done") || !to) return;
+      // Each chosen facet becomes the target; the target only once, in the place of the first.
+      let given = e.tags.some(t => t.dim === "facet" && t.val === to);
+      e.tags = e.tags.flatMap(t => {
+        if (!(t.dim === "facet" && fs.has(t.val))) return [t];
+        if (given) return [];
+        given = true; return [{ dim: "facet", val: to }];
+      });
       lines[i] = toLine(e); moved++;
     });
     S.wc = lines.join("\n");
   });
-  log("removed a facet from a journal (" + moved + " entries given another)");
-  $("jRmMsg").textContent = "#facet-" + f + " removed from " + journalName(j) + (moved ? "; " + moved + (moved === 1 ? " entry has" : " entries have") + " #facet-" + to + " now." : ".");
-  JRM.f = ""; JRM.to = "";
+  log("removed " + fs.size + (fs.size === 1 ? " facet" : " facets") + " from a journal (" + moved + " entries given another)");
+  $("jRmMsg").textContent = names + " removed from " + journalName(j) + (moved ? "; " + moved + (moved === 1 ? " entry has" : " entries have") + " #facet-" + to + " now." : ".");
+  JRM.fs.clear(); JRM.to = "";
   renderJRm(); render(); scheduleSync();
 });
 twoTap($("jMakeDefault"), "Make this my default journal", () => "Tap again: make " + journalName(jEditing) + " your default journal", async () => {
@@ -6400,7 +6428,7 @@ function openJournal(j) {
   $("jTypeRow").classList.toggle("hidden", adding || gone || !isOwner(j));
   $("jAddFacetRow").classList.toggle("hidden", adding || gone || readOnly(j));
   $("jRmFacetRow").classList.toggle("hidden", adding || gone || readOnly(j));
-  JRM.f = ""; JRM.to = "";
+  JRM.fs.clear(); JRM.to = "";
   $("jRmMsg").textContent = "Its entries keep their place: they get another facet of this journal first.";
   if (!adding && !gone && !readOnly(j)) renderJRm();
   $("jDefaultRow").classList.toggle("hidden", adding || !j || gone || !v2 || keys.level !== "owner" || S.cfg.mode === "local");
