@@ -13,6 +13,8 @@ ExecStart=/usr/local/bin/agenda-service -listen 127.0.0.1:41380 -data /var/lib/a
 #   -members-dir /var/lib/agenda/members
 # (/tmp does not survive a restart here: PrivateTmp gives the service a new one.)
 # Not decided yet; off by default.
+# Daily backups (architecture 8.4c) go to /var/lib/agenda/accounts/backups, 9 places
+# rotated as towers of Hanoi (about one year back); -backup-slots 0 turns them off.
 Restart=on-failure
 RestartSec=5
 

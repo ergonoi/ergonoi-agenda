@@ -80,16 +80,29 @@ func TestV2Levels(t *testing.T) {
 	if rec := doV2(t, h, "GET", "/journal", "Read "+j.r, fp, ""); rec.Body.Len() == 0 {
 		t.Fatal("the journal must survive a delete with a wrong token")
 	}
-	// The owner deletes with D and the hash of R.
-	if rec := doV2(t, h, "DELETE", "/journal", "Delete "+j.d, map[string]string{readHashHeader: j.rh}, ""); rec.Code != 204 {
-		t.Fatalf("owner delete: %d", rec.Code)
-	}
-	if rec := doV2(t, h, "GET", "/journal", "Read "+j.r, fp, ""); rec.Code != 200 || rec.Body.Len() != 0 {
-		t.Fatalf("after delete: %d %d", rec.Code, rec.Body.Len())
-	}
 	// A guest may see who uses the journal.
 	if rec := doV2(t, h, "GET", "/members", "Read "+j.r, fp, ""); rec.Code != 200 {
 		t.Fatalf("guest members: %d", rec.Code)
+	}
+	// The owner deletes with D and the hash of R; from then on every reader learns it.
+	if rec := doV2(t, h, "DELETE", "/journal", "Delete "+j.d, map[string]string{readHashHeader: j.rh}, ""); rec.Code != 204 {
+		t.Fatalf("owner delete: %d", rec.Code)
+	}
+	if rec := doV2(t, h, "GET", "/journal", "Read "+j.r, fp, ""); rec.Code != 410 {
+		t.Fatalf("after delete: %d %d", rec.Code, rec.Body.Len())
+	}
+	if rec := doV2(t, h, "POST", "/append", "Write "+j.w, fp, line(1)); rec.Code != 410 {
+		t.Fatalf("an ally writes after delete: %d", rec.Code)
+	}
+	// Only the owner can undo it.
+	if rec := doV2(t, h, "POST", "/undelete", "Read "+j.r, fp, ""); rec.Code != 410 {
+		t.Fatalf("guest undo: %d", rec.Code)
+	}
+	if rec := doV2(t, h, "POST", "/undelete", "Delete "+j.d, map[string]string{readHashHeader: j.rh}, ""); rec.Code != 204 {
+		t.Fatalf("owner undo: %d", rec.Code)
+	}
+	if rec := doV2(t, h, "GET", "/journal", "Read "+j.r, fp, ""); rec.Code != 200 || rec.Body.Len() == 0 {
+		t.Fatalf("after undo: %d %d", rec.Code, rec.Body.Len())
 	}
 }
 

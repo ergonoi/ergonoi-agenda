@@ -110,8 +110,8 @@ func TestAppendGetReplace(t *testing.T) {
 	if r := do(t, h, "DELETE", "/journal", tok, "", nil); r.Code != 204 {
 		t.Fatalf("delete: %d", r.Code)
 	}
-	if r := do(t, h, "GET", "/journal", tok, "", nil); r.Body.Len() != 0 {
-		t.Fatalf("after delete: %q", r.Body)
+	if r := do(t, h, "GET", "/journal", tok, "", nil); r.Code != http.StatusGone {
+		t.Fatalf("after delete: %d %q", r.Code, r.Body)
 	}
 }
 

@@ -260,7 +260,7 @@ func (r *Relay) Expire() (int, error) {
 		}
 		if day := strings.TrimSpace(string(b)); day != "" && day < cutoff {
 			acc := strings.TrimSuffix(filepath.Base(s), ".seen")
-			if err := r.Delete(acc); err != nil {
+			if err := r.Purge(acc); err != nil {
 				return n, fmt.Errorf("expire %s: %w", acc, err)
 			}
 			n++
