@@ -1131,7 +1131,7 @@
 <div id="pop" class="hidden"></div>
 <div id="sheet" class="hidden"><div class="panel">
   <div class="title" id="sheetTitle"></div>
-  <div class="sheettop"><button class="sec hidden" data-act="skip" id="sheetSkip">Skip</button><button class="done" data-act="done" id="sheetDone">Done / remove</button></div>
+  <div class="sheettop"><button class="sec hidden" data-act="skip" id="sheetSkip">Skip instance</button><button class="done" data-act="done" id="sheetDone">Done / remove</button></div>
   <div class="title" style="margin:12px 0 0" id="sheetRe">Reschedule</div>
   <div class="grid">
     <button class="sec" data-act="tomorrow">Next day</button>
@@ -4070,7 +4070,7 @@ function renderDetail() {
       // nothing stands out, so that a click after writing does not close the entry by mistake.
       // A memo has no date, so it is not rescheduled.
       + `<div class="dre" data-dline="${esc(idx)}"><div class="dlbl">Status</div>`
-      + (rec ? `<button type="button" class="sec ddone" data-dact="skip">Skip</button>` : `<button type="button" class="sec ddone" data-dact="done">Mark as done</button>`)
+      + (rec ? `<button type="button" class="sec ddone" data-dact="skip">Skip instance</button>` : `<button type="button" class="sec ddone" data-dact="done">Mark as done</button>`)
       + (isMemo(e) ? "" : `<div class="dlbl">Reschedule</div><div class="dgrid">${steps.map(([a, l]) => `<button type="button" class="sec" data-dact="${a}">${l}</button>`).join("")}</div>`
       + `<label class="sec dpick"><input type="date" id="dDate"><span>Other date</span></label>`)
       + (rec ? `<button type="button" class="danger dseries" data-dact="done">Delete series</button>` : "") + `</div>`;

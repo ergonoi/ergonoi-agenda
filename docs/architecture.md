@@ -229,7 +229,7 @@ An occurrence of a recurring entry can be cancelled or moved without changing th
 
 - **Skip.** `#skip-<date>` on the series: that occurrence does not take place; the next one is shown. Several are allowed.
 - **Reschedule one occurrence.** The series gets `#skip-<original date>`, and a single entry takes the occurrence's place on the new day: same text, facets, topics and time, `#type-fix`, and `#ref-<id of the series>` (4.10b). Its time and date can then be changed like any entry's.
-- **Done for one occurrence** no longer exists as an action (0.9.36): it wrote the same `#skip-<date>` as *Skip* and suggested that the series itself was done. *Skip* covers both, an occurrence attended and one that did not take place.
+- **Done for one occurrence** no longer exists as an action (0.9.36): it wrote the same `#skip-<date>` as *Skip* and suggested that the series itself was done. *Skip instance* covers both, an occurrence attended and one that did not take place.
 - **Delete series** ends the whole series (`#done`).
 - **Calendar files.** Import: `EXDATE` becomes `#skip`; an occurrence with `RECURRENCE-ID` becomes a single entry of its own, and its series skips the original day. Export: `#skip` becomes `EXDATE`.
 - Skips in the past have no effect any more; they may be removed when the entry is next changed.

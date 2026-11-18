@@ -40,4 +40,4 @@ An entry can carry a note of up to 500 characters: an address, a phone number, a
 
 `#recurring-…` repeats an entry: daily, on weekdays (`mon-wed`, `tue-thu`), weekly, monthly on given days, yearly. With two dates, the dates give start and end of the series: `Training #date-2026-11-16 #date-2027-03-31 #time-12:00-13:00 #recurring-mon-wed`. If the dates are closer than one repetition, they are one occurrence over several days that repeats: a festival every year from 10 to 12 July.
 
-On a recurring entry, swiping concerns the next occurrence only: *Skip* it or move it; *Delete series* ends the whole series.
+On a recurring entry, swiping concerns the next occurrence only: *Skip instance* leaves it out, *Reschedule* moves it. *Delete series* ends the whole series.

@@ -40,4 +40,4 @@ Ein Eintrag kann eine Notiz von bis zu 500 Zeichen tragen: eine Adresse, eine Te
 
 `#recurring-…` wiederholt einen Eintrag: täglich, an Wochentagen (`mon-wed`, `tue-thu`), wöchentlich, monatlich an bestimmten Tagen, jährlich. Mit zwei Daten geben die Daten Beginn und Ende der Serie an: `Training #date-2026-11-16 #date-2027-03-31 #time-12:00-13:00 #recurring-mon-wed`. Liegen die Daten näher beieinander als eine Wiederholung, sind sie ein mehrtägiges Vorkommen, das sich wiederholt: ein Fest jedes Jahr vom 10. bis 12. Juli.
 
-Bei einem wiederkehrenden Eintrag betrifft das Wischen nur das nächste Vorkommen: *Skip* lässt es aus, Verschieben verlegt es; *Delete series* beendet die ganze Serie.
+Bei einem wiederkehrenden Eintrag betrifft das Wischen nur das nächste Vorkommen: *Skip instance* lässt es aus, Verschieben verlegt es; *Delete series* beendet die ganze Serie.
