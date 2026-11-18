@@ -1,5 +1,5 @@
 // Several persons on one browser (ui.md 4.11e): each keeps its journals apart under a PIN of
-// its own; the chooser comes after Switch person; every person chooses a PIN, any PIN will do;
+// its own; the chooser comes after Switch person (Settings, Device); every person chooses a PIN, any PIN will do;
 // clearing removes only the current person.
 import { device, newAccount, check, sleep, settled } from "./lib.mjs";
 
@@ -21,9 +21,9 @@ export default async function ({ svc, b }) {
   const first = await A.evaluate(() => S.phrase);
 
   // Someone new; the first time, the person here gives a name.
-  await A.evaluate(() => { openViewMenu(); document.querySelector('#viewMenu [data-person]').click(); });
+  await A.evaluate(() => document.getElementById("btnSwitchPerson").click());
   check(await A.evaluate(() => !!document.getElementById("personFirstName")), "the first switch asks for the name of the person here");
-  A.evaluate(() => { $("personFirstName").value = "Markus"; document.querySelector('#viewMenu form[data-pname]').requestSubmit(); }).catch(() => {});
+  A.evaluate(() => { $("personFirstName").value = "Markus"; document.getElementById("personFirst").requestSubmit(); }).catch(() => {});
   await A.waitForFunction(() => document.getElementById("dlgPerson")?.open, { timeout: 20000 });
   await A.evaluate(() => { const g = id => document.getElementById(id); g("personAdd").click(); g("personName").value = "Lena"; g("personGo").click(); });
   await A.waitForFunction(() => document.getElementById("dlgSetup")?.open, { timeout: 20000 });
@@ -53,7 +53,7 @@ export default async function ({ svc, b }) {
   await A.evaluate(() => { document.getElementById("pin1").value = "333333"; document.getElementById("pinOk").click(); });
   await A.waitForFunction(() => typeof S !== "undefined" && S.keys, { timeout: 20000 });
   check(await A.evaluate(p => S.phrase === p, lena), "Lena unlocks hers with her PIN");
-  check(await A.evaluate(() => { openViewMenu(); return /Lena/.test($("viewMenu").textContent) && /Switch person/.test($("viewMenu").textContent); }), "the menu names the person and offers to switch");
+  check(await A.evaluate(() => { openViewMenu(); return /Switch view/.test($("viewMenu").textContent) && !/Switch person/.test($("viewMenu").textContent) && !!document.getElementById("btnSwitchPerson"); }), "the title menu switches views, Switch person is in the device settings");
 
   // Clearing removes Lena only.
   A.evaluate(() => clearThisBrowser(null)).catch(() => {});

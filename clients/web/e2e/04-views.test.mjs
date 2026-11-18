@@ -24,6 +24,11 @@ export default async function ({ b }) {
   check(await p.evaluate(() => viewLines().length === 1 && /^View: Work view \| on /.test(withJ("", () => S.wc.split("\n").find(l => l.startsWith("View:"))))), "view line written");
   check(await p.evaluate(() => document.getElementById("viewName").textContent === "Work view" && document.querySelector("header h1").classList.contains("hasview")), "title shows view");
   check(await p.evaluate(() => document.getElementById("fline").classList.contains("hidden")), "no fline when view unchanged");
+  // Show all leaves the view and shows everything; the menu names it first.
+  check(await p.evaluate(() => { openViewMenu(); const r = [...document.querySelectorAll("#viewMenu .vrow")].map(b => b.textContent.trim()); return r[0] === "Show all" && /Switch view/.test(document.querySelector("#viewMenu .vlbl").textContent); }), "Switch view lists Show all first");
+  await p.evaluate(() => document.querySelector("#viewMenu [data-vall]").click()); await sleep(300);
+  check(await p.evaluate(() => !activeView() && filterState().facet.length === 0 && document.getElementById("viewName").textContent === ""), "Show all leaves the view, all facets on");
+  await p.evaluate(() => applyView("Work view")); await sleep(300);
   // change: switch another facet off → changed
   await p.evaluate(k => toggleFilter("facet", k, false), facs[1]); await sleep(300);
   check(await p.evaluate(() => document.getElementById("viewName").classList.contains("changed")), "dot when changed");

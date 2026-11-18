@@ -40,7 +40,7 @@ function normSnowflake(v) {
 
 // The note of an entry (architecture 2.4): "{{…}}" after the text, before the tags.
 // Inside, "\n" is a line break, "\}" a brace and "\\" a backslash; "#" starts no tag.
-const NOTE_MAX = 500;
+const NOTE_MAX = 5000;
 function encodeNote(n) { return String(n).replace(/\r/g, "").replace(/\\/g, "\\\\").replace(/\}/g, "\\}").replace(/\n/g, "\\n"); }
 function decodeNote(s) { return s.replace(/\\(.)/g, (_, c) => c === "n" ? "\n" : c); }
 // Finds "{{…}}" followed only by tags (or nothing); returns [before, note, after] or null.
