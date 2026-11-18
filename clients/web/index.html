@@ -947,7 +947,7 @@
     <section data-st="system">
       <h3>About</h3>
       <div class="about">
-        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.21</p>
+        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.22</p>
         <p>Author: Markus Schatzl</p>
         <p class="am"><span id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project: </span><span class="one">Technology is potential. Accessibility makes it matter.</span></p>
         <p class="al"><a href="https://ergonoi.github.io/ergonoi-agenda/" target="_blank" rel="noopener">Documentation <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://github.com/ergonoi/ergonoi-agenda" target="_blank" rel="noopener">Source code on GitHub <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://ergonoi.com" target="_blank" rel="noopener">ergonoi.com <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
@@ -983,7 +983,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.9.21</span>
+    <span class="ver">v0.9.22</span>
   </footer>
 </main>
 <nav id="bnav" aria-label="View">
@@ -5809,13 +5809,16 @@ function renderSheetType() {
 function renderSheetWhen() {
   renderSheetType();
   const w = sheetWhen, parts = [];
-  if (w.date) parts.push(fmtDate(w.date) + (w.until ? "–" + fmtDate(w.until) : ""));
-  if (w.from) parts.push(sheetTime(w).replace("-", "–"));
+  const x = (attr, title) => ` <button type="button" class="x" ${attr} title="${title}">×</button>`;
+  // Each date can be removed on its own; the other stays as a plain date.
+  if (w.date) parts.push([w.date, w.until].filter(Boolean).map((d, i) => esc(fmtDate(d)) + x(`data-nodate="${i}"`, "Remove this date")).join(" – "));
+  if (w.from) parts.push(esc(sheetTime(w).replace("-", "–")) + x("data-notime=\"1\"", "Remove the time"));
   if (sheetMemo) parts.push("memo");
   $("facetTo").classList.toggle("hidden", !w.from);
-  $("facetUntil").classList.toggle("hidden", !w.date);
+  // One calendar: a first date, then a second one (a span); with two it is gone.
+  $("facetCal").classList.toggle("hidden", !!w.until);
   $("facetWhen").classList.toggle("hidden", !parts.length);
-  $("facetWhen").innerHTML = parts.length ? `${esc(parts.join(" · "))} <button type="button" class="x" data-nowhen="1" title="Remove date and time">×</button>` : "";
+  $("facetWhen").innerHTML = parts.join(" · ");
 }
 // Adds the chosen date and time to a new line, unless it carries them already.
 // Start and end are kept apart until the entry is saved: either can be chosen first.
@@ -5838,21 +5841,17 @@ function withSheetWhen(v) {
 }
 (() => {
   const box = $("facetPick");
-  box.appendChild(nativePicker("date", ICON_CAL, "", () => sheetWhen.date || today(), v => {
-    const w = sheetWhen; w.date = v; sheetMemo = false;
-    if (w.until && w.until <= v) w.until = "";
-    renderSheetWhen();
-  }));
-  // A second date, the end of a span or of a series, appears once a date is chosen (3.3).
-  const until = nativePicker("date", ICON_CAL, "until", () => sheetWhen.until || sheetWhen.date || today(), v => {
-    const w = sheetWhen; if (!w.date) return;
-    if (v === w.date) w.until = "";
+  // One calendar (architecture 3.3): the first pick is the date, a second one makes a span,
+  // the earlier day first.
+  const cal = nativePicker("date", ICON_CAL, "", () => sheetWhen.date || today(), v => {
+    const w = sheetWhen; sheetMemo = false;
+    if (!w.date) w.date = v;
     else if (v < w.date) { w.until = w.date; w.date = v; }
-    else w.until = v;
+    else if (v > w.date) w.until = v;
     renderSheetWhen();
   });
-  until.id = "facetUntil"; until.classList.add("hidden");
-  box.appendChild(until);
+  cal.id = "facetCal";
+  box.appendChild(cal);
   box.appendChild(nativePicker("time", ICON_CLOCK, "from", () => sheetWhen.from || "09:00", v => { sheetWhen.from = v; renderSheetWhen(); }));
   // There is no end without a start: "to" appears once a start is chosen.
   const to = nativePicker("time", ICON_CLOCK, "to", () => sheetWhen.to || sheetWhen.from || "10:00", v => { sheetWhen.to = v; renderSheetWhen(); });
@@ -5916,7 +5915,9 @@ function newFacetField(row) {
 }
 $("facetSheet").addEventListener("click", ev => {
   if (ev.target.closest(".newf") || ev.target.closest("#facetPick")) return;
-  if (ev.target.closest("[data-nowhen]")) { sheetWhen = { date: "", until: "", from: "", to: "" }; renderSheetWhen(); return; }
+  const nd = ev.target.closest("[data-nodate]");
+  if (nd) { const w = sheetWhen; if (nd.dataset.nodate === "0") w.date = w.until; w.until = ""; renderSheetWhen(); return; }
+  if (ev.target.closest("[data-notime]")) { sheetWhen.from = sheetWhen.to = ""; renderSheetWhen(); return; }
   if (ev.target.closest("#facetWhen")) return;
   const btn = ev.target.closest("button");
   if (!btn && ev.target !== $("facetSheet")) return;
@@ -6114,7 +6115,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.9.21, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.22, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -6322,7 +6323,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.9.21";
+const APP_VERSION = "0.9.22";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
