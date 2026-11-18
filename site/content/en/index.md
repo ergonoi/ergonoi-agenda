@@ -1,6 +1,6 @@
 # ergonoi Agenda
 
-Appointments, tasks and notes in one place, just like in a paper notebook – but rearranged and moved to another day with a simple swipe. On every device, in any browser, readable only by you and by those you share it with.
+Appointments, tasks and notes in one place, just like in a paper notebook – but rearranged and moved to another day with a simple swipe. On your phone, tablet and computer at once, always in sync, in any browser – readable only by you and by those you share it with.
 
 **ergonoi Agenda is a planning journal that is light enough to understand completely: one encrypted text file per journal, a small server that cannot read it, and an app that runs in the browser.**
 
@@ -20,7 +20,7 @@ Every line is encrypted on your device before it is sent. The key comes from eig
 
 ## Everywhere
 
-The agenda runs in any current browser, on a phone, a tablet or a computer, and can be installed on the home screen like an app. All devices that know the words of a journal show the same journal.
+The agenda runs in any current browser, on a phone, a tablet or a computer, and can be installed on the home screen like an app. You set it up once on each device with your personal access wordlist. From then on all of them show the same journal, and what you change on one appears on the others.
 
 ## Sharing on your own terms
 

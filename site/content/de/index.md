@@ -1,6 +1,6 @@
 # ergonoi Agenda
 
-Termine, Aufgaben und Notizen an einem Ort, wie in einem Notizbuch aus Papier – mit der Möglichkeit, sie mit einfachen Gesten neu zu sortieren oder zu verschieben. Auf jedem Gerät, in jedem Browser, lesbar nur für dich und für die, mit denen du sie teilst.
+Termine, Aufgaben und Notizen an einem Ort, wie in einem Notizbuch aus Papier – mit der Möglichkeit, sie mit einfachen Gesten neu zu sortieren oder zu verschieben. Auf Telefon, Tablet und Rechner zugleich, immer synchron, in jedem Browser – lesbar nur für dich und für die, mit denen du sie teilst.
 
 **ergonoi Agenda ist ein Planungsjournal, das so einfach konzipiert ist, dass seine Funktion transparent bleibt: eine verschlüsselte Textdatei je Journal, ein kleiner Server, der sie nicht lesen kann, und eine App, die im Browser läuft.**
 
@@ -20,7 +20,7 @@ Jede Zeile wird auf deinem Gerät verschlüsselt, bevor sie es verlässt. Der Sc
 
 ## Überall erreichbar
 
-Die Agenda läuft in jedem aktuellen Browser, auf Telefon, Tablet und Rechner, und lässt sich wie eine App auf dem Startbildschirm ablegen. Alle Geräte, die die Wörter eines Journals kennen, zeigen dasselbe Journal.
+Die Agenda läuft in jedem aktuellen Browser, auf Telefon, Tablet und Rechner, und lässt sich wie eine App auf dem Startbildschirm ablegen. Du richtest sie auf jedem Gerät einmal mit deiner persönlichen Zugangswortliste ein. Danach zeigen alle dasselbe Journal, und was du auf einem änderst, erscheint auf den anderen.
 
 ## Teilen nach eigenen Bedingungen
 
