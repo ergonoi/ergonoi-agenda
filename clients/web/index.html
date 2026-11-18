@@ -234,8 +234,19 @@
   #fline button { min-height:var(--bs); font-size:14px; margin-left:auto; }
   #fline button + button { margin-left:0; }
   #sbar { display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px; padding:4px 16px 8px; border-bottom:.5px solid var(--line); }
-  #sbar .qwrap { flex:1 1 200px; display:flex; align-items:center; position:relative; min-width:0; }
-  #sbar #searchQ { flex:1; padding-right:28px; }
+  /* Search in the header (ui.md 1a, step 4): the field takes the place of the title and
+     searches the open view. */
+  #hsearch { flex:1 1 320px; display:flex; align-items:center; gap:4px; min-width:0; }
+  #hsearch.hidden { display:none; }
+  #sline .sdone { display:inline-flex; align-items:center; gap:6px; margin-left:auto; font-size:14px; color:var(--fg2); cursor:pointer; }
+  #hsearch .qwrap { flex:1; display:flex; align-items:center; position:relative; min-width:0; }
+  #hsearch #searchQ { flex:1; padding-right:28px; background:transparent; font-size:17px; border-bottom-color:var(--fg2); }
+  #searchBack { border:0; background:transparent; min-width:var(--tap); min-height:var(--tap); padding:0; display:inline-flex; align-items:center; justify-content:center; color:var(--fg); }
+  html.searching header h1, html.searching header #status, html.searching header .vtabs { display:none !important; }
+  @media (max-width: 600px) {
+    html.searching #add { display:none !important; }
+    html.searching #btnMenu, html.searching #btnClip, html.searching #btnSearch, html.searching #tabFilter, html.searching #hdot { display:none !important; }
+  }
   /* Clears the search field in one tap, as search fields on most systems do. */
   .qclear { position:absolute; right:0; top:50%; transform:translateY(-50%); border:0; background:none; padding:6px; min-height:0; color:var(--muted); cursor:pointer; line-height:0; }
   .qclear:hover { color:var(--fg); }
@@ -703,6 +714,7 @@
   <div class="row">
     <button type="button" id="btnMenu" aria-label="Menu" title="Views, facets, settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     <h1><button type="button" id="homeLink" aria-haspopup="menu" aria-expanded="false" title="Views"><span class="vwrap"><span class="brand">οὐθείς Agenda</span><span id="viewName"></span></span><svg class="caret" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg></button></h1>
+    <div id="hsearch" class="hidden"><button type="button" id="searchBack" aria-label="Close the search" title="Close the search"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><span class="qwrap"><input id="searchQ" type="text" inputmode="search" placeholder="Search text, notes, #tags" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="search"><button type="button" id="searchClear" class="qclear hidden" aria-label="Clear the search"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round"/></svg></button></span></div>
     <div id="viewMenu" class="hidden" role="menu"></div>
     <div id="status"></div>
     <span class="vtabs"><button class="tab" id="tabAgenda" aria-pressed="true">List</button><button class="tab" id="tabMonth" aria-pressed="false">Month</button><button class="tab" id="tabText" aria-pressed="false">Text</button></span>
@@ -727,10 +739,6 @@
       <button type="button" id="btnMic" class="hidden" title="Dictate"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg></button>
       <button>Add</button>
     </form>
-    <div id="sbar" class="hidden">
-      <span class="qwrap"><input id="searchQ" type="text" inputmode="search" placeholder="Search text, notes, #tags" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="search"><button type="button" id="searchClear" class="qclear hidden" aria-label="Clear the search"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round"/></svg></button></span>
-      <div class="tog" id="searchDone"><button type="button" data-v="done" class="off" aria-pressed="false"><span class="ck" aria-hidden="true">✓</span>include done</button></div>
-    </div>
     <div id="fline" class="hidden"></div>
     <div id="sline" class="hidden"></div>
     <div id="agenda"></div>
@@ -3999,23 +4007,26 @@ function matchesSearch(e, terms) {
 function openSearch(on) {
   SEARCH.open = on;
   if (!on) { SEARCH.q = ""; $("searchQ").value = ""; $("searchClear").classList.add("hidden"); }
-  $("sbar").classList.toggle("hidden", !on);
+  $("hsearch").classList.toggle("hidden", !on);
+  document.documentElement.classList.toggle("searching", on);
+  const vn = $("viewName").textContent.trim();
+  $("searchQ").placeholder = vn ? "Search in " + vn : "Search text, notes, #tags";
   $("btnSearch").setAttribute("aria-pressed", String(on));
   if (on) { if (view !== "agenda") setView(monthMode ? "month" : "agenda"); $("searchQ").focus(); }
   renderAgenda();
 }
 $("btnSearch").onclick = () => openSearch(!SEARCH.open);
+$("searchBack").onclick = () => openSearch(false);
 $("searchQ").addEventListener("input", () => { SEARCH.q = $("searchQ").value; $("searchClear").classList.toggle("hidden", !SEARCH.q); renderAgenda(); });
 $("searchClear").onclick = () => { $("searchQ").value = ""; SEARCH.q = ""; $("searchClear").classList.add("hidden"); renderAgenda(); $("searchQ").focus(); };
 $("searchQ").addEventListener("keydown", ev => { if (ev.key === "Escape") openSearch(false); });
-$("searchDone").addEventListener("change", () => { SEARCH.done = togChosen($("searchDone")).includes("done"); renderAgenda(); });
 document.addEventListener("keydown", ev => {
   if (ev.key !== "/" || ev.ctrlKey || ev.metaKey || ev.altKey) return;
   const a = document.activeElement;
   if (a && (a.tagName === "INPUT" || a.tagName === "TEXTAREA" || a.isContentEditable) || document.querySelector("dialog[open]")) return;
   ev.preventDefault(); openSearch(true);
 });
-$("sline").addEventListener("click", ev => { if (ev.target.closest("[data-sreset]")) openSearch(false); });
+$("sline").addEventListener("change", ev => { if (ev.target.closest("[data-sdone]")) { SEARCH.done = ev.target.checked; renderAgenda(); } });
 
 function renderAgenda() {
   if (uiBusy) return;
@@ -4126,7 +4137,7 @@ function renderAgenda() {
   if (!searching && !showBeyond && beyondCount) html += `<button class="more" data-beyond="1">Show up to 3 months (${beyondCount})</button>`;
   else if (!searching && showBeyond) html += `<button class="more" data-beyond="0">Hide items after 30 days</button>`;
   $("sline").classList.toggle("hidden", !searching);
-  $("sline").innerHTML = searching ? `<span>Search: <b>${esc(SEARCH.q.trim())}</b> · ${hits} ${hits === 1 ? "entry" : "entries"}${hiddenHits ? ` · ${hiddenHits} more hidden by the filter` : ""}</span><button class="ghost" data-sreset="1">Reset</button>` : "";
+  $("sline").innerHTML = searching ? `<span>Search: <b>${esc(SEARCH.q.trim())}</b> · ${hits} ${hits === 1 ? "entry" : "entries"}${hiddenHits ? ` · ${hiddenHits} more hidden by the filter` : ""}</span><label class="sdone"><input type="checkbox" data-sdone="1"${SEARCH.done ? " checked" : ""}> include done</label>` : "";
   if (searching) { $("agenda").innerHTML = hits ? html : `<p class="hint">No entry matches the search${hiddenHits ? " with the current filter" : ""}.</p>`; return; }
   const filtered = flt.facet.length || otherActive(flt);
   $("agenda").innerHTML = /class="item|data-beyond/.test(html) ? html : filtered

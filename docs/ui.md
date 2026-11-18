@@ -24,7 +24,7 @@ The interface changes in steps, each recorded here with its aim. The aim of the 
 1. **0.9.0 (20 November 2026): views, facet panel, title.** The facet bar over the list and the filter tab are replaced by named views, chosen from the title, and a facet panel grouped by journal (4.14). Frequent switches between facet combinations take two taps from anywhere; the list gains the rows the bar took; it is visible at once whom a facet belongs to; a read-only journal is marked with a lock instead of a label. Decisions 6.7.
 2. **0.9.1, branch `ui-concept`: phone layout and settings.** On phones a bottom bar *List* / *Month* / *Text*, the menu in the facet panel, settings as pages with a back arrow, rows with switches, PIN levels as a list with a check mark, actions as rows and dangerous ones in Scarlet at the end; journals as rows that open their dialog. *Test connection* under the server address (decisions 6.4b).
 3. **Branch `ui-concept`: three columns on wide screens.** From 1440 px the facet panel, the list and a detail column stand side by side. The list shows when, text and markers only; a click chooses an entry, and the detail column shows it with all its tags as rows (dimension left, value right), where text and tags are changed as before, together with *Done or reschedule* and the note. Without a choice the column stays in place with a short hint. Below 1440 px nothing changes. List and month view alike.
-4. **Planned:** search in the header for the open view.
+4. **Branch `ui-concept`: search in the header.** The magnifier turns the header into the search field (back arrow, field, clear button); it searches the open view and says so in its placeholder. *include done* moves into the result line; on phones the add field is hidden while searching.
 
 ---
 
@@ -590,10 +590,10 @@ The experiment of 0.7 ordered the facet bar by use. With the bar it was retired 
 
 ### 4.14a Search
 
-- The magnifier in the header (or `/` outside text fields on a computer; Cmd-F stays the browser's search) opens a field below the add field ("Search text, notes, #tags", underline as the add field) and a toggle *include done*. While the field holds text, a round cross at its right end clears it in one tap and keeps the focus in the field, as search fields on most systems do. Tapping the magnifier again or Escape closes it and clears the query.
+- The magnifier in the header (or `/` outside text fields on a computer; Cmd-F stays the browser's search) turns the header into a search field in place of the title: a back arrow that closes the search, the field ("Search in *view*", or "Search text, notes, #tags" without a view) and a round cross at its right end that clears it in one tap and keeps the focus in the field. Tapping the magnifier again, the back arrow or Escape closes it and clears the query. On phones the other header buttons and the add field are hidden while searching.
 - The query is matched in the client only, against the text, the note and the tags (`#dim-value`) of the entries of all journals, ignoring case and accents (`brucke` finds *Brücke*); several words must all occur. Tag definitions and comments are not entries and are not found.
 - While a query is set, the list shows every match: open entries beyond the 30-day and three-month horizons (group *After 30 days*), groups without their limits. The facet bar and the filter tab still apply.
-- A line below the facet bar reads "Search: *query* · n entries", adding "m more hidden by the filter" where the filter hides matches, and *Reset*, which closes the search.
+- A line above the list reads "Search: *query* · n entries", adding "m more hidden by the filter" where the filter hides matches, and at its right end the switch *include done*.
 - With *include done*, closed entries still in the journal (until compaction) are found too, in a group *Done*, greyed but usable: their note opens, their tags can be changed, and removing `#done` reopens them (decided 19 November 2026; before, they could not be touched).
 
 
