@@ -1,6 +1,6 @@
 // Offline shell: the app itself is cached; API requests always go to the network.
-const CACHE = "agenda-shell-0.6.5-eaa2b7ae";
-const SHELL = ["./", "index.html", "guide.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png", "favicon-32.png"];
+const CACHE = "agenda-shell-0.6.6-d6ea9fcf";
+const SHELL = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png", "favicon-32.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -13,7 +13,7 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   const url = new URL(e.request.url);
   const isShell = e.request.method === "GET" && url.origin === location.origin &&
-    (url.pathname === "/" || url.pathname.endsWith("/index.html") || url.pathname.endsWith("/guide.html") || url.pathname.endsWith("/manifest.webmanifest") || url.pathname.endsWith(".png") || url.pathname.endsWith(".ico"));
+    (url.pathname === "/" || url.pathname.endsWith("/index.html") || url.pathname.endsWith("/manifest.webmanifest") || url.pathname.endsWith(".png") || url.pathname.endsWith(".ico"));
   if (!isShell) return;
   // Network first, cache as fallback, so updates arrive when online.
   e.respondWith(

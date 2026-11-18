@@ -29,7 +29,7 @@ out = vendor.sub(lambda m: (here / "vendor" / (m.group(1) + ".min.js")).read_tex
 (here / "index.html").write_text(out, encoding="utf-8")
 # The offline cache is named after version and content, so every build replaces it.
 import hashlib
-digest = hashlib.sha256(out.encode("utf-8") + (here / "guide.html").read_bytes()).hexdigest()[:8]
+digest = hashlib.sha256(out.encode("utf-8")).hexdigest()[:8]
 sw = (here / "sw.js").read_text(encoding="utf-8")
 sw = re.sub(r'const CACHE = "[^"]*";', f'const CACHE = "agenda-shell-{version}-{digest}";', sw)
 (here / "sw.js").write_text(sw, encoding="utf-8")

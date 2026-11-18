@@ -27,9 +27,8 @@ Text and document apps synchronise text but know nothing about time, state or pr
 
 ## Documentation
 
-- **[User documentation](site/content/en/)** — the documentation site in `site/`, English and German, built by `site/scripts/build-site.py`
+- **[User documentation](https://outheis-labs.github.io/outheis-agenda/)** — English and German; sources in `site/`, built by `site/scripts/build-site.py`
 - **[Decisions](docs/decisions.md)** — what was decided, why, and which alternatives were rejected; open items
-- **[Guide](docs/guide.md)** — how to use the agenda: entries, tags, filter, Tag definitions, shared journals
 - **[Architecture](docs/architecture.md)** — entry format, tag grammar, time semantics, change model, ingestion, storage, sync, deployment
 - **[User interface](docs/ui.md)** — design tokens, colours, typography, components, interaction
 - **[Prompts](docs/prompts/)** — templates for dictation on device, assistant, Lumo variant
@@ -40,7 +39,6 @@ Text and document apps synchronise text but know nothing about time, state or pr
 outheis-agenda/
 ├── site/            # user documentation (content/en, content/de, templates, scripts)
 ├── docs/
-│   ├── guide.md
 │   ├── decisions.md
 │   ├── architecture.md
 │   ├── ui.md
@@ -61,7 +59,6 @@ human/               # user data, created at runtime, never committed
 
 ```
 python3 clients/web/build.py         # inlines the core module and VERSION into index.html; names the offline cache
-python3 clients/web/build_guide.py   # guide.html from docs/guide.md
 python3 site/scripts/build-site.py   # user documentation in site/html (EN, DE; GitHub Pages)
 TZ=Europe/Berlin node --test clients/core/test/*.test.mjs
 ```

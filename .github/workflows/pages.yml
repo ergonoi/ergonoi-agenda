@@ -1,12 +1,10 @@
 # Builds the user documentation (site/) and publishes it as the GitHub Pages site of the repository.
-# Manual only while the repository is private and Pages is not set up.
-# Once the repository is public and Pages is set to "GitHub Actions", add again:
-#   push:
-#     branches: [main]
-#     paths: ["site/**", "VERSION"]
 name: Documentation site
 
 on:
+  push:
+    branches: [main]
+    paths: ["site/**", "VERSION", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:

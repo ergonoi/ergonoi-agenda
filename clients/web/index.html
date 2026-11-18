@@ -659,9 +659,8 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.6.5</span>
+    <span class="ver">v0.6.6</span>
     <a href="#" id="aboutLink">About</a>
-    <a href="guide.html" target="_blank" rel="noopener">Quick Guide <svg width="7" height="7" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     <a href="https://outheis-labs.github.io/outheis-agenda/" target="_blank" rel="noopener">Documentation <svg width="7" height="7" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
   </footer>
 </main>
@@ -671,7 +670,7 @@
     <strong>οὐθείς Agenda</strong>
     <p>οὐθείς Agenda is an <b>ergonoi</b> project:</p>
     <p style="margin-top:14px">Technology is potential. Accessibility makes it matter.</p>
-    <p class="hint">Version 0.6.5 · outheis-labs</p>
+    <p class="hint">Version 0.6.6 · outheis-labs</p>
     <div class="btnrow" style="justify-content:flex-end"><button class="primary">Close</button></div>
   </form>
 </dialog>
@@ -812,7 +811,7 @@
       <li>To remove it: give its entries another value (<i>Settings → Rename tag</i>; if the other value exists, both are merged) or close them, and delete its <i>Tag definition</i> line in the <i>Text</i> view.</li>
       <li>A facet declared by a shared journal belongs to that journal: entries with it are written there, and it is renamed or removed there.</li>
     </ul>
-    <p class="hint">More in the <a href="guide.html" target="_blank" rel="noopener">guide</a>.</p>
+    <p class="hint">More in the <a href="https://outheis-labs.github.io/outheis-agenda/using/02-facets.html" target="_blank" rel="noopener">documentation</a>.</p>
     <div style="display:flex; justify-content:flex-end"><button class="primary">OK</button></div>
   </form>
 </dialog>
@@ -5004,7 +5003,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { localStorage.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.6.5, " + location.origin + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.6.6, " + location.origin + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -5204,7 +5203,7 @@ $("dlgNote").addEventListener("close", () => { uiBusy = false; });
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.6.5";
+const APP_VERSION = "0.6.6";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
