@@ -1,5 +1,5 @@
 // Offline shell: the app itself is cached; API requests always go to the network.
-const CACHE = "agenda-shell-0.9.25-2e297cae";
+const CACHE = "agenda-shell-0.9.26-3df48564";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png", "favicon-32.png"];
 
 self.addEventListener("install", e => {

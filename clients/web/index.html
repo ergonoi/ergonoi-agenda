@@ -1014,7 +1014,7 @@
     <section data-st="system">
       <h3>About</h3>
       <div class="about">
-        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.25</p>
+        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.26</p>
         <p>Author: Markus Schatzl</p>
         <p class="am"><span id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project: </span><span class="one">Technology is potential. Accessibility makes it matter.</span></p>
         <p class="al"><a href="https://ergonoi.github.io/ergonoi-agenda/" target="_blank" rel="noopener">Documentation <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://github.com/ergonoi/ergonoi-agenda" target="_blank" rel="noopener">Source code on GitHub <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://ergonoi.com" target="_blank" rel="noopener">ergonoi.com <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
@@ -1050,7 +1050,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.9.25</span>
+    <span class="ver">v0.9.26</span>
   </footer>
 </main>
 <nav id="bnav" aria-label="View">
@@ -6343,7 +6343,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.9.25, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.26, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -6551,7 +6551,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.9.25";
+const APP_VERSION = "0.9.26";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
