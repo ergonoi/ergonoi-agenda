@@ -114,9 +114,16 @@
     header .row { gap:0; padding-right:4px; }
     button.tab { padding:0 5px; }
     #tabFilter { padding:0 5px !important; }
-    #btnSearch, #btnSync, #btnSettings { padding:0 4px !important; min-width:38px !important; }
+    #btnClip, #btnSearch, #btnSync, #btnSettings { padding:0 4px !important; min-width:38px !important; }
   }
-  #btnSearch, #btnSync, #btnSettings { border:0; min-width:var(--tap); padding:0 10px; color:var(--fg2); }
+  #btnClip, #btnSearch, #btnSync, #btnSettings { border:0; min-width:var(--tap); padding:0 10px; color:var(--fg2); }
+  /* The clipboard (ui.md 4.16): grey when empty, Teal with a light fill when it holds something. */
+  #btnClip.filled { color:var(--teal); }
+  #btnClip.filled .fill { fill:var(--aqua); fill-opacity:.45; }
+  #btnClip.over, #dlgClip.over { outline:2px dashed var(--teal); outline-offset:-2px; }
+  #clipPreview { margin:10px 0; min-height:48px; display:flex; align-items:center; justify-content:center; border:.5px solid var(--line); border-radius:6px; padding:8px; overflow:hidden; }
+  #clipPreview img { max-width:100%; max-height:40vh; display:block; }
+  #clipPreview pre { white-space:pre-wrap; word-break:break-word; margin:0; font:inherit; font-size:14px; max-height:30vh; overflow:auto; width:100%; }
   #btnSync.spin svg { animation:syncspin .8s linear infinite; }
   #btnSync.failed { color:var(--scarlet); }
   @keyframes syncspin { to { transform:rotate(360deg); } }
@@ -531,6 +538,7 @@
     <div id="status"></div>
     <span class="vtabs"><button class="tab" id="tabAgenda" aria-pressed="true">List</button><button class="tab" id="tabMonth" aria-pressed="false">Month</button><button class="tab" id="tabText" aria-pressed="false">Text</button></span>
     <span class="hbtns">
+    <button id="btnClip" class="hidden" title="Clipboard: move a picture, a file or a text to your other devices" draggable="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path class="fill" fill="none" d="M3.5 13.5l2.5-7h12l2.5 7v5a1.5 1.5 0 0 1-1.5 1.5h-14a1.5 1.5 0 0 1-1.5-1.5z"/><path d="M3.5 13.5h5l1 2h5l1-2h5"/></svg></button>
     <button id="btnSearch" title="Search" aria-pressed="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5.5 5.5"/></svg></button>
     <button class="tab" id="tabFilter" aria-pressed="false" title="Filter"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3.5 5h17l-6.5 7.5V19l-4 1.5v-8z"/></svg></button>
     <button id="btnSync" title="Sync"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/></svg></button>
@@ -667,7 +675,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.7.4</span>
+    <span class="ver">v0.8.0</span>
     <a href="#" id="aboutLink">About</a>
     <a href="https://outheis-labs.github.io/outheis-agenda/" target="_blank" rel="noopener">Documentation <svg width="7" height="7" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
   </footer>
@@ -692,12 +700,28 @@
     </div>
   </form>
 </dialog>
+<dialog id="dlgClip">
+  <form method="dialog">
+    <strong>Clipboard</strong>
+    <p class="hint" id="clipHint">One item for your own devices: a picture, a file or a text, up to 4 MB. Paste it here (Ctrl/Cmd+V), drop it here, or choose it. Only you can read it; a new item replaces the old.</p>
+    <div id="clipPreview"><span class="hint">Empty</span></div>
+    <div class="hint" id="clipMsg" aria-live="polite"></div>
+    <div class="btnrow">
+      <button type="button" class="sec" id="clipPaste">Paste</button>
+      <button type="button" class="sec" id="clipChoose">Choose file or photo</button><input type="file" id="clipFile" class="hidden">
+      <button type="button" class="sec hidden" id="clipCopy">Copy</button>
+      <button type="button" class="sec hidden" id="clipShare">Save / share</button>
+      <button type="button" class="sec hidden" id="clipDownload">Download</button>
+      <button type="button" class="danger hidden" id="clipClear">Clear</button>
+    </div>
+  </form>
+</dialog>
 <dialog id="dlgAbout">
   <form method="dialog">
     <strong>οὐθείς Agenda</strong>
     <p>οὐθείς Agenda is an <b>ergonoi</b> project:</p>
     <p style="margin-top:14px">Technology is potential. Accessibility makes it matter.</p>
-    <p class="hint">Version 0.7.4 · outheis-labs</p>
+    <p class="hint">Version 0.8.0 · outheis-labs</p>
     <div class="btnrow" style="justify-content:flex-end"><button class="primary">Close</button></div>
   </form>
 </dialog>
@@ -2322,6 +2346,7 @@ async function sync() {
     // only on the basis of a default journal that was just read from the server.
     if (S.cfg.mode !== "local" && !defaultFailed && await adoptJournals()) resyncWanted = true;
     if (S.cfg.mode !== "local" && !defaultFailed && followDefaultMove()) resyncWanted = true;
+    if (S.cfg.mode !== "local" && !defaultFailed) clipCheck();
     if (S.cfg.mode !== "local" && !defaultFailed) cleanOverlays();
     if (S.cfg.mode !== "local" && !errors.length) { restoreWrongTombstones(); healMoves(); }
     serverState = errors.length
@@ -4527,6 +4552,7 @@ document.addEventListener("click", ev => {
 })();
 
 function render() {
+  clipShow();
   facetJournalsCache = null; facetColorCache = null;
   renderStatus();
   renderNotices();
@@ -5066,7 +5092,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.7.4, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.8.0, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -5272,7 +5298,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.7.4";
+const APP_VERSION = "0.8.0";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
@@ -6260,6 +6286,170 @@ function followDefaultMove() {
   addNotice("Your default journal is now " + journalName("") + "; set up new devices with its words.", "default-moved");
   return true;
 }
+
+// ---------------------------------------------------------------------------
+// The clipboard (architecture 8.15, ui.md 4.16): one encrypted item per account to move a
+// picture, a file or a text between one's own devices. The server keeps it beside the
+// journal; the client asks for it only when its ETag changed. It is encrypted with the
+// owner's private key of the default journal (version 1: its key), so only the owner reads it.
+// Format before encryption: 4 bytes length of a JSON header {name, type, size}, the header,
+// the content.
+// ---------------------------------------------------------------------------
+const CLIP_MAX = 4 << 20;
+const CLIP = { etag: "", filled: false, blob: null, meta: null, url: "" };
+const clipUsable = () => S.cfg.mode !== "local" && withJ("", () => S.keys && canReplace(S.keys) && !S.gone);
+async function clipKey() { return withJAsync("", async () => (await privKey()) || await key()); }
+async function clipHeaders() { return withJAsync("", async () => ({ ...replaceHeaders(S.keys), "X-Agenda-Member": await myMemberId("") })); }
+function clipShow() {
+  $("btnClip").classList.toggle("hidden", !clipUsable());
+  $("btnClip").classList.toggle("filled", CLIP.filled);
+  $("btnClip").setAttribute("draggable", CLIP.filled && CLIP.blob ? "true" : "false");
+  $("btnClip").title = CLIP.filled ? "Clipboard: " + (CLIP.meta ? CLIP.meta.name : "an item") + " — click to copy, drag out to save" : "Clipboard: move a picture, a file or a text to your other devices";
+}
+function clipSet(blob, meta, etag) {
+  if (CLIP.url) URL.revokeObjectURL(CLIP.url);
+  CLIP.blob = blob; CLIP.meta = meta; CLIP.etag = etag || ""; CLIP.filled = !!blob || !!etag; CLIP.url = blob ? URL.createObjectURL(blob) : "";
+  clipShow(); if ($("dlgClip").open) clipRender();
+}
+// Presence and version only (HEAD); the content is fetched when it is needed.
+async function clipCheck() {
+  if (!clipUsable()) { clipShow(); return; }
+  try {
+    const r = await fetch(serverBackend.base() + "/clip", { method: "HEAD", headers: { ...(await clipHeaders()), ...(CLIP.etag ? { "If-None-Match": CLIP.etag } : {}) }, cache: "no-store" });
+    if (r.status === 304) return;
+    if (r.status === 404) { if (CLIP.filled) clipSet(null, null, ""); return; }
+    if (r.ok) { const e = r.headers.get("ETag") || ""; if (e !== CLIP.etag) { clipSet(null, null, e); } }
+  } catch { /* offline: as before */ }
+}
+async function clipLoad() {
+  if (CLIP.blob || !CLIP.filled) return CLIP.blob;
+  const r = await fetch(serverBackend.base() + "/clip", { headers: await clipHeaders(), cache: "no-store" });
+  if (r.status === 404) { clipSet(null, null, ""); return null; }
+  if (!r.ok) throw new Error("server " + r.status);
+  const raw = new Uint8Array(await r.arrayBuffer());
+  const plain = new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: raw.subarray(0, 12) }, await clipKey(), raw.subarray(12)));
+  const n = new DataView(plain.buffer).getUint32(0);
+  const meta = JSON.parse(new TextDecoder().decode(plain.subarray(4, 4 + n)));
+  clipSet(new Blob([plain.subarray(4 + n)], { type: meta.type }), meta, r.headers.get("ETag") || "");
+  return CLIP.blob;
+}
+async function clipPut(blob, name) {
+  const type = blob.type || "application/octet-stream";
+  if (blob.size > CLIP_MAX) { clipMsg("Too large for the clipboard (" + (blob.size / 1048576).toFixed(1) + " MB, at most 4 MB). Nothing was sent."); return; }
+  clipMsg("Sending …");
+  const meta = { name: name || (type.startsWith("image/") ? "picture." + (type.split("/")[1] || "png") : type === "text/plain" ? "text.txt" : "file"), type, size: blob.size, t: new Date().toISOString() };
+  const head = new TextEncoder().encode(JSON.stringify(meta)), body = new Uint8Array(await blob.arrayBuffer());
+  const plain = new Uint8Array(4 + head.length + body.length);
+  new DataView(plain.buffer).setUint32(0, head.length); plain.set(head, 4); plain.set(body, 4 + head.length);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await clipKey(), plain));
+  const out = new Uint8Array(12 + ct.length); out.set(iv); out.set(ct, 12);
+  try {
+    const r = await fetch(serverBackend.base() + "/clip", { method: "PUT", headers: { ...(await clipHeaders()), "Content-Type": "application/octet-stream" }, body: out });
+    if (r.status === 413) { clipMsg("Too large for the clipboard (at most 4 MB). Nothing was sent."); return; }
+    if (!r.ok) { clipMsg("Not sent: " + (await r.text()).trim()); return; }
+    clipSet(new Blob([body], { type }), meta, r.headers.get("ETag") || "");
+    clipMsg("In the clipboard: " + meta.name + " (" + clipSize(meta.size) + "). Your other devices see it at their next synchronisation.");
+    log("clipboard: " + type + ", " + meta.size + " bytes");
+  } catch (err) { clipMsg("Not sent: " + err.message); }
+}
+const clipSize = n => n < 1024 ? n + " bytes" : n < 1048576 ? Math.round(n / 1024) + " KB" : (n / 1048576).toFixed(1) + " MB";
+function clipMsg(t) { $("clipMsg").textContent = t; }
+function clipRender() {
+  const m = CLIP.meta, b = CLIP.blob, box = $("clipPreview");
+  if (!CLIP.filled) box.innerHTML = '<span class="hint">Empty</span>';
+  else if (!b) box.innerHTML = '<span class="hint">Loading …</span>';
+  else if (m.type.startsWith("image/")) box.innerHTML = `<img alt="${esc(m.name)}" src="${CLIP.url}">`;
+  else if (m.type.startsWith("text/")) { box.innerHTML = "<pre></pre>"; b.text().then(t => { box.querySelector("pre").textContent = t.length > 4000 ? t.slice(0, 4000) + " …" : t; }); }
+  else box.innerHTML = `<span>${esc(m.name)} · ${clipSize(m.size)}</span>`;
+  const has = !!b;
+  $("clipCopy").classList.toggle("hidden", !has || !(m.type.startsWith("text/") || m.type.startsWith("image/")));
+  $("clipShare").classList.toggle("hidden", !has || !navigator.canShare || !navigator.canShare({ files: [new File([b], m.name, { type: m.type })] }));
+  $("clipDownload").classList.toggle("hidden", !has);
+  $("clipClear").classList.toggle("hidden", !CLIP.filled);
+}
+// Copying: text as text, a picture as PNG (the type browsers accept for pictures). The
+// item is created at once with a promise, so that the click still counts as the user's.
+async function clipCopy() {
+  const loading = clipLoad();
+  const asPng = async () => {
+    const b = await loading;
+    if (b.type === "image/png") return b;
+    const img = await createImageBitmap(b), c = document.createElement("canvas");
+    c.width = img.width; c.height = img.height; c.getContext("2d").drawImage(img, 0, 0);
+    return new Promise(res => c.toBlob(res, "image/png"));
+  };
+  const type = CLIP.meta ? CLIP.meta.type : "";
+  try {
+    if (type.startsWith("text/")) await navigator.clipboard.writeText(await (await loading).text());
+    else if (type.startsWith("image/")) await navigator.clipboard.write([new ClipboardItem({ "image/png": asPng() })]);
+    else return false;
+    clipMsg("Copied: " + CLIP.meta.name); return true;
+  } catch (err) { clipMsg("Copying failed: " + err.message); return false; }
+}
+function clipDownload() {
+  if (!CLIP.blob) return;
+  const a = document.createElement("a"); a.href = CLIP.url; a.download = CLIP.meta.name; document.body.appendChild(a); a.click(); a.remove();
+}
+// From the system clipboard, a drop or a paste: the first file, else the text.
+async function clipFrom(dt) {
+  if (dt.files && dt.files.length) return clipPut(dt.files[0], dt.files[0].name);
+  const t = dt.getData && dt.getData("text/plain");
+  if (t) return clipPut(new Blob([t], { type: "text/plain" }), "text.txt");
+  clipMsg("Nothing to take.");
+}
+async function openClip() {
+  clipMsg(""); clipRender();
+  if (!$("dlgClip").open) $("dlgClip").showModal();
+  if (CLIP.filled && !CLIP.blob) { try { await clipLoad(); } catch (err) { clipMsg("Not loaded: " + err.message); } }
+}
+$("btnClip").onclick = async () => {
+  // A click copies what the clipboard holds and opens it: there it takes something new.
+  if (CLIP.filled && CLIP.meta && (CLIP.meta.type.startsWith("text/") || CLIP.meta.type.startsWith("image/"))) { openClip(); clipCopy(); return; }
+  openClip();
+};
+$("btnClip").addEventListener("mouseenter", () => { if (CLIP.filled && !CLIP.blob) clipLoad().catch(() => {}); });
+$("btnClip").addEventListener("dragstart", ev => {
+  if (!CLIP.blob) { ev.preventDefault(); return; }
+  const m = CLIP.meta;
+  ev.dataTransfer.setData("DownloadURL", m.type + ":" + m.name + ":" + CLIP.url); // Chrome and Edge: a file in the folder
+  ev.dataTransfer.setData("text/uri-list", CLIP.url);
+  ev.dataTransfer.effectAllowed = "copy";
+});
+for (const el of [$("btnClip"), $("dlgClip")]) {
+  el.addEventListener("dragover", ev => { if (!clipUsable()) return; ev.preventDefault(); el.classList.add("over"); });
+  el.addEventListener("dragleave", () => el.classList.remove("over"));
+  el.addEventListener("drop", ev => { el.classList.remove("over"); if (!clipUsable()) return; ev.preventDefault(); if (el.id === "btnClip") openClip(); clipFrom(ev.dataTransfer); });
+}
+document.addEventListener("paste", ev => { if ($("dlgClip").open && ev.clipboardData) { ev.preventDefault(); clipFrom(ev.clipboardData); } });
+$("clipPaste").onclick = async () => {
+  try {
+    if (navigator.clipboard.read) {
+      for (const item of await navigator.clipboard.read()) {
+        const t = item.types.find(x => x.startsWith("image/")) || item.types.find(x => x !== "text/plain" && !x.startsWith("text/")) || item.types.find(x => x === "text/plain");
+        if (t) { const b = await item.getType(t); return clipPut(b, t === "text/plain" ? "text.txt" : ""); }
+      }
+    }
+    const t = await navigator.clipboard.readText();
+    if (t) return clipPut(new Blob([t], { type: "text/plain" }), "text.txt");
+    clipMsg("The system clipboard is empty.");
+  } catch (err) { clipMsg("No access to the system clipboard here; paste with Ctrl/Cmd+V or choose a file."); }
+};
+$("clipChoose").onclick = () => $("clipFile").click();
+$("clipFile").onchange = () => { const f = $("clipFile").files[0]; $("clipFile").value = ""; if (f) clipPut(f, f.name); };
+$("clipCopy").onclick = () => clipCopy();
+$("clipDownload").onclick = () => clipDownload();
+$("clipShare").onclick = async () => {
+  try { await navigator.share({ files: [new File([CLIP.blob], CLIP.meta.name, { type: CLIP.meta.type })] }); }
+  catch (err) { if (err.name !== "AbortError") clipMsg("Sharing failed: " + err.message); }
+};
+twoTap($("clipClear"), "Clear", () => "Tap again to clear", async () => {
+  try {
+    const r = await fetch(serverBackend.base() + "/clip", { method: "DELETE", headers: await clipHeaders() });
+    if (!r.ok) throw new Error(String(r.status));
+    clipSet(null, null, ""); clipMsg("Cleared.");
+  } catch (err) { clipMsg("Not cleared: " + err.message); }
+});
 
 async function stopSharing(j) {
   await withJAsync(j, syncOne);

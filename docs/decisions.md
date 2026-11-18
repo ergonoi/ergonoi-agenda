@@ -215,6 +215,10 @@ Everything the web client keeps lies encrypted under a PIN of six to twelve digi
 
 Rejected: passkeys and device unlock (WebAuthn) as an alternative to the PIN: they depend on an operating system, a browser and a key store that someone else controls, bind to the person who set up the device, and do not work for a local journal file. Forward secrecy was considered and dropped: a journal's current state has to stay readable for everyone entitled to it, so it would protect only superseded lines, at the price of member lists and device management. Binding the owner's rights to devices (an owner key per device, the words alone giving ally rights, a delayed recovery) was considered against stolen words and deferred: a device does not stand for a person, several people use the same device and even the same browser. The thought is kept for later.
 
+## 6.6 Clipboard beside the journal (19 November 2026)
+
+A single item (a picture, a file or a text) to move between one's own devices, often needed. It lies beside the journal on the server (architecture 8.15), not in it: as a line it would make every device load the whole file again with every change of any entry. This is the one exception to the rule that the server keeps nothing but the encrypted journal file; the item is encrypted like the journal and readable only by the owner. Limit 4 MB, checked before sending; no bookkeeping of space (items are usually single pictures or pieces of text far below the limit). The symbol is a tray, not a clipboard or two sheets: it stands for a place where something is left to be picked up.
+
 ## 7. Open items and next steps
 
 1. **Node client with MCP tools and a nightly run** on top of the core module (next step).

@@ -20,6 +20,10 @@ The two circular arrows at the top synchronise; they turn while a sync runs and 
 
 The app keeps a copy of your journals in the browser and works offline. What you change is sent when the server can be reached again.
 
+## The clipboard
+
+The tray left of the magnifier moves one thing between your own devices: a picture, a file or a text, up to 4 MB. Drop it on the tray, or click the tray and paste with Ctrl/Cmd+V, or choose a file; on the phone, tap the tray and *Paste* or *Choose file or photo*. The tray turns Teal on your other devices at their next synchronisation. There, a click copies a text or a picture into the clipboard; dragging the tray into a folder saves a copy; on an iPhone, *Save / share* and *Save Image* put a photo into Photos. A new item replaces the old, *Clear* removes it. Only you can read it; those you share journals with see nothing of it.
+
 ## A shared device
 
 On a device that several people use, a tablet in the kitchen for example, the PIN can be switched off: *Settings → Account → Turn off the PIN*. The device then keeps everything unencrypted, and whoever uses it can read and pass on what it holds. Give such a device only guest codes, or ally codes where people should write, never the words of a journal. Its own journal is then the only one it owns.

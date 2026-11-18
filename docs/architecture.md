@@ -992,6 +992,10 @@ The web client reads and writes everything it keeps through one storage layer (`
 - The PIN can be switched off on purpose (a device several people use), with a plain statement that the store is then unencrypted. Whether that is sensible depends on what the device holds, which the app cannot judge: the documentation recommends guest or ally codes only on such devices.
 - The storage layer is the one place a native client replaces, there with a key in the hardware keystore, which limits attempts itself.
 
+### 8.15 The clipboard
+
+One encrypted item per account, to move a picture, a file or a text between one's own devices. The server keeps it as `<account>.clip` beside the journal file: `PUT /clip` replaces it (at most 4 MB of content plus 64 KB for encryption and header), `GET /clip` returns it with an ETag, `HEAD /clip` tells only whether there is one and which, `DELETE /clip` removes it. Only the owner may use it (the same proof as for replacing the journal), and only for an account that exists. The client encrypts with the owner's private key of the default journal (version 1: its key); before encryption the item is a 4-byte length, a JSON header `{name, type, size, t}` and the content, so the server learns neither name nor type. At each synchronisation the client asks with `HEAD` and `If-None-Match`; the content is fetched only when the clipboard is opened, copied or dragged, and not again while its ETag stays. The client checks the size before encrypting and sends nothing that is too large. There is no eviction: a new item replaces the old, *Clear* removes it, and deleting the account removes it with the journal. This is the one thing besides the journal file that the server keeps, and like the journal it cannot read it (decisions 6.6).
+
 ## 9. Deviations from outheis-beta v0.2.52
 
 | Topic | Code | This specification |

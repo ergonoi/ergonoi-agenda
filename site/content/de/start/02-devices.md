@@ -20,6 +20,10 @@ Die zwei kreisförmigen Pfeile oben synchronisieren; sie drehen sich, solange ei
 
 Die App hält eine Kopie deiner Journale im Browser und arbeitet auch offline. Was du änderst, wird gesendet, sobald der Server wieder erreichbar ist.
 
+## Die Ablage
+
+Das Ablagefach links neben der Lupe bringt ein Stück von einem deiner Geräte auf die anderen: ein Bild, eine Datei oder einen Text, bis 4 MB. Zieh es auf das Fach, oder klick auf das Fach und füge mit Strg/Cmd+V ein, oder wähle eine Datei; am Telefon das Fach antippen und *Paste* oder *Choose file or photo*. Auf deinen anderen Geräten wird das Fach bei der nächsten Synchronisation Teal. Dort kopiert ein Klick einen Text oder ein Bild in die Zwischenablage; wer das Fach in einen Ordner zieht, legt dort eine Kopie ab; am iPhone bringen *Save / share* und *Bild sichern* ein Foto in die Fotos-App. Ein neues Stück ersetzt das alte, *Clear* entfernt es. Lesen kannst nur du; wer Journale mit dir teilt, sieht davon nichts.
+
 ## Ein gemeinsam genutztes Gerät
 
 Auf einem Gerät, das mehrere Menschen benutzen, etwa einem Tablet in der Küche, lässt sich die PIN abschalten: *Settings → Account → Turn off the PIN*. Das Gerät hält dann alles unverschlüsselt, und wer es benutzt, kann lesen und weitergeben, was darauf liegt. Gib einem solchen Gerät nur Guest-Codes, oder Ally-Codes, wo Menschen eintragen sollen, nie die Wörter eines Journals. Sein eigenes Journal ist dann das einzige, dessen Owner es ist.

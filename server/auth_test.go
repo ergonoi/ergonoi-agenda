@@ -161,3 +161,41 @@ func TestV2ReplaceOnlyByOwner(t *testing.T) {
 		t.Fatalf("owner replace: %d %s", rec.Code, rec.Body)
 	}
 }
+
+func TestClipOwnerOnly(t *testing.T) {
+	relay, _ := newRelay(t.TempDir())
+	h := newServer(relay, newMembers("")).mux()
+	j := newV2()
+	fp := map[string]string{fingerprintHeader: j.fp}
+	own := map[string]string{fingerprintHeader: j.fp, ownerHeader: j.d}
+	if rec := doV2(t, h, "PUT", "/clip", "Write "+j.w, own, "x"); rec.Code != 404 {
+		t.Fatalf("clip before the journal exists: %d", rec.Code)
+	}
+	doV2(t, h, "POST", "/append", "Write "+j.w, fp, line(1))
+	if rec := doV2(t, h, "PUT", "/clip", "Write "+j.w, fp, "x"); rec.Code != 403 {
+		t.Fatalf("ally clip: %d", rec.Code)
+	}
+	if rec := doV2(t, h, "GET", "/clip", "Write "+j.w, own, ""); rec.Code != 404 {
+		t.Fatalf("empty clip: %d", rec.Code)
+	}
+	rec := doV2(t, h, "PUT", "/clip", "Write "+j.w, own, "secret")
+	if rec.Code != 204 {
+		t.Fatalf("owner clip: %d %s", rec.Code, rec.Body)
+	}
+	etag := rec.Header().Get("ETag")
+	if rec := doV2(t, h, "GET", "/clip", "Write "+j.w, own, ""); rec.Code != 200 || rec.Body.String() != "secret" {
+		t.Fatalf("get clip: %d %q", rec.Code, rec.Body)
+	}
+	if rec := doV2(t, h, "GET", "/clip", "Write "+j.w, map[string]string{fingerprintHeader: j.fp, ownerHeader: j.d, "If-None-Match": etag}, ""); rec.Code != 304 {
+		t.Fatalf("unchanged clip: %d", rec.Code)
+	}
+	if rec := doV2(t, h, "PUT", "/clip", "Write "+j.w, own, strings.Repeat("a", maxClipBytes+1)); rec.Code != 413 {
+		t.Fatalf("too large: %d", rec.Code)
+	}
+	if rec := doV2(t, h, "DELETE", "/clip", "Write "+j.w, own, ""); rec.Code != 204 {
+		t.Fatalf("delete: %d", rec.Code)
+	}
+	if rec := doV2(t, h, "GET", "/clip", "Write "+j.w, own, ""); rec.Code != 404 {
+		t.Fatalf("after delete: %d", rec.Code)
+	}
+}

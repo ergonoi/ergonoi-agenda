@@ -8,6 +8,9 @@
 //	PUT    /journal   replace the file; requires If-Match (compaction by a client)
 //	DELETE /journal   delete the account
 //	GET    /members   who uses the journal: member IDs with last use (members.go)
+//	GET    /clip      the one encrypted clipboard item of the account (ETag; HEAD for presence)
+//	PUT    /clip      replace it (owner only, at most 4 MB of content)
+//	DELETE /clip      remove it
 //	GET    /          web application
 //
 // The account is identified by what the request proves (auth.go): a version 1
@@ -199,6 +202,73 @@ func (s *server) handleJournal(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]any{"since": since, "members": list})
 
+	// The clipboard (architecture 8.15): one encrypted item per account, for the owner only,
+	// to move a picture, a file or a text between one's own devices.
+	case r.URL.Path == "/clip":
+		if !level.canReplace() {
+			http.Error(w, "the clipboard belongs to the owner", http.StatusForbidden)
+			return
+		}
+		switch r.Method {
+		case http.MethodGet, http.MethodHead:
+			if !s.reads.allow(acc) {
+				tooMany(w, 60)
+				return
+			}
+			data, etag, err := s.relay.ClipGet(acc)
+			if err != nil {
+				s.fail(w, err)
+				return
+			}
+			if len(data) == 0 {
+				http.Error(w, "empty", http.StatusNotFound)
+				return
+			}
+			w.Header().Set("ETag", etag)
+			if r.Header.Get("If-None-Match") == etag {
+				w.WriteHeader(http.StatusNotModified)
+				return
+			}
+			w.Header().Set("Content-Type", "application/octet-stream")
+			w.Header().Set("Content-Length", strconv.Itoa(len(data)))
+			if r.Method == http.MethodGet {
+				w.Write(data)
+			}
+		case http.MethodPut:
+			if !s.writes.allow(acc) {
+				tooMany(w, 60)
+				return
+			}
+			if !s.relay.exists(acc) {
+				http.Error(w, "no such journal", http.StatusNotFound)
+				return
+			}
+			body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, maxClipBytes+1))
+			if err != nil || len(body) > maxClipBytes {
+				http.Error(w, "too large for the clipboard", http.StatusRequestEntityTooLarge)
+				return
+			}
+			if len(body) == 0 {
+				http.Error(w, "empty", http.StatusBadRequest)
+				return
+			}
+			etag, err := s.relay.ClipPut(acc, body)
+			if err != nil {
+				s.fail(w, err)
+				return
+			}
+			w.Header().Set("ETag", etag)
+			w.WriteHeader(http.StatusNoContent)
+		case http.MethodDelete:
+			if err := s.relay.ClipDelete(acc); err != nil {
+				s.fail(w, err)
+				return
+			}
+			w.WriteHeader(http.StatusNoContent)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+
 	case r.URL.Path == "/journal" && r.Method == http.MethodDelete:
 		if !level.canDelete() {
 			forbidden()
@@ -273,6 +343,7 @@ func (s *server) mux() *http.ServeMux {
 	mux.HandleFunc("/journal", s.handleJournal)
 	mux.HandleFunc("/append", s.handleJournal)
 	mux.HandleFunc("/members", s.handleJournal)
+	mux.HandleFunc("/clip", s.handleJournal)
 	files := http.FileServer(http.FS(web.FS))
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		securityHeaders(w)

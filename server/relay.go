@@ -19,11 +19,14 @@ import (
 // changing them requires rebuilding the binary.
 const (
 	maxAccountBytes = 5 << 20 // 5 MB per account file
-	maxLineBytes    = 4096    // decoded size of one encrypted line
-	nonceBytes      = 12
-	tagBytes        = 16
-	padBlock        = 256
-	inactiveDays    = 5 * 365 // accounts without access are deleted after 5 years
+	// One encrypted item per account for moving something between one's own devices
+	// (architecture 8.15): 4 MB of content plus what encryption and its header add.
+	maxClipBytes = 4<<20 + 64<<10
+	maxLineBytes = 4096 // decoded size of one encrypted line
+	nonceBytes   = 12
+	tagBytes     = 16
+	padBlock     = 256
+	inactiveDays = 5 * 365 // accounts without access are deleted after 5 years
 )
 
 var (
@@ -232,7 +235,7 @@ func (r *Relay) Replace(acc string, lines []string, ifMatch string) (string, err
 // Delete removes all files of an account.
 func (r *Relay) Delete(acc string) error {
 	defer r.lock(acc)()
-	for _, ext := range []string{".enc", ".enc.prev", ".enc.tmp", ".seen"} {
+	for _, ext := range []string{".enc", ".enc.prev", ".enc.tmp", ".seen", ".clip", ".clip.tmp"} {
 		if err := os.Remove(r.path(acc, ext)); err != nil && !os.IsNotExist(err) {
 			return err
 		}
@@ -262,4 +265,44 @@ func (r *Relay) Expire() (int, error) {
 		}
 	}
 	return n, nil
+}
+
+// ClipGet returns the stored clipboard item of an account and its ETag; none is empty.
+func (r *Relay) ClipGet(acc string) ([]byte, string, error) {
+	defer r.lock(acc)()
+	data, err := os.ReadFile(r.path(acc, ".clip"))
+	if err != nil && !os.IsNotExist(err) {
+		return nil, "", err
+	}
+	if len(data) == 0 {
+		return nil, "", nil
+	}
+	return data, etagOf(data), nil
+}
+
+// ClipPut replaces the clipboard item; there is only one per account.
+func (r *Relay) ClipPut(acc string, data []byte) (string, error) {
+	defer r.lock(acc)()
+	if len(data) > maxClipBytes {
+		return "", errTooLarge
+	}
+	p := r.path(acc, ".clip")
+	tmp := p + ".tmp"
+	if err := os.WriteFile(tmp, data, 0o600); err != nil {
+		return "", err
+	}
+	if err := os.Rename(tmp, p); err != nil {
+		return "", err
+	}
+	r.touch(acc)
+	return etagOf(data), nil
+}
+
+// ClipDelete removes the clipboard item.
+func (r *Relay) ClipDelete(acc string) error {
+	defer r.lock(acc)()
+	if err := os.Remove(r.path(acc, ".clip")); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	return nil
 }

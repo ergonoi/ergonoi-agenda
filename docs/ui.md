@@ -446,6 +446,10 @@ A round `?` button (32 px, 0.5 px border) next to every field for a new facet or
 
 Under *Content*, journals the user may write offer *Add a facet to this journal*: a field with the prefix `#facet-`, *Add*, and a hint. It writes a Tag definition into this journal; an existing name or an invalid one is answered in the hint. Journals of version 2 that the user owns (not the default) offer *Make this my default journal* (two taps, architecture 8.11j). In the dialog of a version 2 journal that replaced one of version 1, the former journal can be removed from one's own journals (*Remove it from my journals*) or deleted on the server.
 
+### 4.16 Clipboard
+
+A tray symbol left of the magnifier, for accounts the user owns (not in local mode): `--fg2` when empty, Teal with a light Aqua fill when it holds something. A click opens the dialog *Clipboard*; when it holds a text or a picture, the click also copies it into the system clipboard (a picture as PNG). Dropping a file or a text on the symbol or the open dialog puts it there; while the dialog is open, Ctrl/Cmd+V does the same. Dragging the filled symbol into a folder saves a copy (Chrome and Edge). The dialog shows a preview (picture, the start of a text, or name and size), a hint, and *Paste* (from the system clipboard, where the browser allows it), *Choose file or photo*, *Copy*, *Save / share* (the system's share sheet, where it takes files: on an iPhone *Save Image* puts a photo into Photos), *Download* and *Clear* (two taps). Too large an item is refused with its size before anything is sent.
+
 ### 4.12a PIN
 
 The PIN dialog (`#dlgPin`, without the close button of other dialogs) has four uses: *Enter your PIN* at the start (*Unlock*, *Forgot PIN*), *Enter your PIN* before words or codes are shown (*OK*, *Cancel*), *Choose a PIN* once an account exists (*Set PIN*, *Use without PIN*, which warns first and asks for a second tap) and *Choose a new PIN* (*Set PIN*, *Cancel*). The field is a numeric password field, six to twelve digits. *Settings → Account → PIN* shows the state and offers *Change PIN* and *Turn off the PIN* (two taps, then the PIN), or *Set a PIN* when it is off.
