@@ -1,0 +1,8 @@
+{
+  "name": "outheis-agenda-e2e",
+  "private": true,
+  "type": "module",
+  "description": "Browser tests of the web client against a local service and the click dummy",
+  "scripts": { "test": "node run.mjs" },
+  "dependencies": { "puppeteer-core": "^23.11.1" }
+}

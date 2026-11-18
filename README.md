@@ -63,6 +63,8 @@ python3 site/scripts/build-site.py   # user documentation in site/html (EN, DE; 
 TZ=Europe/Berlin node --test clients/core/test/*.test.mjs
 ```
 
+Browser tests of the web client (Chrome, a local service, the click dummy): `clients/web/e2e`, see its README.
+
 ## Running
 
 Requires Go ≥ 1.22.
