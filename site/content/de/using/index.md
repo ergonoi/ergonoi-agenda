@@ -28,7 +28,7 @@ Die vollständige Liste, mit den Tags, die die App selbst schreibt, steht unter 
 
 ## Termine, Aufgaben und Memos
 
-- Ein Eintrag mit Uhrzeit oder Wiederholung ist **fest**: Er gehört zu seinem Tag. Vergeht der Tag ohne *Done*, wartet er oben in der Liste unter *Past*, damit ein ausgefallener Besuch nicht verloren geht.
+- Ein Eintrag mit Uhrzeit oder Wiederholung ist **fest**: Er gehört zu seinem Tag und ist nach diesem Tag aus der Liste verschwunden. Gelöscht wird nichts; die Suche findet ihn weiter. Was danach trotzdem noch zu tun ist, gehört in einen flexiblen Eintrag.
 - Ein Eintrag ohne Uhrzeit ist **beweglich**: Er wandert jeden Tag mit nach *Today*, bis er erledigt ist. Das Tag `#anchor-fix` oder `#anchor-flex` ändert das, wo nötig.
 - Ein **Memo** wird zum Nachschlagen aufbewahrt: beim Hinzufügen auf das Lesezeichen tippen. Es ist nie fällig und erscheint nicht in der Liste; die Suche findet es unter *Memos*.
 

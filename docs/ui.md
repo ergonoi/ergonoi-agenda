@@ -96,7 +96,7 @@ No white buttons on white ground. In dark mode, secondary buttons are outlined i
 
 | Size | Height | Text | Used for |
 |---|---|---|---|
-| small `--bs` | 32 px | 14 px | everything inside a line or an entry: chips, `+`, note button, *Done* / *Reschedule* in *Past*, *‹ › Today* of the month view, *Reset* in the search and filter lines, buttons in notices, the round `?` |
+| small `--bs` | 32 px | 14 px | everything inside a line or an entry: chips, `+`, note button, *‹ › Today* of the month view, *Reset* in the search and filter lines, buttons in notices, the round `?` |
 | normal `--bm` | 44 px | 15 px | everything else: *Add*, dialogs, settings, value buttons, facet panel, sheets (swipe sheet, facet choice, reschedule grid) |
 
 On touch screens small buttons get an invisible margin, so that the touch target still reaches 44 px. Tabs and header icons keep `--tap` (44 px).
@@ -188,7 +188,7 @@ From 1100 px window width the content column is at most 1200 px wide; the areas 
 
 *Settings → Experimental → Minimal colours* (per device, `localStorage agenda.minimal`, class `minimal`). Colour is used only where it directs attention to something, not as decoration: facet colours (stripes, dots, bar), overdue dates, *now*, *review*, danger, the sync state. Everything else is black, grey and white.
 
-- **Header:** white with a 0.5 px `--line` bottom border instead of Pearl Aqua (theme colour white); title in the body font. *List* / *Month* / *Text* as small grey buttons, the active one with a 1 px `--fg` border, instead of underlined tabs.
+- **Header:** a light Wisteria (`#E2C8E8`, 50 % on white; dark mode: the plain surface) with a 0.5 px `--line` bottom border instead of Pearl Aqua (decided 21 November 2026, white was too empty); title in the body font. *List* / *Month* / *Text* as small grey buttons, the active one with a 1 px `--fg` border, instead of underlined tabs.
 - **Buttons:** a light grey fill (`--btn`, `#EFEEEE`, dark `#2C2C2C`) sets them off from the ground; no Wisteria, no Dark Amethyst, no Teal. The primary action has a 1 px `--fg` border and 500 weight. Danger keeps its Scarlet outline. Icon buttons, the fold chevron and menu rows stay without fill.
 - **Tags stay unfilled** (outlined chips, facet choice buttons), so that values are not mistaken for actions.
 - The recurring icon sits in a small outlined box; the facet stripe is 2 px.
@@ -284,7 +284,7 @@ The calendar and clock buttons are the system's own `date` and `time` fields, la
 ### 4.3 Group heading
 
 - Padding 22 px 16 px 8 px; 11 px, weight 600, uppercase, letter-spacing 1.2 px, `--muted`.
-- Groups: **Today**, **Tomorrow**, **Next 7 days**, **Later**, and on request **Up to 3 months** (5.4). Empty groups are not shown.
+- Groups: **Today**, **Tomorrow**, **Next 7 days**, **Later**, and on request **After 30 days** (5.4). Empty groups are not shown.
 - Below a group with more items than its limit: a full-width row *+N more* (15 px, `--fg2`, 44 px high, bottom separator); after expanding, *Show fewer*.
 
 ### 4.4 Item — collapsed (default)
@@ -518,18 +518,18 @@ Left border 3 px Amber Flame, padding 8 px 12 px, 15 px; *dismiss* button. Used 
 
 | Group | Shown date | Limit |
 |---|---|---|
-| Past | fixed items whose date has passed, until *Done* or *Reschedule* (architecture 5.5); text and date in Slate, two secondary buttons *Done* and *Reschedule* in the row | 3 (also items with a clock time) |
+| Past | in the search only: fixed items whose day has passed (architecture 5.5); text and date in Slate | none |
 | Today | today, and flexible items carried from earlier days (date in Scarlet Fire, marker *now*) | 5 |
 | Tomorrow | tomorrow | 5 |
 | Next 7 days | day 2 to day 7 | 10 |
 | Later | day 8 to day 30 | 10 |
-| Up to 3 months | day 31 to day 90, only after *Show up to 3 months (N)* | none |
+| After 30 days | day 31 onwards without end, only after *Show all (N)* | none |
 
 - The shown date is the first `#date`; for recurring items the next occurrence on or after today; for multi-day items in progress (first date past, second date today or later) today.
 - Items after day 90 never appear in a view. This includes meta lines (`#type-meta`) and memos (architecture 3.4, 5.6). They remain in the journal and in the text view.
 - **Limits.** Items with a clock time (`#time` with start or span) do not count against the limit and are always shown. Of the other items, only the first *limit* are shown; the rest are behind *+N more* and can be expanded per group. Items never move to another group because a group is full.
 
-**Ordering within a group.** Groups over several days (*Next 7 days*, *Later*, *Up to 3 months*, *Past*) run by date, as the printout does; items carried into *Today* count as today. Within a day, without a weighting model, the static client uses a fallback:
+**Ordering within a group.** Groups over several days (*Next 7 days*, *Later*, *After 30 days*, *Past*) run by date, as the printout does; items carried into *Today* count as today. Within a day, without a weighting model, the static client uses a fallback:
 
 1. recurring items without a clock time (fixed points);
 2. items with a clock time, by date and start time;
@@ -581,7 +581,7 @@ A filter **hides values**. Within one kind of tag an item matches if its value i
 - **Interaction.** Tap a facet: on or off. Long press: only this facet; a toast says so with *Undo*, since a long press may also happen by accident. Tap a journal's heading: all its facets on (when all are off) or off; long press: only this journal. The other tags: tap hides or shows a value, long press shows only this value. Switched off is 20 % opacity; there is nothing in between.
 - **Filter line.** Without an active view, a line below the add field says what is hidden (`Filter: 3 of 14 facets · not low`) with *Show all*. With an unchanged view there is no line; the title says which filter applies.
 - An item added while the filter would hide it is written as usual; a notice says that it is hidden.
-- Counts and filters cover open items up to three months ahead; entries dated beyond (tag definitions) never appear.
+- Counts and filters cover all open items; meta lines and tag definitions never appear.
 - The facet selection preselects the facets of the printout (4.13).
 
 ### 4.14b Retired: facet bar ordered by use
@@ -592,7 +592,7 @@ The experiment of 0.7 ordered the facet bar by use. With the bar it was retired 
 
 - The magnifier in the header (or `/` outside text fields on a computer; Cmd-F stays the browser's search) turns the header into a search field in place of the title: a back arrow that closes the search, the field ("Search in *view*", or "Search text, notes, #tags" without a view) and a round cross at its right end that clears it in one tap and keeps the focus in the field. Tapping the magnifier again, the back arrow or Escape closes it and clears the query. On phones the other header buttons and the add field are hidden while searching.
 - The query is matched in the client only, against the text, the note and the tags (`#dim-value`) of the entries of all journals, ignoring case and accents (`brucke` finds *Brücke*); several words must all occur. Tag definitions and comments are not entries and are not found.
-- While a query is set, the list shows every match: open entries beyond the 30-day and three-month horizons (group *After 30 days*), groups without their limits. The facet bar and the filter tab still apply.
+- While a query is set, the list shows every match: open entries after 30 days (group *After 30 days*), passed fixed entries (group *Past*), groups without their limits. The facet bar and the filter tab still apply.
 - A line above the list reads "Search: *query* · n entries", adding "m more hidden by the filter" where the filter hides matches, and at its right end the switch *include done*.
 - With *include done*, closed entries still in the journal (until compaction) are found too, in a group *Done*, greyed but usable: their note opens, their tags can be changed, and removing `#done` reopens them (decided 19 November 2026; before, they could not be touched).
 

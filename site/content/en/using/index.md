@@ -28,7 +28,7 @@ The complete list, with the tags the app writes itself, is in *Reference*.
 
 ## Events, tasks and memos
 
-- An entry with a time or a repetition is **fixed**: it belongs to its day. If the day passes without *Done*, it waits under *Past* at the top of the list, so that a missed visit is not lost.
+- An entry with a time or a repetition is **fixed**: it belongs to its day and is gone from the list once the day is over. Nothing is deleted; the search still finds it. What must be done afterwards anyway belongs in a flexible entry.
 - An entry without time is **flexible**: it moves along to *Today* each day until it is done. The tag `#anchor-fix` or `#anchor-flex` changes this where needed.
 - A **memo** is kept to be looked up: tap the bookmark when adding. It is never due and does not appear in the list; the search finds it under *Memos*.
 

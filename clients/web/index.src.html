@@ -261,8 +261,6 @@
   #sline button { min-height:var(--bs); font-size:14px; margin-left:auto; }
   /* Closed entries found by the search stay usable: a note can be read, a tag changed, and removing #done reopens them. */
   .item.isdone { opacity:.55; }
-  .pastbtns { display:flex; gap:8px; margin:8px 0 0; }
-  .pastbtns button { min-height:var(--bs); padding:0 10px; font-size:14px; }
   section[data-g="past"] .item .text { color:var(--fg2); }
   section[data-g="past"] .item.overdue .when { color:var(--fg2); } /* calmer than an overdue task */
   #viewSettings { padding:4px 16px 40px; }
@@ -369,7 +367,7 @@
   .chips { display:flex; flex-wrap:wrap; gap:4px; margin:8px 0 0 33.333%; }
   .jtag { font-size:12px; font-weight:400; color:var(--fg2); border:.5px solid var(--line); border-radius:4px; padding:1px 6px; margin-left:8px; vertical-align:2px; white-space:nowrap; }
   .chip { position:relative; min-height:var(--bs); padding:0 8px; font-size:14px; white-space:nowrap; color:var(--muted); border:.5px solid var(--line); border-radius:6px; background:transparent; }
-  @media (pointer: coarse) { .chip::after, .pastbtns button::after, .cal .nav button::after { content:""; position:absolute; inset:-6px 0; } .pastbtns button, .cal .nav button { position:relative; } }
+  @media (pointer: coarse) { .chip::after, .cal .nav button::after { content:""; position:absolute; inset:-6px 0; } .cal .nav button { position:relative; } }
   .chip b { font-weight:400; color:var(--fg2); }
   .chip .sw { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; vertical-align:1px; }
   .chip.now { border-color:var(--scarlet); } .chip.now b { color:var(--scarlet); }
@@ -667,12 +665,10 @@
   html.compact .chips { margin:6px 0 0; }
   html.compact .chip { font-size:13px; padding:0 7px; }
   html.compact .chip.plus { font-size:15px; }
-  html.compact .pastbtns { margin:6px 0 0; gap:6px; }
-  html.compact .pastbtns button { font-size:13px; padding:0 9px; }
   html.compact .fold { top:2px; right:0; min-width:36px; min-height:36px; }
   html.compact .fold svg { width:18px; height:18px; }
   html.compact .recic svg, html.compact .noteic svg { width:14px; height:14px; }
-  @media (pointer: coarse) { html.compact .chip::after, html.compact .pastbtns button::after, html.compact .cal .nav button::after { inset:-8px 0; } }
+  @media (pointer: coarse) { html.compact .chip::after, html.compact .cal .nav button::after { inset:-8px 0; } }
   /* Month */
   html.compact .cal { padding:10px 12px 4px; }
   html.compact .cal .cd { height:40px; font-size:14px; }
@@ -697,8 +693,10 @@
      set off from the ground by a light grey fill, tags stay unfilled. ===== */
   html.minimal { --btn:#EFEEEE; }
   @media (prefers-color-scheme: dark) { html.minimal { --btn:#2C2C2C; } }
-  html.minimal header { background:var(--bg); border-bottom:.5px solid var(--line); --fg:#1A1A1A; --fg2:#4A4646; --muted:#7A7676; }
-  @media (prefers-color-scheme: dark) { html.minimal header { --fg:#f0f0f0; --fg2:#a0a0a0; --muted:#707070; } }
+  /* A light Wisteria (50 % on white) for the header with minimal colours; dark mode keeps
+     the plain surface (ui.md 2.10). */
+  html.minimal header { background:#E2C8E8; border-bottom:.5px solid var(--line); --fg:#1A1A1A; --fg2:#4A4646; --muted:#7A7676; }
+  @media (prefers-color-scheme: dark) { html.minimal header { background:var(--bg); --fg:#f0f0f0; --fg2:#a0a0a0; --muted:#707070; } }
   html.minimal header h1 { font-family:inherit; font-weight:500; }
   :where(html.minimal) button { background:var(--btn); border-color:var(--btn); }
   html.minimal header button:not(.tab), html.minimal #tabFilter, html.minimal #btnMic, html.minimal .fold, html.minimal .more, html.minimal .noteic, html.minimal #pop .opt, html.minimal #pop .x, html.minimal #pop .ok, html.minimal #facetSheet .when .x { background:transparent; border-color:transparent; }
@@ -2621,12 +2619,12 @@ function orderKey(it) {
 // Groups, limits and horizon (docs/ui.md 5.4). Items with a clock time do not count
 // against the limit and are always shown.
 const GROUPS = [
-  { key: "past", title: "Past", limit: 3 },
+  { key: "past", title: "Past", limit: Infinity }, // in the search only
   { key: "today", title: "Today", limit: 5 },
   { key: "tomorrow", title: "Tomorrow", limit: 5 },
   { key: "week", title: "Next 7 days", limit: 10 },
   { key: "later", title: "Later", limit: 10 },
-  { key: "beyond", title: "Up to 3 months", limit: Infinity },
+  { key: "beyond", title: "After 30 days", limit: Infinity },
 ];
 const openGroups = new Set();
 let showBeyond = false;
@@ -2666,13 +2664,12 @@ function filterLabel(dim, v) {
   if (dim === "recurring") return v ? "recurring" : "one-off";
   return v || "without " + dim;
 }
-// Open items in the views' range (up to 3 months), the basis of all counts.
+// Open items, the basis of all counts (no horizon since 0.9.3).
 function viewItems() {
-  const t90 = addDays(today(), 90), t0 = today();
   const all = [];
   const ovs = overlayMap();
   for (const j of journals()) withJ(j, () => all.push(...parseLines(S.wc).map(e => applyOverlay(Object.assign(e, { _j: j }), j, ovs))));
-  return all.filter(e => !has(e, "done") && shownDate(e, t0) <= t90);
+  return all.filter(e => !has(e, "done"));
 }
 function valuesOf(dim) {
   if (dim === "time" || dim === "recurring") return ["with", ""];
@@ -3183,7 +3180,7 @@ function renderAgenda() {
   if (monthMode && !searchTerms().length) { renderMonth(); return; }
   facetColorCache = null; facetJournalsCache = null;
   const groups = Object.fromEntries(GROUPS.map(g => [g.key, []]));
-  const t0 = today(), t1 = addDays(t0, 1), t7 = addDays(t0, 7), t30 = addDays(t0, 30), t90 = addDays(t0, 90);
+  const t0 = today(), t1 = addDays(t0, 1), t7 = addDays(t0, 7), t30 = addDays(t0, 30);
   let beyondCount = 0;
   const flt = filterState();
   renderFilters();
@@ -3219,17 +3216,15 @@ function renderAgenda() {
         if (!has(e, "recurring")) overToday = true;
         else d = shownDate(e, t1);
       }
-      if (d > t90 && !searching) return; // outside every view; still in the journal and the Text tab
       const local = !e.id || !known.has(e.id + "/" + e.rev + "/" + e._ck);
       let g = isMemo(e) ? "memo" : d <= t0 ? "today" : d === t1 ? "tomorrow" : d <= t7 ? "week" : d <= t30 ? "later" : "beyond";
       // Passed without #done (architecture 5.5): a flexible entry is carried to Today and
-      // counts as urgent; a fixed one waits in Past for Done or Reschedule, unless it passes
-      // without asking (from a calendar, or in a journal of fixed dates).
+      // counts as urgent; a fixed one belongs to its day and is gone from the list once the
+      // day (or its time span) is over. Nothing is written; the search still finds it.
       let carried = false;
       if (d < t0 || overToday) {
         if (bindingOf(e, jFixed) === "flex") carried = d < t0;
-        else if (passesSilently(e, jFixed)) { if (!searching) return; }
-        else g = "past";
+        else { if (!searching) return; g = "past"; }
       }
       if (g === "beyond") beyondCount++;
       groups[g].push({ e, idx: j + "|" + idx, j, d, local, overdue: d < t0, carried });
@@ -3252,7 +3247,7 @@ function renderAgenda() {
   });
   if (!searching && fuOn()) for (const g of ["today", "tomorrow"]) for (const it of groups[g]) for (const fv of facetsOf(it.e)) fuSignal("seen", fv, it.j);
   let html = "";
-  const groupList = searching ? GROUPS.map(g => g.key === "beyond" ? { ...g, title: "After 30 days" } : g).concat([{ key: "memo", title: "Memos", limit: Infinity }, { key: "done", title: "Done", limit: Infinity }]) : GROUPS;
+  const groupList = searching ? GROUPS.concat([{ key: "memo", title: "Memos", limit: Infinity }, { key: "done", title: "Done", limit: Infinity }]) : GROUPS;
   for (const { key: g, title, limit } of groupList) {
     if (g === "beyond" && !showBeyond && !searching) continue;
     // By day first (groups over several days run by date, as on paper); within a day the
@@ -3266,13 +3261,13 @@ function renderAgenda() {
     });
     if (!items.length) {
       // Empty groups are shown only as columns on wide screens (CSS), to keep the columns in place.
-      if (g !== "beyond" && g !== "done" && !searching) html += `<section class="empty"><h2>${title}</h2><p class="hint none">Nothing</p></section>`;
+      if (g !== "beyond" && g !== "done" && g !== "past" && !searching) html += `<section class="empty"><h2>${title}</h2><p class="hint none">Nothing</p></section>`;
       continue;
     }
     const expanded = openGroups.has(g) || searching;
     let counted = 0, hidden = 0;
     const visible = items.filter(it => {
-      if (hasClock(it.e) && g !== "past") return true; // Past keeps its limit, clock or not
+      if (hasClock(it.e)) return true;
       counted++;
       if (expanded || counted <= limit) return true;
       hidden++;
@@ -3284,7 +3279,7 @@ function renderAgenda() {
     else if (expanded && counted > limit) html += `<button class="more" data-group="${g}">Show fewer</button>`;
     html += `</section>`;
   }
-  if (!searching && !showBeyond && beyondCount) html += `<button class="more" data-beyond="1">Show up to 3 months (${beyondCount})</button>`;
+  if (!searching && !showBeyond && beyondCount) html += `<button class="more" data-beyond="1">Show all (${beyondCount})</button>`;
   else if (!searching && showBeyond) html += `<button class="more" data-beyond="0">Hide items after 30 days</button>`;
   $("sline").classList.toggle("hidden", !searching);
   $("sline").innerHTML = searching ? `<span>Search: <b>${esc(SEARCH.q.trim())}</b> · ${hits} ${hits === 1 ? "entry" : "entries"}${hiddenHits ? ` · ${hiddenHits} more hidden by the filter` : ""}</span><label class="sdone"><input type="checkbox" data-sdone="1"${SEARCH.done ? " checked" : ""}> include done</label>` : "";
@@ -3329,7 +3324,7 @@ function renderMonth() {
         return;
       }
       for (const d of occurrences(e, g0, g1)) {
-        if (d < t0 && !rec && passesSilently(e, jFixed)) continue; // passed calendar entries are gone from the list too
+        if (d < t0 && !rec) continue; // a passed fixed entry is gone, as in the list (architecture 5.5)
         put(d, { ...base, d, occ: rec ? d : "", overdue: false, carried: false });
       }
     });
@@ -3431,7 +3426,6 @@ function itemHtml({ e, idx, j, d, local, overdue, closed, carried, snapId }, g) 
     <div class="when${implied && !time ? " onlywide" : ""}">${whenHtml}</div>
     <div class="body"><div class="text" data-line="${idx}">${esc(e.text)}${get(e, "recurring") ? `<span class="recic" title="Recurring: ${esc(get(e, "recurring"))}" aria-label="Recurring"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v4.5h-4.5"/></svg></span>` : ""}${e.note ? `<button class="noteic" data-note="${idx}" title="Note" aria-label="Note"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg></button>` : ""}${j ? `<span class="jtag">${esc(journalName(j))}</span>` : ""}</div>
       ${open ? "" : `<div class="marks">${marks.join("")}</div>`}
-      ${g === "past" ? `<div class="pastbtns"><button class="sec" data-pastdone="${idx}">Done</button><button class="sec" data-pastre="${idx}">Reschedule</button></div>` : ""}
       <div class="chips">${chips.join("")}</div></div>
     <button class="fold" data-fold="${esc(key)}" title="${open ? "Hide tags" : "Show tags"}" aria-expanded="${open}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></div>`;
 }
@@ -3936,7 +3930,7 @@ function endSwipe(open) {
 $("agenda").addEventListener("pointerdown", ev => {
   if (ev.pointerType === "mouse" && ev.button !== 0) return;
   const item = ev.target.closest(".item");
-  if (!item || uiBusy || ev.target.closest(".chip, input, .fold, .pastbtns")) return;
+  if (!item || uiBusy || ev.target.closest(".chip, input, .fold")) return;
   swipe = { item, x: ev.clientX, y: ev.clientY, dx: 0, id: ev.pointerId, dir: null };
 });
 window.addEventListener("pointermove", ev => {
@@ -3973,11 +3967,6 @@ function agendaClick(ev) {
     calDay = calMonth.slice(0, 7) === t0.slice(0, 7) ? t0 : calMonth;
     render(); return;
   }
-  // A fixed entry that has passed: it took place (Done), or it gets a new date.
-  const pd = ev.target.closest("[data-pastdone]");
-  if (pd) { updateLine(pd.dataset.pastdone, x => addTag(x, "done", today())); return; }
-  const pr = ev.target.closest("[data-pastre]");
-  if (pr) { openSheet(pr.dataset.pastre); return; }
   const fold = ev.target.closest(".fold");
   if (fold) {
     const k = fold.dataset.fold;
