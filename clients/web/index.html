@@ -65,18 +65,71 @@
   button.tab { font-size:inherit; border:0; border-bottom:2px solid transparent; border-radius:0; color:var(--muted); padding:0 12px; }
   button.tab[aria-pressed="true"] { color:var(--fg); border-bottom-color:var(--fg); }
   /* Filter: facet legend in the list (style of the outheis web UI), other tags in the filter tab. */
-  #fbar { display:flex; flex-wrap:wrap; gap:0 18px; padding:4px 16px; border-bottom:.5px solid var(--line); }
-  #fbar button, #viewFilter .vals button { min-height:var(--bm); padding:0; border:0; border-radius:0; background:transparent; font-size:14px; letter-spacing:.03em; display:inline-flex; align-items:center; gap:7px; color:var(--fg); transition:opacity .2s; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
-  #fbar .sw, #viewFilter .sw { width:24px; height:3px; border-radius:1px; }
-  #fbar .n, #viewFilter .n { color:var(--muted); font-size:12px; }
-  #fbar button.off, #viewFilter .vals button.off { opacity:var(--off); }
-  #fbar .fmore { color:var(--muted); }
-  #fbar .sw { display:inline-flex; gap:2px; height:3px; background:transparent !important; }
-  #fbar .sw i { flex:1; height:3px; border-radius:1px; }
-  #fbar button.part { opacity:.55; }
+
+  /* Title: the active view (ui.md 4.14), a tap opens the views. */
+  header h1 button#homeLink { all:unset; cursor:pointer; display:inline-flex; align-items:center; gap:6px; font:inherit; }
+  header h1 button#homeLink:focus-visible { outline:2px solid var(--fg); outline-offset:2px; }
+  header h1 .brand { display:block; }
+  header h1 .caret { flex:none; margin-top:2px; }
+  #viewName { display:none; }
+  header h1.hasview #viewName { display:block; }
+  header h1.hasview .brand { font-size:11px; font-weight:400; letter-spacing:.02em; line-height:1.1; }
+  header h1.hasview .vwrap { display:flex; flex-direction:column; }
+  #viewName.changed::after { content:" •"; }
+  header .row { position:relative; }
+  #viewMenu { position:absolute; top:100%; left:12px; z-index:30; min-width:260px; max-width:min(340px, calc(100vw - 24px)); background:var(--bg); color:var(--fg); border:.5px solid var(--line); border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.18); padding:6px 0; }
+  #viewMenu.hidden { display:none; }
+  #viewMenu .vrow, #fpanel .vrow { display:flex; align-items:center; gap:12px; width:100%; min-height:var(--tap); padding:0 18px; border:0; border-radius:0; background:transparent; font-size:16px; color:var(--fg); text-align:left; cursor:pointer; }
+  #viewMenu .vrow.on, #fpanel .vrow.on { background:rgba(127,127,127,.12); font-weight:500; }
+  #viewMenu .vrow .ck { margin-left:auto; color:var(--teal); }
+  #viewMenu .vsep { border-top:.5px solid var(--line); margin:6px 0; }
+  .vact { display:block; width:100%; min-height:var(--bs); padding:0 18px; border:0; border-radius:0; background:transparent; text-align:left; font-size:15px; color:var(--teal); cursor:pointer; }
+  .vact.plain { color:var(--fg2); }
+  .vsw { display:inline-flex; gap:2px; flex:none; }
+  .vsw i { width:5px; height:13px; border-radius:1px; }
+  .vname { display:flex; gap:8px; align-items:center; padding:4px 18px 8px; }
+  .vname input { flex:1; min-width:0; }
+  .vname button { min-height:var(--bs); padding:0 12px; }
+  /* Facet panel (ui.md 4.14): views, then the facets grouped by journal, then the other
+     tags. A drawer on narrow screens, a column beside the list on wide ones. */
+  #fpanel { position:fixed; top:0; bottom:0; left:0; width:min(320px, 86vw); z-index:20; background:var(--bg); border-right:.5px solid var(--line); overflow-y:auto; padding:12px 0 40px; transform:translateX(-102%); transition:transform .2s; }
+  #fpanel.open { transform:none; }
+  #fdim { position:fixed; inset:0; z-index:19; background:rgba(26,26,26,.3); }
+  #fdim.hidden { display:none; }
+  #fpanel h3 { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); font-weight:500; margin:16px 18px 4px; display:flex; align-items:center; gap:8px; }
+  #fpanel h3 .ghost { margin-left:auto; min-height:28px; padding:0 8px; font-size:12px; letter-spacing:0; text-transform:none; }
+  #fpanel .fall { display:flex; gap:8px; padding:4px 18px 0; }
+  #fpanel .fall button { min-height:var(--bs); padding:0 10px; font-size:14px; }
+  #fpanel .jh { all:unset; box-sizing:border-box; cursor:pointer; display:flex; align-items:center; gap:6px; width:100%; padding:12px 18px 2px; font:600 14px "Inter", var(--font, sans-serif); color:var(--fg2); -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+  #fpanel .jh.off { opacity:var(--off); }
+  #fpanel .lock { color:var(--muted); flex:none; }
+  #fpanel .fac { all:unset; box-sizing:border-box; cursor:pointer; display:flex; align-items:center; gap:12px; width:100%; min-height:40px; padding:0 18px; font-size:16px; color:var(--fg); -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; transition:opacity .2s; }
+  #fpanel .fac .sw { width:22px; height:3px; border-radius:1px; flex:none; }
+  #fpanel .fac .n { margin-left:auto; color:var(--muted); font-size:12px; }
+  #fpanel .fac.off { opacity:var(--off); }
+  #fpanel .fac:focus-visible, #fpanel .jh:focus-visible { outline:0; text-decoration:underline; text-underline-offset:4px; }
+  #fpanel details { margin-top:14px; border-top:.5px solid var(--line); }
+  #fpanel summary { cursor:pointer; padding:12px 18px 4px; font:600 14px "Inter", var(--font, sans-serif); color:var(--fg2); }
+  #fpanel .more { padding:0 18px; }
+  #fpanel .more h4 { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); font-weight:500; margin:14px 0 2px; }
+  #fpanel .vals { display:flex; flex-wrap:wrap; gap:0 18px; }
+  #fpanel .vals button { min-height:var(--bm); padding:0; border:0; border-radius:0; background:transparent; font-size:15px; display:inline-flex; align-items:center; gap:7px; color:var(--fg); -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+  #fpanel .vals button.off { opacity:var(--off); }
+  #fpanel .vals .n { color:var(--muted); font-size:12px; }
+  #fpanel .vedit { display:flex; align-items:center; gap:8px; padding:4px 18px; }
+  #fpanel .vedit input { flex:1; min-width:0; }
+  #fpanel .vedit button { min-height:var(--bs); padding:0 10px; font-size:14px; }
+  #fpanel .hint { padding:0 18px; }
+  @media (min-width: 1240px) {
+    #fpanel { transform:none; z-index:4; top:var(--hh, 61px); width:280px; background:var(--side, var(--bg)); transition:none; }
+    html main, html header .row { margin-left:max(280px, calc((100vw - 1200px) / 2)); margin-right:auto; max-width:min(1200px, calc(100vw - 280px)); }
+    #fdim { display:none; }
+    #tabFilter { display:none; }
+  }
   #fline { display:flex; align-items:center; gap:8px; padding:4px 16px; font-size:14px; color:var(--fg2); border-bottom:.5px solid var(--line); }
   #fline b { font-weight:500; color:var(--fg); }
   #fline button { min-height:var(--bs); font-size:14px; margin-left:auto; }
+  #fline button + button { margin-left:0; }
   #sbar { display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px; padding:4px 16px 8px; border-bottom:.5px solid var(--line); }
   #sbar .qwrap { flex:1 1 200px; display:flex; align-items:center; position:relative; min-width:0; }
   #sbar #searchQ { flex:1; padding-right:28px; }
@@ -92,7 +145,6 @@
   .pastbtns button { min-height:var(--bs); padding:0 10px; font-size:14px; }
   section[data-g="past"] .item .text { color:var(--fg2); }
   section[data-g="past"] .item.overdue .when { color:var(--fg2); } /* calmer than an overdue task */
-  #viewFilter { padding:4px 16px 40px; }
   #viewSettings { padding:4px 16px 40px; }
   #viewSettings h3 { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); font-weight:500; margin:22px 0 4px; }
   #viewSettings hr { border:0; border-top:.5px solid var(--line); margin:24px 0 0; }
@@ -108,10 +160,6 @@
   #viewSettings #logCount { margin:0 0 0 4px; }
   #btnSettings { border-radius:0; border-bottom:2px solid transparent !important; }
   #btnSettings[aria-pressed="true"] { border-bottom-color:var(--fg) !important; }
-  #viewFilter .top { display:flex; justify-content:space-between; align-items:center; min-height:52px; font-size:14px; color:var(--muted); }
-  #viewFilter h3 { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); font-weight:500; margin:18px 0 2px; }
-  #viewFilter .vals { display:flex; flex-wrap:wrap; gap:0 20px; }
-  #viewFilter .vals button { font-size:15px; }
   #tabFilter { padding:0 10px; }
   /* Views (List, Text) and the icons; on wide screens one row, the views set off from the icons. */
   header .vtabs, header .hbtns { display:flex; align-items:center; flex:none; }
@@ -295,7 +343,7 @@
   #agenda section.calday .hint { margin:0; padding:4px 16px 16px 10px; border-left:6px solid var(--mist); }
   #agenda section.calday h2 { text-transform:none; letter-spacing:0; font-size:15px; color:var(--fg); font-weight:500; }
   #notices { padding:0 16px; }
-  #toast { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(16px + env(safe-area-inset-bottom)); z-index:12; display:flex; align-items:center; gap:12px; max-width:min(560px, 92vw); padding:4px 4px 4px 16px; background:var(--bg); border:.5px solid var(--line); border-radius:6px; box-shadow:0 6px 20px rgba(0,0,0,.12); font-size:14px; color:var(--fg2); }
+  #toast { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(16px + env(safe-area-inset-bottom)); z-index:25; display:flex; align-items:center; gap:12px; max-width:min(560px, 92vw); padding:4px 4px 4px 16px; background:var(--bg); border:.5px solid var(--line); border-radius:6px; box-shadow:0 6px 20px rgba(0,0,0,.12); font-size:14px; color:var(--fg2); }
   #toast span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   #toast button { flex:none; font-weight:500; color:var(--fg); }
   .notice { border-left:3px solid var(--amber); padding:8px 12px; margin:12px 0 0; font-size:15px; }
@@ -346,7 +394,7 @@
   #facetSheet .facets button.tag { color:var(--fg); }
   #dlgRename .vals small, .valbtns small, #facetSheet .facets small { color:var(--muted); font-size:12px; font-weight:400; }
   .ln { display:inline-block; flex:none; width:22px; height:3px; border-radius:1px; background:var(--line); }
-  #dlgRename .vals button:focus-visible, .valbtns button:focus-visible, #facetSheet .facets button.tag:focus-visible, .tog button:focus-visible, #fbar button:focus-visible { outline:0; text-decoration:underline; text-underline-offset:4px; }
+  #dlgRename .vals button:focus-visible, .valbtns button:focus-visible, #facetSheet .facets button.tag:focus-visible, .tog button:focus-visible { outline:0; text-decoration:underline; text-underline-offset:4px; }
   #dlgRename .row { display:flex; }
   .jchoice { padding:8px 16px 12px; grid-column:1 / -1; }
   #facetSheet .jchoice { padding:4px 0 0; }
@@ -478,13 +526,11 @@
   html.compact #status { font-size:12px; }
   @media (max-width: 600px) { html.compact header .vtabs { align-self:center; padding-bottom:6px; } html.compact #status { padding-bottom:6px; } }
   /* Function area: add field, facet bar, search and filter lines on a quiet surface */
-  html.compact #add, html.compact #fbar, html.compact #sbar, html.compact #sline, html.compact #fline { background:var(--panel); }
+  html.compact #add, html.compact #sbar, html.compact #sline, html.compact #fline { background:var(--panel); }
   html.compact #add { padding:8px 16px; border-bottom:0; gap:4px; }
   html.compact #add input, html.compact #searchQ { min-height:36px; font-size:16px; }
   html.compact #add > button:last-child { min-height:36px; }
   html.compact #btnMic { min-height:36px; }
-  html.compact #fbar { padding:0 16px 4px; gap:0 14px; }
-  html.compact #fbar button { min-height:32px; font-size:13px; letter-spacing:.02em; }
   /* Groups and entries */
   html.compact section h2 { padding:14px 16px 4px; font-size:13px; font-weight:500; letter-spacing:0; text-transform:none; color:var(--fg2); }
   html.compact #agenda section h2, html.compact #agenda .more, html.compact #agenda > .hint { border-left-width:3px; padding-left:13px; }
@@ -552,7 +598,8 @@
 <body>
 <header>
   <div class="row">
-    <h1><a href="./" id="homeLink" title="Back to the list">οὐθείς Agenda</a></h1>
+    <h1><button type="button" id="homeLink" aria-haspopup="menu" aria-expanded="false" title="Views"><span class="vwrap"><span class="brand">οὐθείς Agenda</span><span id="viewName"></span></span><svg class="caret" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg></button></h1>
+    <div id="viewMenu" class="hidden" role="menu"></div>
     <div id="status"></div>
     <span class="vtabs"><button class="tab" id="tabAgenda" aria-pressed="true">List</button><button class="tab" id="tabMonth" aria-pressed="false">Month</button><button class="tab" id="tabText" aria-pressed="false">Text</button></span>
     <span class="hbtns">
@@ -579,13 +626,11 @@
       <span class="qwrap"><input id="searchQ" type="text" inputmode="search" placeholder="Search text, notes, #tags" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="search"><button type="button" id="searchClear" class="qclear hidden" aria-label="Clear the search"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round"/></svg></button></span>
       <div class="tog" id="searchDone"><button type="button" data-v="done" class="off" aria-pressed="false"><span class="ck" aria-hidden="true">✓</span>include done</button></div>
     </div>
-    <div id="fbar"></div>
     <div id="fline" class="hidden"></div>
     <div id="sline" class="hidden"></div>
     <div id="agenda"></div>
   </div>
 
-  <div id="viewFilter" class="hidden"></div>
   <div id="viewSettings" class="hidden">
     <div id="setMode" class="hint"></div>
     <div id="exRow" class="exrow hidden"><span>Example tags and entries</span><span class="btns"><button type="button" class="warn" id="exDelete">Delete</button><button type="button" class="ghost" id="exKeep">Keep</button></span></div>
@@ -663,10 +708,6 @@
       <label class="check"><input type="checkbox" id="cfgMinimal"><span>Minimal colours: colour only where it points to something (facets, overdue, now, danger); a white header and grey buttons. This device only.</span></label>
     </section>
     <section data-st="system">
-      <h3>Experimental</h3>
-      <label class="check"><input type="checkbox" id="cfgFu"><span>Order the facet bar by how you use the facets: given to entries, set as filter, seen in <i>Today</i> and <i>Tomorrow</i>. Recent use counts more; the order changes at most once a day. The state is kept in one line of your journal and applies on all your devices. Switching it on also switches on the log below, where its decisions are written so that it can be checked.</span></label>
-    </section>
-    <section data-st="system">
       <h3 id="logLabel">Log</h3>
       <label class="check"><input type="checkbox" id="cfgLog"><span>Write a log in this browser to trace faults. It records syncs, errors and changes to the journal list, never entries or phrases.</span></label>
       <div class="hint hidden" id="logMsg" style="color:var(--scarlet)"></div>
@@ -698,11 +739,14 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.8.4</span>
+    <span class="ver">v0.9.0</span>
     <a href="#" id="aboutLink">About</a>
     <a href="https://outheis-labs.github.io/outheis-agenda/" target="_blank" rel="noopener">Documentation <svg width="7" height="7" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
   </footer>
 </main>
+<div id="fdim" class="hidden"></div>
+<aside id="fpanel" aria-label="Views and facets"></aside>
+
 
 <dialog id="dlgPin">
   <form method="dialog">
@@ -750,7 +794,7 @@
     <strong>οὐθείς Agenda</strong>
     <p>οὐθείς Agenda is an <b>ergonoi</b> project:</p>
     <p style="margin-top:14px">Technology is potential. Accessibility makes it matter.</p>
-    <p class="hint">Version 0.8.4 · outheis-labs</p>
+    <p class="hint">Version 0.9.0 · outheis-labs</p>
     <div class="btnrow" style="justify-content:flex-end"><button class="primary">Close</button></div>
   </form>
 </dialog>
@@ -3372,75 +3416,8 @@ function countBy(items, dim) {
 // are switched off always stay visible, so that nothing is hidden unseen.
 // ---------------------------------------------------------------------------
 
-function facetAssignCounts() {
-  const c = new Map();
-  for (const j of journals()) withJ(j, () => {
-    const cur = [...currentOf(parseLines(S.snap)).values()];
-    const ids = new Set(cur.map(e => e.id));
-    for (const e of cur.concat(parseLines(S.wc).filter(e => !e.id || !ids.has(e.id)))) {
-      if (DEF_RE.test(e.text)) continue;
-      for (const fv of facetsOf(e)) { const k = facetKey(fv, j); c.set(k, (c.get(k) || 0) + 1); }
-    }
-  });
-  return c;
-}
 // The journal of a facet key of the bar (name, or name@journal).
 function keyJ(k) { const kj = keyJournal(k); return kj !== null ? kj : ([...(facetJournals().get(keyName(k)) || [])][0] || ""); }
-function fbarOrder(vals) {
-  const mode = fuOn() ? "use" : "count", t0 = today();
-  let st = null; try { st = JSON.parse(LS.getItem("agenda.fbar.order") || "null"); } catch {}
-  const counts = facetAssignCounts();
-  const score = fuOn() ? fuLine().scores : new Map();
-  const rank = (a, b) => (a === "") - (b === "") || (score.get(fuKey(keyName(b), keyJ(b))) || 0) - (score.get(fuKey(keyName(a), keyJ(a))) || 0) || (counts.get(b) || 0) - (counts.get(a) || 0);
-  if (!st || st.date !== t0 || st.mode !== mode) {
-    const keys = vals.slice().sort(rank);
-    st = { date: t0, mode, keys };
-    LS.setItem("agenda.fbar.order", JSON.stringify(st));
-    if (mode === "use") logExp("fu order " + keys.slice(0, 12).map(k => k + "=" + (score.get(fuKey(keyName(k), keyJ(k))) || 0).toFixed(1) + "/" + (counts.get(k) || 0)).join(" "));
-  }
-  const pos = new Map(st.keys.map((k, i) => [k, i]));
-  // Facets new today go after the known ones, in the same order.
-  return vals.slice().sort((a, b) => (pos.has(a) ? pos.get(a) : 1e6) - (pos.has(b) ? pos.get(b) : 1e6) || rank(a, b));
-}
-let FBAR_SHOWN = new Set();
-function fbarFold(open, f, selecting) {
-  const bar = $("fbar"), more = bar.querySelector(".fmore");
-  const btns = [...bar.querySelectorAll("[data-fname]")];
-  btns.forEach(b => { b.style.display = ""; });
-  more.style.display = "";
-  if (open) {
-    more.textContent = "Fewer";
-    FBAR_SHOWN = new Set(btns.map(b => b.dataset.fname));
-    if (bar.offsetHeight && btns.length && btns[btns.length - 1].offsetTop - bar.firstChild.offsetTop < 2) more.style.display = "none";
-    return;
-  }
-  const top0 = bar.firstChild.offsetTop;
-  const rowsUsed = () => new Set([...bar.children].filter(x => x.style.display !== "none").map(x => x.offsetTop)).size;
-  // Hide from the end until two rows remain, keeping the facets whose state is the
-  // exception: those switched off, or in selection mode those switched on.
-  const keep = b => selecting ? !b.classList.contains("off") : b.classList.contains("off") || b.classList.contains("part");
-  let hidden = 0;
-  let hiddenOff = 0;
-  const setMore = () => { more.textContent = "+" + hidden + (hiddenOff ? (hiddenOff === hidden ? " off" : " · " + hiddenOff + " off") : ""); more.style.display = hidden ? "" : "none"; };
-  more.style.display = "none";
-  if (rowsUsed() > 2 || !bar.offsetHeight) {
-    more.style.display = "";
-    // Never more than two rows: the others first, then, if still too many, also the kept
-    // ones from the end; the button says how many of the folded facets are off.
-    for (const pass of [false, true]) for (let i = btns.length - 1; i >= 0 && rowsUsed() > 2; i--) {
-      if (btns[i].style.display === "none" || (!pass && keep(btns[i]))) continue;
-      btns[i].style.display = "none"; hidden++;
-      if (btns[i].classList.contains("off")) hiddenOff++;
-      setMore();
-    }
-  }
-  setMore();
-  FBAR_SHOWN = new Set(btns.filter(b => b.style.display !== "none").map(b => b.dataset.fname));
-  void top0;
-}
-let fbarResize = null;
-window.addEventListener("resize", () => { clearTimeout(fbarResize); fbarResize = setTimeout(() => { if (view === "agenda" && !uiBusy) renderFbar(); }, 200); });
-
 // ---------------------------------------------------------------------------
 // Experiment: facet bar ordered by use (ui.md 4.14b). One line in the default journal
 // holds the state and the scores of all facets, rewritten at most once a day:
@@ -3467,7 +3444,8 @@ function fuLine() {
     return null;
   });
 }
-function fuOn() { const L = fuLine(); return !!(L && L.on); }
+// Retired in 0.9.0 with the facet bar; the line in a journal is left alone.
+function fuOn() { return false; }
 function fuWrite(on, date, scores) {
   const body = [...scores.entries()].filter(([, v]) => v >= 0.05).sort((a, b) => b[1] - a[1]).map(([k, v]) => " " + k + ":" + v.toFixed(2)).join("");
   const text = "Addon function: statistical facet order " + (on ? "on" : "off") + (date ? " " + date : "") + body;
@@ -3497,7 +3475,7 @@ function fuSignal(kind, f, j) {
   P.delta[k] = (P.delta[k] || 0) + FU_W[kind];
   if (kind !== "seen") {
     // Whether the facet was in the folded bar: the measure of whether the order helps.
-    const shown = FBAR_SHOWN.has(facetKey(f, j)) || FBAR_SHOWN.has(f);
+    const shown = false;
     P.stats.uses++; if (shown) P.stats.shown++;
     logExp("fu " + kind + " " + k + (shown ? " shown" : " folded"));
   }
@@ -3528,130 +3506,286 @@ function fuSetOn(on) {
   sync();
 }
 
-function renderFbar() {
-  // Only facets with open entries are shown; the count follows the filter tab.
+// ---------------------------------------------------------------------------
+// Views and the facet panel (ui.md 4.14). A view is a named filter: the facets switched on
+// and the other tags hidden. Views are lines of the default journal, so that they apply on
+// all devices of the account:
+//   View: Workshop | on workshop@ admin@ | hide rank:low #type-meta
+// A facet is written as name@journal id ("" for the default journal), "-" stands for
+// "without facet", "*" for all facets. Facets that appear later are off in a view with a
+// list. Which view is active is kept per device.
+// ---------------------------------------------------------------------------
+
+const VIEW_RE = /^View: ([^|]+?) \| on ([^|]*?)(?: \| hide ([^|]*))?\s*$/;
+function viewLines() {
+  return withJ("", () => {
+    const out = [], ls = S.wc.split("\n");
+    ls.forEach((l, idx) => {
+      const e = parse(l); if (!e || has(e, "done")) return;
+      const m = VIEW_RE.exec(e.text); if (!m) return;
+      const on = m[2].trim().split(/\s+/).filter(Boolean), hide = (m[3] || "").trim().split(/\s+/).filter(Boolean);
+      out.push({ idx, name: m[1].trim(), on, hide });
+    });
+    return out;
+  });
+}
+const viewByName = n => viewLines().find(v => v.name === n) || null;
+function activeView() { const n = LS.getItem("agenda.view"); return n ? viewByName(n) : null; }
+// The filter a view stands for, in the keys of the current state.
+function filterOfView(v) {
+  const keys = valuesOf("facet"), all = v.on.includes("*");
+  const on = new Set(v.on);
+  const f = { facet: all ? [] : keys.filter(k => !on.has(k === "" ? "-" : facetName(k) + "@" + keyJ(k))), off: {}, select: false, sel: [] };
+  for (const d of FILTER_DIMS) f.off[d] = [];
+  for (const h of v.hide) { const i = h.indexOf(":"), d = h.slice(0, i), val = h.slice(i + 1); if (f.off[d]) f.off[d].push(val === "-" ? "" : val); }
+  return f;
+}
+// The line of the current filter.
+function viewSpec(f) {
+  const keys = valuesOf("facet");
+  const on = !f.facet.length ? ["*"] : keys.filter(k => !f.facet.includes(k)).map(k => k === "" ? "-" : facetName(k) + "@" + keyJ(k));
+  const hide = [];
+  for (const d of FILTER_DIMS) for (const v of f.off[d]) hide.push(d + ":" + (v === "" ? "-" : v));
+  return { on, hide };
+}
+const viewText = (name, sp) => "View: " + name + " | on " + sp.on.join(" ") + (sp.hide.length ? " | hide " + sp.hide.join(" ") : "");
+const sameSet = (a, b) => a.length === b.length && a.every(x => b.includes(x));
+// What differs between the current filter and the active view: facets now on (+) or off (−),
+// and whether the other filters differ.
+function viewDiff(v, f) {
+  const vf = filterOfView(v), plus = [], minus = [];
+  for (const k of valuesOf("facet")) {
+    const nowOn = !f.facet.includes(k), viewOn = !vf.facet.includes(k);
+    if (nowOn && !viewOn) plus.push(k); else if (!nowOn && viewOn) minus.push(k);
+  }
+  const other = FILTER_DIMS.some(d => !sameSet(f.off[d], vf.off[d]));
+  return plus.length || minus.length || other ? { plus, minus, other } : null;
+}
+function applyView(name) {
+  const v = viewByName(name); if (!v) return;
+  saveFilter(filterOfView(v));
+  LS.setItem("agenda.view", name);
+  closeViewMenu();
+  if (view !== "agenda") setView(monthMode ? "month" : "agenda"); else render();
+}
+function writeView(name, oldName) {
+  const sp = viewSpec(filterState());
+  name = name.replace(/\|/g, "/").trim(); if (!name) return;
+  checkpoint((oldName ? "View saved: " : "View added: ") + name);
+  withJ("", () => {
+    const ls = S.wc.split("\n");
+    const at = viewLines().find(v => v.name === (oldName || name));
+    if (at) { const e = parse(ls[at.idx]); e.text = viewText(name, sp); ls[at.idx] = toLine(e); S.wc = ls.join("\n"); }
+    else S.wc = (S.wc.trim() ? S.wc + "\n" : "") + viewText(name, sp) + " #type-meta";
+  });
+  LS.setItem("agenda.view", name);
+  render(); scheduleSync();
+}
+function renameView(oldName, name) {
+  name = name.replace(/\|/g, "/").trim();
+  const v = viewByName(oldName); if (!v || !name || name === oldName || viewByName(name)) return;
+  checkpoint("View renamed: " + name);
+  withJ("", () => { const ls = S.wc.split("\n"), e = parse(ls[v.idx]); e.text = viewText(name, { on: v.on, hide: v.hide }); ls[v.idx] = toLine(e); S.wc = ls.join("\n"); });
+  if (LS.getItem("agenda.view") === oldName) LS.setItem("agenda.view", name);
+  render(); scheduleSync();
+}
+function deleteView(name) {
+  const v = viewByName(name); if (!v) return;
+  checkpoint("View deleted: " + name);
+  withJ("", () => { const ls = S.wc.split("\n"); ls.splice(v.idx, 1); S.wc = ls.join("\n"); });
+  if (LS.getItem("agenda.view") === name) LS.removeItem("agenda.view");
+  showToast("View deleted: " + name);
+  render(); scheduleSync();
+}
+const viewSw = v => {
+  const keys = v.on.includes("*") ? valuesOf("facet").filter(Boolean) : valuesOf("facet").filter(k => k && v.on.includes(facetName(k) + "@" + keyJ(k)));
+  return `<span class="vsw">${keys.slice(0, 10).map(k => `<i style="background:${facetColor(k) || "var(--line)"}"></i>`).join("")}</span>`;
+};
+
+// The title shows the active view; a dot when the filter differs from it.
+function renderViewTitle() {
+  const v = activeView(), d = v ? viewDiff(v, filterState()) : null;
+  document.querySelector("header h1").classList.toggle("hasview", !!v);
+  $("viewName").textContent = v ? v.name : "";
+  $("viewName").classList.toggle("changed", !!d);
+  $("homeLink").title = v ? "View: " + v.name + (d ? " (changed)" : "") : "Views";
+}
+let viewNaming = false;
+function renderViewMenu() {
+  const vs = viewLines(), cur = LS.getItem("agenda.view");
+  let h = vs.map(v => `<button type="button" role="menuitem" class="vrow${v.name === cur ? " on" : ""}" data-view="${esc(v.name)}">${viewSw(v)}${esc(v.name)}${v.name === cur ? '<span class="ck" aria-hidden="true">✓</span>' : ""}</button>`).join("");
+  if (vs.length) h += `<div class="vsep"></div>`;
+  h += viewNaming
+    ? `<form class="vname" data-vnew="1"><input id="viewNewName" placeholder="Name of the view" autocomplete="off" maxlength="40"><button type="submit">Save</button></form>`
+    : `<button type="button" class="vact" data-vsave="1">+ Save current as view …</button>`;
+  if (vs.length) h += `<button type="button" class="vact plain" data-vedit="1">Edit views …</button>`;
+  $("viewMenu").innerHTML = h;
+  if (viewNaming) $("viewNewName").focus();
+}
+function openViewMenu() { viewNaming = false; renderViewMenu(); $("viewMenu").classList.remove("hidden"); $("homeLink").setAttribute("aria-expanded", "true"); }
+function closeViewMenu() { $("viewMenu").classList.add("hidden"); $("homeLink").setAttribute("aria-expanded", "false"); viewNaming = false; }
+$("homeLink").onclick = ev => {
+  ev.preventDefault();
+  if ($("viewMenu").classList.contains("hidden")) openViewMenu(); else closeViewMenu();
+};
+$("viewMenu").addEventListener("click", ev => {
+  const b = ev.target.closest("button"); if (!b) return;
+  if (b.dataset.view !== undefined) { applyView(b.dataset.view); return; }
+  if (b.dataset.vsave) { viewNaming = true; renderViewMenu(); return; }
+  if (b.dataset.vedit) { closeViewMenu(); panelEdit = true; openPanel(true); }
+});
+$("viewMenu").addEventListener("submit", ev => {
+  ev.preventDefault();
+  const n = $("viewNewName").value.trim(); if (!n) return;
+  writeView(n); closeViewMenu();
+});
+document.addEventListener("pointerdown", ev => {
+  if (!$("viewMenu").classList.contains("hidden") && !ev.target.closest("#viewMenu, #homeLink")) closeViewMenu();
+});
+
+// The panel: a drawer on narrow screens, a column on wide ones (CSS decides).
+let panelEdit = false, panelNaming = false;
+const panelDocked = () => window.matchMedia("(min-width: 1240px)").matches;
+function openPanel(on) {
+  $("fpanel").classList.toggle("open", on);
+  $("fdim").classList.toggle("hidden", !on || panelDocked());
+  $("tabFilter").setAttribute("aria-pressed", String(on));
+  if (on) renderPanel();
+  else { panelEdit = false; panelNaming = false; }
+}
+$("tabFilter").onclick = () => openPanel(!$("fpanel").classList.contains("open"));
+$("fdim").onclick = () => openPanel(false);
+document.addEventListener("keydown", ev => {
+  if (ev.key !== "Escape") return;
+  if (!$("viewMenu").classList.contains("hidden")) closeViewMenu();
+  else if ($("fpanel").classList.contains("open") && !panelDocked()) openPanel(false);
+});
+// The docked panel starts below the header, wherever the header is (it is sticky).
+function setHeaderHeight() { document.documentElement.style.setProperty("--hh", Math.max(0, document.querySelector("header").getBoundingClientRect().bottom) + "px"); }
+window.addEventListener("resize", () => { setHeaderHeight(); if (panelDocked()) $("fdim").classList.add("hidden"); });
+window.addEventListener("scroll", setHeaderHeight, { passive: true });
+
+function renderPanel() {
+  setHeaderHeight();
+  if (!panelDocked() && !$("fpanel").classList.contains("open")) return;
   const f = filterState(), all = viewItems(), items = all.filter(e => passesOther(e, f));
   const total = countBy(all, "facet"), c = countBy(items, "facet");
-  if (fuOn()) fuFold();
-  // One button per facet name, across journals (ui.md 4.14); the facets of single journals
-  // are chosen in the filter tab. The names follow the order of their best-placed facet.
-  const keys = fbarOrder(valuesOf("facet").filter(v => total.get(v)));
-  const groups = new Map();
-  for (const k of keys) { const n = facetName(k); if (!groups.has(n)) groups.set(n, []); groups.get(n).push(k); }
-  let names = [...groups.keys()];
-  const stateOf = n => { const ks = groups.get(n), off = ks.filter(k => f.facet.includes(k)).length; return !off ? "on" : off === ks.length ? "off" : "part"; };
-  // Selection mode (from None until All, or until no facet is off): the names switched on
-  // come first, in the order they were chosen. It does not depend on how many are on, so
-  // that choosing one more never turns the bar over.
-  const selecting = !!f.select && f.facet.length > 0;
-  if (selecting) {
-    const on = names.filter(n => stateOf(n) !== "off"), sel = f.sel || [];
-    on.sort((a, b) => (sel.includes(a) ? sel.indexOf(a) : 1e6) - (sel.includes(b) ? sel.indexOf(b) : 1e6));
-    names = on.concat(names.filter(n => stateOf(n) === "off"));
+  const vs = viewLines(), cur = LS.getItem("agenda.view");
+  let h = `<h3>Views${vs.length ? `<button type="button" class="ghost" data-vedit="1">${panelEdit ? "Done" : "Edit"}</button>` : ""}</h3>`;
+  if (panelEdit) h += vs.map(v => `<div class="vedit">${viewSw(v)}<input data-vren="${esc(v.name)}" value="${esc(v.name)}" maxlength="40" aria-label="Name of the view"><button type="button" class="warn" data-vdel="${esc(v.name)}">Delete</button></div>`).join("");
+  else h += vs.map(v => `<button type="button" class="vrow${v.name === cur ? " on" : ""}" data-view="${esc(v.name)}">${viewSw(v)}${esc(v.name)}</button>`).join("");
+  h += panelNaming
+    ? `<form class="vname" data-vnew="1"><input id="panelNewName" placeholder="Name of the view" autocomplete="off" maxlength="40"><button type="submit">Save</button></form>`
+    : `<button type="button" class="vact" data-vsave="1">+ Save current as view …</button>`;
+  h += `<h3>Facets</h3><div class="fall"><button type="button" data-fall="1">All</button><button type="button" data-fnone="1">None</button></div>`;
+  // Facets grouped by the journal they belong to, in the order of the journals; within a
+  // journal by name, so that each keeps its place.
+  const keys = valuesOf("facet").filter(k => k && (total.get(k) || f.facet.includes(k)));
+  for (const j of journals()) {
+    const ks = keys.filter(k => keyJ(k) === j).sort((a, b) => facetName(a).localeCompare(facetName(b)));
+    if (!ks.length) continue;
+    const allOff = ks.every(k => f.facet.includes(k));
+    h += `<button type="button" class="jh${allOff ? " off" : ""}" data-fj="${esc(j)}" title="Tap: all facets of this journal on or off. Long press: only this journal.">${esc(journalName(j))}${readOnly(j) ? LOCK_SVG : ""}</button>`;
+    h += ks.map(k => `<button type="button" class="fac${f.facet.includes(k) ? " off" : ""}" data-facetf="${esc(k)}"><span class="sw" style="background:${facetColor(k) || "var(--line)"}"></span>${esc(facetName(k))}<span class="n">${c.get(k) || 0}</span></button>`).join("");
   }
-  const open = LS.getItem("agenda.fbar.open") === "1";
-  const sw = ks => `<span class="sw">${ks.map(k => `<i style="background:${facetColor(k) || "var(--line)"}"></i>`).join("")}</span>`;
-  $("fbar").innerHTML = `<button data-fall="1">All</button><button data-fnone="1">None</button>` + names.map(n => {
-    const ks = groups.get(n), st = stateOf(n);
-    return `<button data-fname="${esc(n)}" class="${st === "on" ? "" : st}"${ks.length > 1 ? ` title="${esc(ks.map(k => journalName(keyJ(k))).join(", "))}"` : ""}>${sw(ks)}${esc(n || "without facet")}<span class="n">${ks.reduce((a, k) => a + (c.get(k) || 0), 0)}</span></button>`;
-  }).join("") + `<button class="fmore" data-fmore="1"></button>`;
-  fbarFold(open, f, selecting);
-  const parts = [];
-  // A name switched on in some journals only (set in the filter tab).
-  for (const n of names) if (stateOf(n) === "part") parts.push(n + ": only " + groups.get(n).filter(k => !f.facet.includes(k)).map(k => journalName(keyJ(k))).join(", "));
+  if (total.get("") || f.facet.includes("")) h += `<button type="button" class="fac${f.facet.includes("") ? " off" : ""}" data-facetf="" style="margin-top:8px"><span class="sw" style="background:var(--line)"></span>without facet<span class="n">${c.get("") || 0}</span></button>`;
+  // The other tags, folded.
+  const base = all.filter(e => passesFacet(e, f));
+  let more = "";
   for (const d of FILTER_DIMS) {
-    if (!f.off[d].length) continue;
-    const all = valuesOf(d), shown = all.filter(v => !f.off[d].includes(v));
-    parts.push(shown.length <= f.off[d].length
-      ? shown.map(v => filterLabel(d, v)).join(", ") || "nothing in " + d
-      : "not " + f.off[d].map(v => filterLabel(d, v)).join(", "));
+    const cd = countBy(base, d);
+    const vals = valuesOf(d).filter(v => cd.get(v) || f.off[d].includes(v));
+    if (!vals.length) continue;
+    more += `<h4>${d}</h4><div class="vals">` + vals.map(v =>
+      `<button type="button" data-fdim="${d}" data-fval="${esc(v)}" class="${f.off[d].includes(v) ? "off" : ""}">${esc(filterLabel(d, v))}<span class="n">${cd.get(v) || 0}</span></button>`).join("") + `</div>`;
   }
-  $("fline").classList.toggle("hidden", !parts.length);
-  $("fline").innerHTML = parts.length ? `<span>Filter: ${parts.map(p => "<b>" + esc(p) + "</b>").join(" · ")}</span><button class="ghost" data-freset="1">Reset</button>` : "";
+  const moreOpen = LS.getItem("agenda.fmore") === "1" || otherActive(f);
+  if (more) h += `<details id="fpMore"${moreOpen ? " open" : ""}><summary>More: topic, action, rank, size, time, repeats</summary><div class="more">${more}<p class="hint" style="padding:0;margin-top:14px">Tap a value to hide or show it, long press for only this value. Within one kind any shown value matches; across kinds all must match.</p></div></details>`;
+  h += `<p class="hint" style="margin-top:18px">Tap a facet to switch it on or off; long press shows only this facet. Tap a journal to switch all its facets.</p>`;
+  $("fpanel").innerHTML = h;
+  if (panelNaming) $("panelNewName").focus();
+  const det = $("fpMore"); if (det) det.ontoggle = () => LS.setItem("agenda.fmore", det.open ? "1" : "0");
 }
+const LOCK_SVG = '<svg class="lock" width="13" height="13" viewBox="0 0 16 16" role="img" aria-label="read only"><title>read only</title><rect x="3.5" y="7" width="9" height="6.5" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>';
+
+// The line under the add field: how the filter differs from the active view, or, without
+// a view, that facets or other tags are hidden.
+function renderFline() {
+  const f = filterState(), v = activeView(), d = v ? viewDiff(v, f) : null;
+  let html = "";
+  if (d) {
+    const names = ks => ks.map(k => k ? facetName(k) + (facetAmbiguous(facetName(k)) ? " · " + journalName(keyJ(k)) : "") : "without facet");
+    const parts = [...names(d.plus).map(n => "+ " + n), ...names(d.minus).map(n => "− " + n)];
+    if (d.other) parts.push("other filters");
+    html = `<span><b>${esc(v.name)}</b> changed: ${esc(parts.join(", "))}</span><button type="button" class="ghost" data-vupd="1">Save</button><button type="button" class="ghost" data-vrev="1">Revert</button>`;
+  } else if (!v) {
+    const parts = [], keys = valuesOf("facet");
+    const offN = f.facet.filter(k => keys.includes(k)).length;
+    if (offN) parts.push((keys.length - offN) + " of " + keys.length + " facets");
+    for (const dd of FILTER_DIMS) {
+      if (!f.off[dd].length) continue;
+      const allv = valuesOf(dd), shown = allv.filter(x => !f.off[dd].includes(x));
+      parts.push(shown.length <= f.off[dd].length ? shown.map(x => filterLabel(dd, x)).join(", ") || "nothing in " + dd : "not " + f.off[dd].map(x => filterLabel(dd, x)).join(", "));
+    }
+    if (parts.length) html = `<span>Filter: ${parts.map(p => "<b>" + esc(p) + "</b>").join(" · ")}</span><button type="button" class="ghost" data-freset="1">Show all</button>`;
+  }
+  $("fline").classList.toggle("hidden", !html);
+  $("fline").innerHTML = html;
+}
+function renderFilters() { renderViewTitle(); renderFline(); renderPanel(); }
+
 const facetName = k => k ? keyName(k) : "";
-// Facet selection by name, across journals: tap switches all facets of the name on (from
-// off or partly on) or off; long press shows only this name.
-function toggleFacetName(n, only) {
-  const f = filterState(), all = valuesOf("facet"), ks = all.filter(k => facetName(k) === n);
-  if (only && f.select) only = false;
-  if (only) { f.facet = all.filter(k => !ks.includes(k)); f.select = true; f.sel = []; }
-  else if (ks.every(k => !f.facet.includes(k))) f.facet = f.facet.concat(ks);
-  else f.facet = f.facet.filter(k => !ks.includes(k));
-  const on = ks.some(k => !f.facet.includes(k));
-  if (on && n) fuSignal("filter", n, keyJ(ks[0]));
-  syncSel(f, on ? n : null);
-  saveFilter(f);
-  render();
-}
-// The order in which names were switched on, for the selection mode.
-function syncSel(f, added) {
-  const onNames = new Set(valuesOf("facet").filter(k => !f.facet.includes(k)).map(facetName));
-  f.sel = (f.sel || []).filter(n => onNames.has(n));
-  if (added !== null && added !== undefined && onNames.has(added) && !f.sel.includes(added)) f.sel.push(added);
-  if (!f.facet.length) { f.select = false; f.sel = []; }
-}
+// The order in which facets were switched on, kept for older states.
+function syncSel(f) { if (!f.facet.length) { f.select = false; f.sel = []; } }
 
-function renderFilterView() {
-  const f = filterState(), base = viewItems().filter(e => passesFacet(e, f));
-  const shown = base.filter(e => passesOther(e, f)).length;
-  let html = `<div class="top"><span>${shown} of ${base.length} items match</span><button class="ghost" data-freset="1">Reset</button></div>`;
-  // Facets of single journals (the list sets them by name across journals).
-  if (journals().length > 1) {
-    const fa = viewItems().filter(e => passesOther(e, f)), cf = countBy(fa, "facet");
-    const ks = valuesOf("facet").filter(k => k && (cf.get(k) || f.facet.includes(k)));
-    ks.sort((a, b) => facetName(a).localeCompare(facetName(b)) || journalName(keyJ(a)).localeCompare(journalName(keyJ(b))));
-    if (ks.length) html += `<h3>Facets by journal</h3><div class="vals"><button data-fall="1">All</button><button data-fnone="1">None</button>` + ks.map(k =>
-      `<button data-facetf="${esc(k)}" class="${f.facet.includes(k) ? "off" : ""}"><span class="sw" style="background:${facetColor(k) || "var(--line)"}"></span>${esc(facetName(k))} · ${esc(journalName(keyJ(k)))}<span class="n">${cf.get(k) || 0}</span></button>`).join("") + `</div>`;
-  }
-  for (const d of FILTER_DIMS) {
-    const c = countBy(base, d);
-    const vs = valuesOf(d).filter(v => c.get(v) || f.off[d].includes(v)); // values without entries are not shown
-    if (!vs.length) continue;
-    html += `<h3>${d}</h3><div class="vals"><button data-dall="${d}">All</button><button data-dnone="${d}">None</button>` + vs.map(v =>
-      `<button data-fdim="${d}" data-fval="${esc(v)}" class="${f.off[d].includes(v) ? "off" : ""}">${esc(filterLabel(d, v))}<span class="n">${c.get(v) || 0}</span></button>`).join("") + `</div>`;
-  }
-  html += `<p class="hint" style="margin-top:22px">Tap a value to hide or show it. Long press: only this value. <i>All</i> and <i>None</i> show or hide all values of a kind. Within one kind any shown value matches; across kinds all must match. The result is shown in the list. <i>Reset</i> clears these filters; the facet selection stays.</p>`;
-  $("viewFilter").innerHTML = html;
-}
-
-// Tap toggles a value; long press shows only this value of its kind.
+// Tap toggles a value; long press shows only this value of its kind, with Undo.
 function toggleFilter(dim, v, only) {
-  const f = filterState();
-  // While choosing facets one by one, a long press adds like a tap.
-  if (only && dim === "facet" && f.select) only = false;
+  const f = filterState(), before = JSON.stringify(f);
   const list = dim === "facet" ? f.facet : f.off[dim];
-  let next;
-  if (only) { next = valuesOf(dim).filter(x => x !== v); if (dim === "facet") { f.select = true; f.sel = [facetName(v)]; } }
-  else next = list.includes(v) ? list.filter(x => x !== v) : list.concat([v]);
+  const next = only ? valuesOf(dim).filter(x => x !== v) : list.includes(v) ? list.filter(x => x !== v) : list.concat([v]);
   if (dim === "facet") f.facet = next; else f.off[dim] = next;
-  if (dim === "facet" && v && (only || !next.includes(v))) fuSignal("filter", keyName(v), keyJ(v));
-  if (dim === "facet") { f.facet = next; syncSel(f, !next.includes(v) ? facetName(v) : null); }
+  if (dim === "facet") syncSel(f);
   saveFilter(f);
   render();
+  if (only) filterUndo("Only " + (dim === "facet" ? (v ? facetName(v) : "without facet") : filterLabel(dim, v)), before);
+}
+// All facets of a journal on or off; long press: only this journal.
+function toggleJournalFacets(j, only) {
+  const f = filterState(), before = JSON.stringify(f), keys = valuesOf("facet"), ks = keys.filter(k => k && keyJ(k) === j);
+  if (only) f.facet = keys.filter(k => !ks.includes(k));
+  else if (ks.every(k => f.facet.includes(k))) f.facet = f.facet.filter(k => !ks.includes(k));
+  else f.facet = [...new Set(f.facet.concat(ks))];
+  syncSel(f); saveFilter(f); render();
+  if (only) filterUndo("Only " + journalName(j), before);
+}
+// Undo for a filter change, which is not a change of the journal.
+function filterUndo(label, before) {
+  $("toast").innerHTML = `<span>${esc(label)}</span><button type="button" class="ghost" id="toastUndo">Undo</button>`;
+  $("toast").classList.remove("hidden");
+  $("toastUndo").onclick = () => { LS.setItem("agenda.filter", before); hideToast(); render(); };
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(hideToast, 6000);
 }
 function filterTarget(t) {
   const b = t.closest("button");
   if (!b) return null;
   if (b.dataset.fall) return { all: true };
   if (b.dataset.fnone) return { none: true };
-  if (b.dataset.dall) return { dimAll: b.dataset.dall };
-  if (b.dataset.dnone) return { dimNone: b.dataset.dnone };
   if (b.dataset.freset) return { reset: true };
-  if (b.dataset.fname !== undefined) return { fname: b.dataset.fname };
+  if (b.dataset.fj !== undefined) return { fj: b.dataset.fj };
   if (b.dataset.facetf !== undefined) return { dim: "facet", v: b.dataset.facetf };
   if (b.dataset.fdim) return { dim: b.dataset.fdim, v: b.dataset.fval };
   return null;
 }
 let pressTimer = null, pressAt = 0, pressKey = ""; // pressAt: time of the last long press; its click is ignored
-for (const id of ["fbar", "fline", "viewFilter"]) {
+for (const id of ["fpanel", "fline"]) {
   const el = $(id);
   el.addEventListener("pointerdown", ev => {
     const t = filterTarget(ev.target);
-    if (!t || (!t.dim && t.fname === undefined)) return;
+    if (!t || (!t.dim && t.fj === undefined)) return;
     pressTimer = setTimeout(() => {
       pressAt = Date.now();
-      if (t.fname !== undefined) { pressKey = "fname|" + t.fname; toggleFacetName(t.fname, true); }
+      if (t.fj !== undefined) { pressKey = "fj|" + t.fj; toggleJournalFacets(t.fj, true); }
       else { pressKey = t.dim + "|" + t.v; toggleFilter(t.dim, t.v, true); }
     }, 500);
   });
@@ -3659,34 +3793,31 @@ for (const id of ["fbar", "fline", "viewFilter"]) {
   el.addEventListener("pointerup", cancel); el.addEventListener("pointerleave", cancel); el.addEventListener("pointercancel", cancel);
   el.addEventListener("contextmenu", ev => { if (filterTarget(ev.target)) ev.preventDefault(); });
   el.addEventListener("click", ev => {
-    const mb = ev.target.closest("[data-fmore]");
-    if (mb) {
-      const open = LS.getItem("agenda.fbar.open") !== "1";
-      LS.setItem("agenda.fbar.open", open ? "1" : "0");
-      if (open && fuOn()) { const P = fuPending(); P.stats.expands++; fuSave(P); logExp("fu unfold"); }
-      renderFbar(); return;
-    }
+    const b = ev.target.closest("button");
+    if (b && b.dataset.view !== undefined) { applyView(b.dataset.view); if (!panelDocked()) openPanel(false); return; }
+    if (b && b.dataset.vedit) { panelEdit = !panelEdit; renderPanel(); return; }
+    if (b && b.dataset.vsave) { panelNaming = true; renderPanel(); return; }
+    if (b && b.dataset.vdel) { deleteView(b.dataset.vdel); return; }
+    if (b && b.dataset.vupd) { const v = activeView(); if (v) { writeView(v.name, v.name); showInfo("View saved: " + v.name); } return; }
+    if (b && b.dataset.vrev) { const v = activeView(); if (v) applyView(v.name); return; }
     const t = filterTarget(ev.target);
     if (!t) return;
-    if (t.dim && t.dim + "|" + t.v === pressKey && Date.now() - pressAt < 800) return; // the click ending a long press
-    if (t.fname !== undefined) { if ("fname|" + t.fname === pressKey && Date.now() - pressAt < 800) return; toggleFacetName(t.fname, false); return; }
+    const key = t.fj !== undefined ? "fj|" + t.fj : t.dim + "|" + t.v;
+    if ((t.dim || t.fj !== undefined) && key === pressKey && Date.now() - pressAt < 800) return; // the click ending a long press
+    if (t.fj !== undefined) { toggleJournalFacets(t.fj, false); return; }
     const f = filterState();
     if (t.all) { f.facet = []; f.select = false; f.sel = []; saveFilter(f); render(); return; }
-    // None: every facet off, so that single ones can be switched on (selection mode).
-    if (t.none) { f.facet = valuesOf("facet"); f.select = true; f.sel = []; saveFilter(f); render(); return; }
-    // All / None at the start of each kind in the filter tab.
-    if (t.dimAll) { f.off[t.dimAll] = []; saveFilter(f); render(); return; }
-    if (t.dimNone) { f.off[t.dimNone] = valuesOf(t.dimNone); saveFilter(f); render(); return; }
-    if (t.reset) {
-      for (const d of FILTER_DIMS) f.off[d] = [];
-      // Names switched on in some journals only become fully on; names fully off stay off.
-      const all = valuesOf("facet");
-      f.facet = f.facet.filter(k => all.filter(x => facetName(x) === facetName(k)).every(x => f.facet.includes(x)));
-      saveFilter(f); render(); return;
-    }
+    if (t.none) { f.facet = valuesOf("facet"); saveFilter(f); render(); return; }
+    if (t.reset) { saveFilter({ facet: [], off: {} }); render(); return; }
     toggleFilter(t.dim, t.v, false);
   });
 }
+$("fpanel").addEventListener("change", ev => { const i = ev.target.closest("[data-vren]"); if (i) renameView(i.dataset.vren, i.value); });
+$("fpanel").addEventListener("submit", ev => {
+  ev.preventDefault();
+  const n = $("panelNewName").value.trim(); if (!n) return;
+  panelNaming = false; writeView(n);
+});
 
 function setJournalType(j, fixed) {
   checkpoint(fixed ? "Journal of fixed dates" : "Journal of mixed dates");
@@ -3764,7 +3895,7 @@ function renderAgenda() {
   const t0 = today(), t1 = addDays(t0, 1), t7 = addDays(t0, 7), t30 = addDays(t0, 30), t90 = addDays(t0, 90);
   let beyondCount = 0;
   const flt = filterState();
-  renderFbar();
+  renderFilters();
   refIndex = null;
   const ovs = overlayMap();
   const terms = searchTerms(), searching = terms.length > 0;
@@ -3880,7 +4011,7 @@ function renderAgenda() {
 function renderMonth() {
   facetColorCache = null; facetJournalsCache = null;
   const flt = filterState();
-  renderFbar();
+  renderFilters();
   refIndex = null;
   $("sline").classList.add("hidden");
   const ovs = overlayMap(), t0 = today();
@@ -4660,8 +4791,8 @@ function render() {
   facetJournalsCache = null; facetColorCache = null;
   renderStatus();
   renderNotices();
+  renderViewTitle();
   if (view === "agenda") renderAgenda();
-  else if (view === "filter") renderFilterView();
   else if (view === "settings") { if (!$("dlgJournal").open) renderJournalList(); renderExRow(); }
   else if (!manualActive()) { renderTextJ(); $("wc").value = visibleWc(textJ); }
 }
@@ -4680,7 +4811,6 @@ function setView(v) {
   view = v;
   $("viewAgenda").classList.toggle("hidden", v !== "agenda");
   $("viewText").classList.toggle("hidden", v !== "text");
-  $("viewFilter").classList.toggle("hidden", v !== "filter");
   $("viewSettings").classList.toggle("hidden", v !== "settings");
   $("btnSettings").setAttribute("aria-pressed", String(v === "settings"));
   $("btnSearch").setAttribute("aria-pressed", String(SEARCH.open && v === "agenda"));
@@ -4688,7 +4818,6 @@ function setView(v) {
   $("tabAgenda").setAttribute("aria-pressed", v === "agenda" && !monthMode);
   $("tabMonth").setAttribute("aria-pressed", v === "agenda" && monthMode);
   $("tabText").setAttribute("aria-pressed", v === "text");
-  $("tabFilter").setAttribute("aria-pressed", v === "filter");
   if (ME && v !== "text") endManual();
   if (v === "text") { if (!journals().includes(textJ)) textJ = ""; renderTextJ(); $("wc").value = visibleWc(textJ); }
   render();
@@ -4697,17 +4826,6 @@ function setView(v) {
 $("tabAgenda").onclick = () => setView("agenda");
 $("tabMonth").onclick = () => setView("month");
 $("tabText").onclick = () => setView("text");
-// The name in the header leads back to the main view (the list), from wherever one is.
-$("homeLink").onclick = ev => {
-  ev.preventDefault();
-  if (manualActive()) return; // unsaved manual edits are not discarded silently
-  for (const d of document.querySelectorAll("dialog[open]")) d.close();
-  if (!$("pop").classList.contains("hidden")) closePop();
-  if (!$("facetSheet").classList.contains("hidden")) chooseFacet("cancel");
-  setView("agenda");
-  window.scrollTo({ top: 0, behavior: "smooth" });
-};
-$("tabFilter").onclick = () => setView("filter");
 $("btnSync").onclick = () => sync();
 
 // The text view shows one journal at a time (its working copy is one file).
@@ -5116,7 +5234,6 @@ function prepSettings() { withJ("", () => {
   $("cfgServer").disabled = c.mode === "local";
   $("phraseBox").classList.add("hidden"); $("qrBox").classList.add("hidden"); $("qrBox").innerHTML = "";
   renderLogRow();
-  $("cfgFu").checked = fuOn();
   $("cfgMinimal").checked = document.documentElement.classList.contains("minimal");
   $("cfgCompact").checked = document.documentElement.classList.contains("compact");
   $("exportPlain").checked = false;
@@ -5170,7 +5287,6 @@ $("cfgMinimal").onchange = () => {
   document.querySelector('meta[name="theme-color"]').content = on ? "#FFFFFF" : "#97EAD2";
   try { LS.setItem("agenda.minimal", on ? "1" : "0"); } catch {}
 };
-$("cfgFu").onchange = () => { fuSetOn($("cfgFu").checked); renderLogRow(); };
 // The log cannot be switched off while the experiment is on: it records the experiment.
 // Nothing is ever written while the log is off.
 $("cfgLog").onchange = () => {
@@ -5205,7 +5321,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.8.4, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.0, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -5413,7 +5529,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.8.4";
+const APP_VERSION = "0.9.0";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)

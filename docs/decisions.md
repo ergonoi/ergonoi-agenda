@@ -107,7 +107,7 @@ A short undo buffer (five steps, Ctrl-Z, an *Undo* bar on phones) was added afte
 
 While building it, a race was found and fixed: a change made while a synchronisation was waiting for the network was overwritten when the working copy was rebuilt at its end. The rebuild is now skipped when the working copy changed in the meantime, and another synchronisation follows.
 
-### 4.4 Filter (ui.md 4.14)
+### 4.4 Filter (ui.md 4.14; superseded by 6.7)
 
 - The facet bar is always visible in the list, styled like the legend of the outheis web interface (coloured line, name, count; hidden values at 20 % opacity).
 - The other tags are in a filter tab (funnel). Showing the results inside the tab was considered, but the tab already needs the space; the result appears in the list, with a line naming the filter and *Reset*.
@@ -220,6 +220,18 @@ Three levels (20 November 2026): asking at every opening proved a nuisance on th
 ## 6.6 Clipboard beside the journal (19 November 2026)
 
 A single item (a picture, a file or a text) to move between one's own devices, often needed. It lies beside the journal on the server (architecture 8.15), not in it: as a line it would make every device load the whole file again with every change of any entry. This is the one exception to the rule that the server keeps nothing but the encrypted journal file; the item is encrypted like the journal and readable only by the owner. Limit 4 MB, checked before sending; no bookkeeping of space (items are usually single pictures or pieces of text far below the limit). The symbol is a tray, not a clipboard or two sheets: it stands for a place where something is left to be picked up. The item is removed after 24 hours (decided 19 November 2026): the clipboard is for passing something on, not for keeping it, and nothing should lie on the server longer than that. The age is the file's modification time, so no further information is stored. A filled tray is shown in a blue added for this purpose (`#2B3BD6`, ui.md 2.1), since Scarlet already means urgency and Amber is too weak on Pearl Aqua.
+
+## 6.7 Views instead of the facet bar (20 November 2026)
+
+First increment toward more ergonomics and a less cluttered interface (ui.md 1a). The facet bar had grown with the number of facets (20 and more in real use) and took two rows above the list; facets of the same name in several journals were switched together, so it was not visible whom a facet belonged to; the fine selection lay in a separate tab whose result could only be seen after going back to the list.
+
+- Frequent changes are switches between a few fixed combinations, depending on the matter one is working on. Hence named views, chosen from the title: two taps from anywhere, and the title always says which filter applies. Pills above the list were considered and rejected: they take a row for something done a few times a day and must scroll beyond five or six views.
+- The facets are grouped by journal, so that ownership is visible at once and each facet keeps a fixed place; switching a name across journals with one tap is given up, a tap on the journal's heading switches all its facets instead.
+- Showing a single facet is a long press, as before; since it is not discoverable and may happen by accident, it is announced in a toast with Undo.
+- On wide screens the panel stands beside the list, so that fine-tuning and its result are in view together; on phones it is a drawer over the list.
+- A read-only journal is marked with a lock icon, not with a written label that takes space.
+- Views are lines of the default journal, like aliases and overlays, so they apply on all devices and stay private.
+- The experimental facet order by use (4.14b) was retired with the bar; within a journal the order is by name.
 
 ## 7. Open items and next steps
 

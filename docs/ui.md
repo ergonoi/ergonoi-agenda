@@ -1,6 +1,6 @@
 # Agenda — User Interface Specification
 
-Status: 2026-11-14 · Companion to `architecture.md` (data model, sync) · Reference implementation: `clients/web/index.src.html` with `clients/core/agenda-core.js`, built into `clients/web/index.html`
+Status: 2026-11-20 · Companion to `architecture.md` (data model, sync) · Reference implementation: `clients/web/index.src.html` with `clients/core/agenda-core.js`, built into `clients/web/index.html`
 
 This document contains everything needed to build the agenda client, or a client in the same visual language: principles, design tokens, layout, components, interactions, ordering rules and states. All values are those of the reference implementation.
 
@@ -16,6 +16,13 @@ This document contains everything needed to build the agenda client, or a client
 6. **Few taps.** Changing a tag: two taps. Adding a tag: two taps. Closing an item: one swipe, one tap.
 7. **Local first.** No action waits for the network (architecture 7.7). The interface always shows what state it displays and what is pending.
 8. **Balance is fragile.** Changes to size, weight or colour of one element affect the hierarchy of all others; adjust one thing at a time.
+
+### 1a. Increments
+
+The interface changes in steps, each recorded here with its aim. The aim of the steps since November 2026 is ergonomics (short paths for frequent actions, fixed places, no surprises) and an uncluttered interface (one task per area, nothing on screen that is needed only now and then). The model is the clarity of well-made professional apps such as PatMed: one header with one task, a calm list, choices in menus and panels rather than in bars over the content.
+
+1. **0.9.0 (20 November 2026): views, facet panel, title.** The facet bar over the list and the filter tab are replaced by named views, chosen from the title, and a facet panel grouped by journal (4.14). Frequent switches between facet combinations take two taps from anywhere; the list gains the rows the bar took; it is visible at once whom a facet belongs to; a read-only journal is marked with a lock instead of a label. Decisions 6.7.
+2. **Planned, in a branch:** three columns on wide screens (panel, list, detail of the chosen entry), a bottom bar *List* / *Month* / *Text* on phones, search in the header for the open view, settings as pages of rows.
 
 ---
 
@@ -88,7 +95,7 @@ No white buttons on white ground. In dark mode, secondary buttons are outlined i
 | Size | Height | Text | Used for |
 |---|---|---|---|
 | small `--bs` | 32 px | 14 px | everything inside a line or an entry: chips, `+`, note button, *Done* / *Reschedule* in *Past*, *‹ › Today* of the month view, *Reset* in the search and filter lines, buttons in notices, the round `?` |
-| normal `--bm` | 44 px | 15 px | everything else: *Add*, dialogs, settings, value buttons, facet bar, sheets (swipe sheet, facet choice, reschedule grid) |
+| normal `--bm` | 44 px | 15 px | everything else: *Add*, dialogs, settings, value buttons, facet panel, sheets (swipe sheet, facet choice, reschedule grid) |
 
 On touch screens small buttons get an invisible margin, so that the touch target still reaches 44 px. Tabs and header icons keep `--tap` (44 px).
 
@@ -98,8 +105,8 @@ Dialogs, popovers and sheets have a 0.5 px Silver border; behind them the page i
 
 ### 2.3b Choosing
 
-- **Tag values, one or several** — everywhere, without exception (facet choice on Add, value to rename, facet of a journal overlay, facet for imported calendar entries, facets for *Print agenda* and *Export calendar*, journals in *Rename tag*, *Pass facets*): in the style of the facet bar, side by side and wrapping: a colour line (22 × 3 px, the facet's colour, `--line` for topics and journals) and the name, 15 px, no border, a touch target of 44 px. As in the facet bar, two values only: chosen `--fg`, not chosen `--fg` at `opacity: var(--off)`; both regular weight, nothing in between. Counts or the journal small in `--muted` after the name. Keyboard focus underlines the name instead of drawing a box.
-- **Several of a set** start as the use suggests: *Print* and *Export* with all chosen, *Pass facets* with none. A value is only faint (opacity `--off`, 0.45) where it is explicitly switched off in a filter: the facet bar and the filter view.
+- **Tag values, one or several** — everywhere, without exception (facet choice on Add, value to rename, facet of a journal overlay, facet for imported calendar entries, facets for *Print agenda* and *Export calendar*, journals in *Rename tag*, *Pass facets*): in the style of the facet list, side by side and wrapping: a colour line (22 × 3 px, the facet's colour, `--line` for topics and journals) and the name, 15 px, no border, a touch target of 44 px. As in the facet panel, two values only: chosen `--fg`, not chosen `--fg` at `opacity: var(--off)`; both regular weight, nothing in between. Counts or the journal small in `--muted` after the name. Keyboard focus underlines the name instead of drawing a box.
+- **Several of a set** start as the use suggests: *Print* and *Export* with all chosen, *Pass facets* with none. A value is only faint (opacity `--off`, 0.45) where it is explicitly switched off in a filter: the facet panel.
 - **One of a few fixed options** (tag type `facet`/`topic`, date binding): text tabs as for the journals in the text view (4.10), the chosen one in `--fg`, weight 500, with a 2 px underline; others in `--fg2`. No framed segmented field.
 - Native selects only inside rows of a list (import preview) and for periods.
 - **Marking lines** of a list (manual edit): checkboxes.
@@ -169,7 +176,7 @@ From 1100 px window width the content column is at most 1200 px wide; the areas 
 
 *Settings → Experimental → Compact layout* (per device, `localStorage agenda.compact`; the class `compact` on `<html>` is set before the page is drawn). It changes measures and surfaces only, never markup or behaviour, so every other section of this document holds for it as well. It can be combined with 2.10.
 
-- **Surfaces:** the function area (add field, facet bar, search and filter lines) lies on `--panel` (`#F8F7F7`, dark `#222`).
+- **Surfaces:** the function area (add field, search and filter lines) lies on `--panel` (`#F8F7F7`, dark `#222`).
 - **Header:** 48 px, title 19 px.
 - **Entries:** two columns, the date and time on the left (86 px, 13 px, `--fg2`, overdue in Scarlet Fire), the text on the right (16 px, 400); 9 px vertical padding; 3 px facet stripe. An entry without a time leaves the left column empty, so that the texts stay aligned. Group titles in sentence case, 13 px / 500, `--fg2`.
 - **Sizes:** buttons 28 px (`--bs`) and 36 px (`--bm`), text 14 px; on touch screens small buttons keep a 44 px touch target through an invisible margin.
@@ -217,7 +224,7 @@ One scale in every dialog: text 15 px; captions above fields 13 px, muted, 16 px
 
 - Sticky, background Pearl Aqua (`--aqua`, #97EAD2), bottom border 0.5 px Charcoal. Text in the header stays dark in both colour schemes (Charcoal; inactive tab and status in Slate).
 - Header content is limited to the content column (max. 820 px, centred); background and bottom rule span the full window.
-- Title "οὐθείς Agenda": 24 px / 600, never wraps, same size on all screens.
+- Title: the active view (4.14), 24 px / 600, under "οὐθείς Agenda" in 11 px; without a view "οὐθείς Agenda" in 24 px / 600. Never wraps. A caret after it; a tap opens the views. Up to 0.8 the title led back to the list; the tabs do that.
 - Wide screens (> 600 px): one row, at least 60 px high: title, status line (flexible), the views *List* / *Month* / *Text*, 16 px space, then the four icons Search, Filter, Sync, Settings.
 - Narrow screens (≤ 600 px): title and the four icons in the first row; below, the status line on the left and *List* / *Month* / *Text* right-aligned. Four icons and two views in one row looked crowded on a phone.
 - Tabs **List** / **Month** / **Text**: no border, 2 px underline when active; inactive in Slate. The open search and the filter tab carry the same underline on their icon.
@@ -258,7 +265,7 @@ Opens when the new line has no `#facet`.
 
 - Bottom sheet over a scrim `rgba(26,26,26,.3)`; panel `--bg`, top border 0.5 px `--rule`, max width 540 px, bottom padding includes `env(safe-area-inset-bottom)`.
 - Title: the entered text, 17 px / 500; on the right of the title row, above its 0.5 px `--line` separator, a calendar button and the clock button *from*, after a start time also *to* (system pickers, 4.3a). A chosen date and time appear below the separator ("Fri 27.11. · 09:30–10:15 ×") and are added as `#date-…` and `#time-…` to the new item, unless its line has them already; × removes the choice.
-- Facets in the style of the facet bar (2.3b): one per facet, side by side and wrapping, a colour line and the name in `--fg`; a name that occurs in several journals appears once per journal, with the journal's name small after it (`Familie`); with more than one journal every facet carries that label (4.11d). A tap chooses it.
+- Facets in the style of the facet list (2.3b): one per facet, side by side and wrapping, a colour line and the name in `--fg`; a name that occurs in several journals appears once per journal, with the journal's name small after it (`Familie`); with more than one journal every facet carries that label (4.11d). A tap chooses it.
 - Order: first the facets of the default journal, then those of the other journals the user owns, then those of shared journals the user may write; within each group the order of the facet values. A name in several journals therefore appears in several places; the hierarchy of one's own journals takes precedence (decided 19 November 2026, to be reverted if it proves wrong).
 - Below the grid, a full-width field for a new facet with a primary *Add* button. The field shows the fixed prefix `#facet-` in `--muted`, so the complete stored tag is visible while only the value is typed; the value is lowercased; letters, digits and underscore only, otherwise a hint below the field.
 - The same prefixed field heads the value menu of every dimension with free values in the tag popover, above the suggestions, so every value the grammar allows can be entered and a new value is reachable without scrolling: `#facet-`, `#topic-` (words may be joined by hyphens), `#date-` (`YYYY-MM-DD`, with a calendar button, 4.3a), `#time-` (`08:00`, `09:00-15:00`, `45m`, `1h30m`; buttons *from* and *to* with the system time picker fill a time or a span), `#recurring-` (all patterns of architecture 4.4). An invalid value turns the field Scarlet and shows the allowed forms below it. Dimensions with a fixed vocabulary (`rank`, `size`, `action`) keep their plain list.
@@ -388,7 +395,7 @@ A view like the filter tab, opened with the gear in the header (which then carri
 - **Data:** *Journals* (server mode only: the journal list 4.11d, *+ Add journal*, *Rename tag*, a hint that facets belong to journals); *Import and export*: *Import entries* (4.11b), *Export journal file* (a small panel: the journal is downloaded encrypted as `agenda-journal.enc`, a checkbox *Export unencrypted as plain text* for `agenda-journal.txt`, *Cancel* / *Download*; built from the local copy, so it works without the server), *Export calendar* (4.11g); *Local journal and print*: *Open local journal*, *Print agenda* (4.13).
 - **Account:** *Account ID* (monospace, 64 hex digits) with *Copy account ID*; *Server URL*, underline-only input, applied when the field is left (disabled in local mode); *Show account phrase* and *Show QR code* (4.11h); a sentence on what deleting removes, and *Delete account on server* (Scarlet Fire, two-tap: the first tap arms and states the consequence, the second removes the account file on the server and then clears the browser).
 - **Device:** *PIN* with its three levels (4.12a) and *Change PIN*; *Clear data in this browser* (Scarlet Fire, two-tap; removes phrase, keys, local copy, settings and outbox and reloads; the journal on the server is not touched); *Display*: *Compact layout* and *Minimal colours*.
-- **System:** *Experimental* (the facet bar ordered by use) and *Log* (4.18). Version and links stand in the footer as on every view.
+- **System:** *Log* (4.18). The section *Experimental* is empty since 0.9.0 and not shown. Version and links stand in the footer as on every view.
 
 ### 4.11a Setup dialog
 
@@ -444,7 +451,7 @@ A round `?` button (32 px, 0.5 px border) next to every field for a new facet or
 
 ### 4.12b Journal dialog: facets and default journal
 
-Under *Content*, journals the user may write offer *Add a facet to this journal*: a field with the prefix `#facet-`, *Add*, and a hint. It writes a Tag definition into this journal; an existing name or an invalid one is answered in the hint. Below it, *Remove a facet from this journal*: the journal's facets (declared ones and those of open entries) in the style of the facet bar. Choosing one that open entries still carry names their number and asks which facet they get instead, again as a facet choice of the journal's other facets; without another facet the hint says to add one first. *Remove* (two taps) gives those entries the chosen facet (an entry that already has it just loses the old one), then closes the facet's Tag definition lines. Closed entries keep their old facet; no entry is closed. *Undo* takes it back. Journals of version 2 that the user owns (not the default) offer *Make this my default journal* (two taps, architecture 8.11j). In the dialog of a version 2 journal that replaced one of version 1, the former journal can be removed from one's own journals (*Remove it from my journals*) or deleted on the server.
+Under *Content*, journals the user may write offer *Add a facet to this journal*: a field with the prefix `#facet-`, *Add*, and a hint. It writes a Tag definition into this journal; an existing name or an invalid one is answered in the hint. Below it, *Remove a facet from this journal*: the journal's facets (declared ones and those of open entries) in the style of the facet list. Choosing one that open entries still carry names their number and asks which facet they get instead, again as a facet choice of the journal's other facets; without another facet the hint says to add one first. *Remove* (two taps) gives those entries the chosen facet (an entry that already has it just loses the old one), then closes the facet's Tag definition lines. Closed entries keep their old facet; no entry is closed. *Undo* takes it back. Journals of version 2 that the user owns (not the default) offer *Make this my default journal* (two taps, architecture 8.11j). In the dialog of a version 2 journal that replaced one of version 1, the former journal can be removed from one's own journals (*Remove it from my journals*) or deleted on the server.
 
 ### 4.16 Clipboard
 
@@ -456,7 +463,7 @@ The PIN dialog (`#dlgPin`, without the close button of other dialogs) has four u
 
 ### 4.13 Print
 
-*Print* (settings) first asks what to print, *Events and tasks* or *Memos* (one of the two, in the style of the facet bar; the choice is remembered), and for the facets to include (checkboxes, all selected the first time; the selection is remembered in browser storage). It then prints one A4 page, portrait, through the browser's print dialog (*Save as PDF* there gives the PDF). The page is a working sheet to tick by hand, photograph and hand back:
+*Print* (settings) first asks what to print, *Events and tasks* or *Memos* (one of the two, in the style of the facet list; the choice is remembered), and for the facets to include (checkboxes, all selected the first time; the selection is remembered in browser storage). It then prints one A4 page, portrait, through the browser's print dialog (*Save as PDF* there gives the PDF). The page is a working sheet to tick by hand, photograph and hand back:
 
 - Typeface Inter 400/600, embedded; 9.5 pt throughout, title 12 pt; margins 8–10 mm; full width.
 - Head: "οὐθείς Agenda" (for memos "οὐθείς Agenda · Memos"), the selected facets.
@@ -558,26 +565,26 @@ A missing rank means *not assessed* and counts as `medium`; `rank:low` therefore
 - Views beyond the date groups (follow-up of `waiting`, weekly review, search) are not yet specified.
 - The ordering is a fallback; weighting of relevance by a language model is not implemented.
 
-### 4.14 Filter
+### 4.14 Views and filter
 
-Two places, one rule: a filter **hides values**. Within one kind of tag an item matches if its value is shown; across kinds it must match every kind. The empty value stands for "without this tag" and can be hidden like any other. The selection is stored in the browser (`agenda.filter`).
+A filter **hides values**. Within one kind of tag an item matches if its value is shown; across kinds it must match every kind. The empty value stands for "without this tag" and can be hidden like any other. The current filter is stored in the browser (`agenda.filter`). Since 0.9.0 the facet bar in the list and the filter tab are replaced by views and a facet panel (decisions 6.7).
 
-- **Facet bar in the list.** Always present below the add field: `All`, `None`, then one button per facet *name* across all journals, as in the outheis web UI legend — a 24×3 px line in the facet colour (divided into one segment per journal where several journals have the name; the tooltip names them), the name, the number of matching items of all these journals (`--muted`, 12 px). Tapping switches the name in all journals at once; a name switched on in some journals only (set in the filter tab) is shown at 55 % opacity and named in the filter line ("sport: only Anna"); tapping it switches it on everywhere, *Reset* in the filter line too. A hidden facet is shown at 20 % opacity. Tap toggles; long press shows only this facet; `All` shows all facets, `None` hides all, so that single ones can be switched on. The facet selection preselects the facets of the printout (4.13).
-- **Order and folding.** The facets are ordered by how often they are assigned (entries of the current state, open and closed, carrying them), or by use with the experiment of 4.14b; *without facet* comes last. The order is fixed for the day (kept in the browser), so that buttons do not move while one works; facets new on that day are appended. The bar shows at most two rows, then `+n` (`--muted`) for the rest; tapping it shows all and turns into *Fewer*; the state is kept in the browser. The bar never takes more than two rows. Facets that are switched off are folded last, so that the list does not hide entries unseen; the button says how many of the folded facets are off (`+10 · 5 off`, or `+5 off` when all are). After *None* (or a long press on one facet) the bar is in selection mode until *All*, or until no facet is off: the facets switched on come first (after *All* and *None*), in the order they were chosen, and are folded last; the facets that are off are folded first. The mode does not depend on how many facets are on, so choosing one more never reorders the bar. In this mode a long press adds a facet like a tap. Colours stay bound to the order of first use (2.3), not to this order.
-- **Filter tab** (funnel icon after *Text*). With more than one journal it begins with *Facets by journal*: every facet of every journal (`sport · Anna`, `sport · Ben`), with *All* and *None*, for the fine selection that the bar does not offer. Then the other kinds: `topic`, `action`, `rank`, `size`, `time` (with / without), `recurring` (recurring / one-off), each value with its count among the items passing the facet bar. Same interaction as the facet bar. Top line: "n of m items match" and *Reset*. The result is shown in the list, not in the tab.
-- **Filter line.** When the tab hides anything, a line below the facet bar names the filter briefly (the shown values, or "not …" when fewer are hidden) and offers *Reset*. *Reset* clears the tab's filters; the facet selection is kept.
+- **Views.** A view is a named filter: the facets switched on and the other tags hidden. Views are lines of the default journal, so they apply on all devices of the account (architecture 3.4): `View: Workshop | on workshop@ admin@ | hide rank:low #type-meta`. A facet is written as `name@<journal id>` (empty for the default journal), `-` stands for *without facet*, `*` for all facets. A view with a list keeps facets that appear later switched off; `*` includes them. Which view is active is kept per device (`agenda.view`). Views do not store the tab (*List*, *Month*) or the search.
+- **Title.** The header shows the active view under a small "οὐθείς Agenda" (11 px); without a view only the name of the app. A caret follows. A tap opens a menu below the title: the views with their facet colours (at most ten 5×13 px bars), the active one with ✓; *+ Save current as view …* (an inline field for the name); *Edit views …* (opens the panel in edit mode). Choosing a view applies it and shows the list, also from *Text* or *Settings*.
+- **Changed view.** When the filter differs from the active view, the title gets a dot (`Workshop •`) and the line below the add field names the difference (`Workshop changed: + work, − admin`, *other filters* for the other tags) with *Save* (writes the view anew) and *Revert*.
+- **Facet panel.** Opened with the funnel in the header. On screens narrower than 1240 px a drawer from the left (at most 320 px or 86 % of the width) over a dimmed list; the list behind it updates at once. From 1240 px a column of 280 px beside the list, always visible; the funnel is then hidden. Content from top to bottom:
+  - *Views* with *Edit* (rename in place, *Delete* with Undo) and *+ Save current as view …*.
+  - *Facets*: *All*, *None*; then the facets grouped under their journal, in the order of the journals (default journal first), within a journal by name, so that each facet keeps its place. A journal read as a guest carries a lock icon (13 px, Slate) instead of a written label. Each facet: a 22×3 px line in its colour, the name, the number of matching items (`--muted`, 12 px). Facets with the same name in several journals each stand under their journal. *Without facet* comes last.
+  - *More: topic, action, rank, size, time, repeats*, folded (open when one of them filters): the other kinds, each value with its count among the items passing the facets.
+- **Interaction.** Tap a facet: on or off. Long press: only this facet; a toast says so with *Undo*, since a long press may also happen by accident. Tap a journal's heading: all its facets on (when all are off) or off; long press: only this journal. The other tags: tap hides or shows a value, long press shows only this value. Switched off is 20 % opacity; there is nothing in between.
+- **Filter line.** Without an active view, a line below the add field says what is hidden (`Filter: 3 of 14 facets · not low`) with *Show all*. With an unchanged view there is no line; the title says which filter applies.
 - An item added while the filter would hide it is written as usual; a notice says that it is hidden.
 - Counts and filters cover open items up to three months ahead; entries dated beyond (tag definitions) never appear.
-- The header carries no extra marker for an active filter; the filter line is the signal.
+- The facet selection preselects the facets of the printout (4.13).
 
-### 4.14b Experiment: facet bar ordered by use
+### 4.14b Retired: facet bar ordered by use
 
-*Settings → Experimental → Order the facet bar by how you use the facets.* Off, everything is as in 4.14.
-
-- Signals, collected in the browser during the day: a facet given to an entry (add field, tag menu, calendar import; at most three counted per facet and day) 3 points; set as filter (switched on, or long press) 2; entries with it in *Today* or *Tomorrow* when the list is shown 1, once a day.
-- On the first view of a day the signals of earlier days are added, all scores decay with a half-life of 14 days, and the bar is ordered by score, ties by assignment count. Without scores the order is that of 4.14.
-- State and scores are one line in the default journal (architecture 3.4), rewritten at most once a day per device, so the experiment applies on all devices: `Addon function: statistical facet order on 2026-11-16 work@<journal id>:12.40 … #type-meta`. Turning it off writes `off` and keeps the scores.
-- Evaluation: switching the experiment on switches on the diagnostic log (4.18) if it is off; switching the experiment off leaves the log as it is; while the experiment is on, the log cannot be switched off (a message in Scarlet Fire says why). Nothing is written while the log is off — also when the experiment was switched on on another device; the settings then say so. While the log is on it receives every switch, every order with scores and counts, every use with whether the facet was visible in the folded bar (`shown` / `folded`), every unfolding, and a summary per day. The share of uses in the folded bar is the measure of whether the order helps.
+The experiment of 0.7 ordered the facet bar by use. With the bar it was retired in 0.9.0: within a journal the panel orders facets by name, so that each keeps its place. An existing `Addon function: statistical facet order …` line stays in the journal and is ignored.
 
 ### 4.14a Search
 

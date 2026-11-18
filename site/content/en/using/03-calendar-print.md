@@ -14,7 +14,7 @@ Plain text can be imported the same way: one entry per line, pasted or from a fi
 
 ## Printing
 
-*Settings → Print* prints either the coming days as a checklist with room for notes, or the memos. You choose the facets; the facets switched on in the facet bar are preselected.
+*Settings → Print* prints either the coming days as a checklist with room for notes, or the memos. You choose the facets; the facets switched on in the facet panel are preselected.
 
 ## The journal file
 

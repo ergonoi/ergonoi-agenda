@@ -150,7 +150,8 @@ Facet and topic values are not configured anywhere. The vocabulary of a dimensio
 - **Journal name.** A journal names itself with an entry `Journal name: <name> #type-meta`. The name is display text, kept as typed (a capital first letter is the convention), at most 40 characters, without `#` or line break. Like a Tag definition it needs no facet and never appears in a view. If several such entries are open, the one with the highest `#rev` applies; without one, clients show the first four characters of the account ID (8.11).
 - **Journal version.** `Journal version: <x.y.z> #type-meta` names the oldest app version that can write the journal's format (3.7).
 - **Starter definitions.** A new account receives Tag definitions for `private`, `work` and the topics `sports`, `official`, `travel`, and four example entries (`ui.md` 4.11c). The user deletes or keeps them once (`ui.md` 4.11i). A journal without any facet offers none; the first one is typed.
-- **Addon function.** `Addon function: <name> on|off …` keeps the state of an optional function in the default journal, one line per function; the only one is the experimental facet order (`ui.md` 4.14b), which also keeps its scores in that line.
+- **Addon function.** `Addon function: <name> on|off …` keeps the state of an optional function in the default journal, one line per function. The only one was the experimental facet order (`ui.md` 4.14b), retired in 0.9.0; an existing line is ignored.
+- **View.** `View: <name> | on <facet@journal id> … | hide <kind:value> … #type-meta` is a named filter of the user (`ui.md` 4.14), in the default journal, so that it applies on all the user's devices and is not seen by other members. `*` stands for all facets, `-` for *without facet* or an empty value. Closing or removing the line removes the view.
 - **Journal type.** `Journal type: fixed|mixed #type-meta`: a journal of fixed dates (5.5); set by its owner.
 - **Journal examples.** `Journal examples: kept #type-meta` (or `deleted`, when starter definitions were kept for the user's own entries) records that choice in the default journal, so that it is not asked again on any device.
 - **Facet colours** are assigned in order of first use (smallest `#id` carrying the value), cycling through the colour palette (`docs/ui.md`, 2.3).
@@ -939,7 +940,7 @@ Owner is whoever knows the words of a journal of version 2; whoever only passes 
 
 ### 8.11j Another default journal
 
-The default journal is the account: its words set up a device, and it holds the private lines (`Journal key`, `Journal alias`, `Journal overlay`, `Tag overlay`, `Addon function`, `Journal handover`). Any journal of version 2 that the user owns can take its place (*Make this my default journal*):
+The default journal is the account: its words set up a device, and it holds the private lines (`Journal key`, `Journal alias`, `Journal overlay`, `Tag overlay`, `Addon function`, `View`, `Journal handover`). Any journal of version 2 that the user owns can take its place (*Make this my default journal*):
 
 - The client sends both journals, copies the open private lines of the default into the chosen journal under new identities (except its own key line), adds a key line for the former default (`own`) and closes any earlier pointer there.
 - In the former default it closes these lines and appends the private line `Default journal moved: <journal id> #type-meta`; the key line of the new default stays open beside it.

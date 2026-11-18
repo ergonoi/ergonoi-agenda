@@ -2,15 +2,19 @@
 
 *Lebensbereiche als Farben, und nur zeigen, was gerade zählt.*
 
-## Die Facettenleiste
+## Ansichten
 
-Unter dem Eingabefeld zeigt die Facettenleiste jede Facette mit der Zahl ihrer Einträge. Ein Tippen blendet eine Facette aus oder ein; langes Drücken zeigt nur diese eine. *All* zeigt wieder alle, *None* blendet alle aus, damit man einzelne einschalten kann. Die am häufigsten verwendeten Facetten stehen vorn.
+Eine Ansicht ist ein Filter mit Namen: welche Facetten eingeschaltet und welche übrigen Tags ausgeblendet sind. Der Titel oben zeigt, in welcher Ansicht du bist. Ein Tippen auf den Titel wechselt in eine andere Ansicht oder speichert den aktuellen Filter mit *Save current as view …* als neue. Ansichten stehen in deinem Journal und gelten auf allen deinen Geräten.
 
-Eingeschaltete Facetten sind dunkel, ausgeschaltete hell. Dazwischen gibt es nichts.
+Änderst du den Filter, während eine Ansicht aktiv ist, steht hinter ihrem Namen ein Punkt, und eine Zeile unter dem Eingabefeld nennt die Änderung, mit *Save*, um sie in die Ansicht zu übernehmen, und *Revert*, um zur Ansicht zurückzukehren.
 
-## Der Filter
+## Die Facettenliste
 
-Der Trichter oben filtert nach den übrigen Tags: Thema, Zustand, Wichtigkeit, Aufwand, Uhrzeit, Wiederholung. Das Ergebnis erscheint in der Liste, mit einer Zeile, die den Filter nennt, und *Reset*.
+Der Trichter oben öffnet die Facettenliste; auf einem breiten Bildschirm steht sie ständig neben der Liste. Sie zeigt deine Ansichten und darunter die Facetten, gruppiert nach dem Journal, zu dem sie gehören. Ein Schloss hinter dem Namen eines Journals bedeutet, dass du es als Gast liest.
+
+Ein Tippen blendet eine Facette aus oder ein; langes Drücken zeigt nur diese eine (eine Meldung bietet *Undo*). Ein Tippen auf den Namen eines Journals schaltet alle seine Facetten; langes Drücken zeigt nur dieses Journal. *All* zeigt alle Facetten, *None* blendet alle aus. Eingeschaltete Facetten sind dunkel, ausgeschaltete hell. Dazwischen gibt es nichts.
+
+Unter den Facetten filtert *More* nach den übrigen Tags: Thema, Zustand, Wichtigkeit, Aufwand, Uhrzeit, Wiederholung. Ohne Ansicht nennt eine Zeile unter dem Eingabefeld, was ausgeblendet ist, mit *Show all*.
 
 ## Eine Facette anlegen und behalten
 
@@ -20,7 +24,7 @@ Eine Facette besteht, sobald ein Eintrag sie verwendet. Legst du sie in der Face
 Tag definition: family appointments #facet-family #type-meta
 ```
 
-Der Text nach dem Doppelpunkt sagt, wofür die Facette steht. Solche Zeilen erscheinen nie in der Liste; du siehst sie in der Ansicht *Text*. Themen werden auf dieselbe Weise behalten.
+Der Text nach dem Doppelpunkt sagt, wofür die Facette steht. Solche Zeilen erscheinen nie in der Liste; du siehst sie in der Ansicht *Text*. Themen und Ansichten werden auf dieselbe Weise behalten.
 
 ## Umbenennen
 
@@ -32,4 +36,4 @@ Im Dialog eines Journals nimmt *Remove a facet from this journal* eine Facette a
 
 ## Derselbe Name in mehreren Journalen
 
-Zwei Journale können beide eine Facette `sport` haben. Es sind verschiedene Facetten: Wo der Name mehr als einmal vorkommt, folgt ihm der Name des Journals (`sport · Anna`), jede hat ihre eigene Farbe, und beim Hinzufügen eines Eintrags fragt die App, welche gemeint ist. In der Facettenleiste schaltet eine Schaltfläche den Namen in allen Journalen; *Facets by journal* im Filter wählt einzelne.
+Zwei Journale können beide eine Facette `sport` haben. Es sind verschiedene Facetten: Jede steht in der Facettenliste unter ihrem eigenen Journal, hat ihre eigene Farbe, und beim Hinzufügen eines Eintrags fragt die App, welche gemeint ist. An anderen Stellen folgt ihr der Name des Journals (`sport · Anna`).

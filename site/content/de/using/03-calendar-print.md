@@ -14,7 +14,7 @@ Auch reiner Text lässt sich so importieren: ein Eintrag je Zeile, eingefügt od
 
 ## Drucken
 
-*Settings → Print* druckt entweder die kommenden Tage als Abhakliste mit Platz für Notizen, oder die Memos. Du wählst die Facetten; die in der Facettenleiste eingeschalteten sind vorgewählt.
+*Settings → Print* druckt entweder die kommenden Tage als Abhakliste mit Platz für Notizen, oder die Memos. Du wählst die Facetten; die in der Facettenliste eingeschalteten sind vorgewählt.
 
 ## Die Journaldatei
 
