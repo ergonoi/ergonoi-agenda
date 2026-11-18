@@ -17,7 +17,7 @@ To recognise who may read or write, the server gets tokens derived from the keys
 - Lost words cannot be restored, by nobody.
 - Whoever has the words has the journal. Pass on only what is needed: the ally code to those who write, the guest code to those who read.
 - Exports in plain text and calendar files are not encrypted; they are meant to leave the agenda.
-- The copy in your browser is as safe as your device. *Clear data in this browser* removes it.
+- The copy in your browser lies encrypted with your PIN. Whoever reads out the storage of a stolen device could still try all PINs outside the app; a longer PIN makes that much slower. *Clear data in this browser* removes the copy.
 
 ## Checking it yourself
 

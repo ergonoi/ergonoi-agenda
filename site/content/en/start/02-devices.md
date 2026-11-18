@@ -20,6 +20,10 @@ The two circular arrows at the top synchronise; they turn while a sync runs and 
 
 The app keeps a copy of your journals in the browser and works offline. What you change is sent when the server can be reached again.
 
+## A shared device
+
+On a device that several people use, a tablet in the kitchen for example, the PIN can be switched off: *Settings → Account → Turn off the PIN*. The device then keeps everything unencrypted, and whoever uses it can read and pass on what it holds. Give such a device only guest codes, or ally codes where people should write, never the words of a journal. Its own journal is then the only one it owns.
+
 ## Clearing a device
 
 *Settings → Clear data in this browser* removes the words and the copy of the journal from this browser. The journal on the server is not touched.

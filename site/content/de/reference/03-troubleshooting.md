@@ -10,6 +10,10 @@ Die kreisförmigen Pfeile drehen sich, solange eine Synchronisation läuft, und 
 
 *Settings* ganz unten und der Dialog *About* zeigen die Version der App. Nach einer Aktualisierung des Servers kann eine App auf dem Startbildschirm noch die alte Version ausführen: schließen und wieder öffnen, nötigenfalls zweimal.
 
+## PIN vergessen
+
+*Forgot PIN* auf dem PIN-Bildschirm leert diesen Browser. Die Journale auf dem Server bleiben; verloren geht nur, was noch nicht gesendet war. Richte den Browser mit deinen acht Wörtern neu ein und wähle eine neue PIN. Nach fünf falschen Versuchen wartet die App eine Minute, danach jeweils länger.
+
 ## Das Diagnoseprotokoll
 
 *Settings → Log*: *Write a log in this browser* anhaken, wiederholen, was schiefging, dann *Copy log* oder *Save log*. Das Protokoll enthält Anfragen, Fehler und den Zustand deiner Journale, nie den Text von Einträgen, Wörter oder Schlüssel. Journale erscheinen mit den ersten vier Zeichen ihrer Kennung. Schick es dem, der deinen Server betreibt.

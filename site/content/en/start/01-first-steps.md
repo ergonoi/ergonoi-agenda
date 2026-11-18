@@ -14,6 +14,10 @@ Nobody can restore lost words, not even the operator of the server. This is the 
 
 Give your journal a name, for example your first name, and tap *Continue*.
 
+## Your PIN
+
+Then choose a PIN of six to twelve digits. This browser keeps your journals, their words and codes only encrypted with it and asks for it when the app opens; showing words or codes asks for it again. A forgotten PIN is no loss of data: *Forgot PIN* clears this browser, and you set it up again with your eight words.
+
 ## The first entry
 
 Type into the field at the top, or dictate, and tap *Add*:

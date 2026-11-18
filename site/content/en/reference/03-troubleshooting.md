@@ -10,6 +10,10 @@ The circular arrows turn while a sync runs and turn red when it failed. Below th
 
 *Settings*, at the bottom, and the *About* dialog show the version of the app. After the server was updated, an app on the home screen may still run the old version: close it and open it again, if needed twice.
 
+## Forgotten PIN
+
+*Forgot PIN* on the PIN screen clears this browser. The journals on the server stay; only changes that were not yet sent are lost. Set up again with your eight words and choose a new PIN. After five wrong attempts the app waits a minute, then longer each time.
+
 ## The diagnostic log
 
 *Settings → Log*: tick *Write a log in this browser*, repeat what went wrong, then *Copy log* or *Save log*. The log contains requests, errors and the state of your journals, never the text of entries, words or keys. Journals appear by the first four characters of their identifier. Send it to whoever runs your server.

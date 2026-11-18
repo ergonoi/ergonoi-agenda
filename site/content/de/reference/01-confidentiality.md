@@ -17,7 +17,7 @@ Um zu erkennen, wer lesen oder schreiben darf, bekommt der Server aus den Schlü
 - Verlorene Wörter lassen sich nicht wiederherstellen, von niemandem.
 - Wer die Wörter hat, hat das Journal. Gib nur weiter, was nötig ist: den Ally-Code denen, die schreiben, den Guest-Code denen, die lesen.
 - Exporte als reiner Text und Kalenderdateien sind nicht verschlüsselt; sie sollen die Agenda verlassen.
-- Die Kopie in deinem Browser ist so sicher wie dein Gerät. *Clear data in this browser* entfernt sie.
+- Die Kopie in deinem Browser liegt mit deiner PIN verschlüsselt. Wer den Speicher eines gestohlenen Geräts ausliest, könnte außerhalb der App dennoch alle PINs durchprobieren; eine längere PIN macht das deutlich langsamer. *Clear data in this browser* entfernt die Kopie.
 
 ## Selbst nachprüfen
 

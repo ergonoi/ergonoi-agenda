@@ -209,6 +209,12 @@ Forwarding by servers on behalf of clients in general (a server asks its peers w
 
 **Deleting and replacing across servers.** A server holding a copy must not be able to roll a journal back, serve a shortened state or declare it deleted. Required before any copies between servers: the owner gets a signing key pair (e.g. Ed25519); deleting and replacing count only with the owner's signature, which every server can check without reading the content (appending likewise with the allies' key). A mirror never replaces a longer state by a shorter one without such a signature. The clients remain the last instance: they know their last state and the highest revision and already detect and offer to restore vanished lines (architecture 6.4a).
 
+## 6.5 PIN for the browser store (18 November 2026)
+
+Everything the web client keeps lies encrypted under a PIN of six to twelve digits, asked for when the app opens (architecture 8.14). On by default; it can be switched off on purpose, because a device in a kitchen that the whole family uses would be impractical with it. A rule that allowed switching it off only when a device holds no owner words other than those of its own journal was rejected: what deserves protection is the content, not the role, and the app cannot judge the content (an own journal may matter more than a shared one that is public anyway). The app says plainly what is unprotected; the documentation recommends guest or ally codes only on shared devices.
+
+Rejected: passkeys and device unlock (WebAuthn) as an alternative to the PIN: they depend on an operating system, a browser and a key store that someone else controls, bind to the person who set up the device, and do not work for a local journal file. Forward secrecy was considered and dropped: a journal's current state has to stay readable for everyone entitled to it, so it would protect only superseded lines, at the price of member lists and device management. Binding the owner's rights to devices (an owner key per device, the words alone giving ally rights, a delayed recovery) was considered against stolen words and deferred: a device does not stand for a person, several people use the same device and even the same browser. The thought is kept for later.
+
 ## 7. Open items and next steps
 
 1. **Node client with MCP tools and a nightly run** on top of the core module (next step).

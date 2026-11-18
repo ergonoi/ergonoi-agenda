@@ -971,6 +971,17 @@ Many people keep appointments in several calendars (work, private, a provider su
 
 ---
 
+### 8.14 Storage in the browser and the PIN (0.7.0)
+
+The web client reads and writes everything it keeps through one storage layer (`LS`, defined in the boot script before the app). With a PIN, every entry is compressed (`deflate-raw` where the browser has `CompressionStream`), encrypted with AES-GCM under a key derived from the PIN (PBKDF2-SHA-256, 600 000 rounds, random 16-byte salt) and stored under `agv:<name>`; the app itself is a script of type `text/plain` that the boot script starts only once the PIN has opened the store, so nothing of it runs on plain data. Plain stay only `agenda.pin` (salt and an encrypted check value), `agenda.pinWait` (failed attempts) and display settings (`agenda.compact`, `agenda.minimal`, `agenda.month`, `agenda.fbar.open`).
+
+- The PIN has six to twelve digits. It is chosen once an account exists: at the end of the setup, or at the first start of an installation from before 0.7.0, whose plain data is then encrypted and removed.
+- Words and codes (phrase, ally and guest code, QR code, handover code) are shown only after the PIN, unless it was entered in the last five minutes. After 15 minutes in the background the app locks again (the page reloads and asks).
+- After five wrong attempts the app waits one minute, then twice as long each time. This holds in the app only: whoever reads out the storage can try PINs elsewhere, which PBKDF2 slows but does not prevent; a longer PIN helps.
+- *Forgot PIN* clears the browser; the journals on the server are untouched, changes not yet sent are lost.
+- The PIN can be switched off on purpose (a device several people use), with a plain statement that the store is then unencrypted. Whether that is sensible depends on what the device holds, which the app cannot judge: the documentation recommends guest or ally codes only on such devices.
+- The storage layer is the one place a native client replaces, there with a key in the hardware keystore, which limits attempts itself.
+
 ## 9. Deviations from outheis-beta v0.2.52
 
 | Topic | Code | This specification |

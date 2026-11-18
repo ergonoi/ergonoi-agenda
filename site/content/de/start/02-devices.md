@@ -20,6 +20,10 @@ Die zwei kreisförmigen Pfeile oben synchronisieren; sie drehen sich, solange ei
 
 Die App hält eine Kopie deiner Journale im Browser und arbeitet auch offline. Was du änderst, wird gesendet, sobald der Server wieder erreichbar ist.
 
+## Ein gemeinsam genutztes Gerät
+
+Auf einem Gerät, das mehrere Menschen benutzen, etwa einem Tablet in der Küche, lässt sich die PIN abschalten: *Settings → Account → Turn off the PIN*. Das Gerät hält dann alles unverschlüsselt, und wer es benutzt, kann lesen und weitergeben, was darauf liegt. Gib einem solchen Gerät nur Guest-Codes, oder Ally-Codes, wo Menschen eintragen sollen, nie die Wörter eines Journals. Sein eigenes Journal ist dann das einzige, dessen Owner es ist.
+
 ## Ein Gerät leeren
 
 *Settings → Clear data in this browser* entfernt die Wörter und die Kopie des Journals aus diesem Browser. Das Journal auf dem Server bleibt unberührt.

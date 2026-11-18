@@ -2,13 +2,13 @@
 
 Termine, Aufgaben und Notizen an einem Ort, wie in einem Notizbuch aus Papier – mit der Möglichkeit, sie mit einfachen Gesten neu zu sortieren oder zu verschieben. Auf jedem Gerät, in jedem Browser, lesbar nur für dich und für die, mit denen du sie teilst.
 
-**οὐθείς Agenda ist ein Planungsjournal, das leicht genug ist, um es ganz zu verstehen: eine verschlüsselte Textdatei je Journal, ein kleiner Server, der sie nicht lesen kann, und eine App, die im Browser läuft.**
+**οὐθείς Agenda ist ein Planungsjournal, das so einfach konzipiert ist, dass seine Funktion transparent bleibt: eine verschlüsselte Textdatei je Journal, ein kleiner Server, der sie nicht lesen kann, und eine App, die im Browser läuft.**
 
 ---
 
 ## Eine Liste
 
-Die meisten Werkzeuge verteilen einen Tag auf einen Kalender, eine Aufgabenverwaltung und eine Notiz-App, jede mit eigenem Konto und eigener Vorstellung davon, was wohin gehört. Die Agenda hält sie zusammen. Termin, Aufgabe und Notiz sind Zeilen im selben Journal; sie unterscheiden sich durch einige Tags, nicht durch das Programm, das sie verwaltet. Was heute ansteht, steht an einer Stelle.
+Die Pflege von Kalender, Aufgaben und Notizen verteilt sich häufig auf mehrere Werkzeuge, jedes mit eigenem Konto und eigener Vorstellung davon, was wohin gehört. Sind sie in einem Werkzeug zusammengeführt, dann oft auf wenig ergonomische Weise. Die Agenda hält sie zusammen. Termin, Aufgabe und Notiz sind Zeilen im selben Journal; sie unterscheiden sich durch einige Tags, nicht durch das Programm, das sie verwaltet. Was heute ansteht, steht an einer Stelle.
 
 ## Leichtgewichtig
 

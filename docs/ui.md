@@ -441,6 +441,10 @@ Values that arrive in typed lines, the text view or an import get no definition.
 
 A round `?` button (32 px, 0.5 px border) next to every field for a new facet or topic (facet choice, tag popover) opens a short dialog: a new value exists once an entry with it is saved; it disappears after the retention period once no open entry carries it; a *Tag definition* line keeps it; how to remove it (rename or close its entries, delete the definition line); facets of shared journals belong to that journal. It links to the guide.
 
+### 4.12a PIN
+
+The PIN dialog (`#dlgPin`, without the close button of other dialogs) has four uses: *Enter your PIN* at the start (*Unlock*, *Forgot PIN*), *Enter your PIN* before words or codes are shown (*OK*, *Cancel*), *Choose a PIN* once an account exists (*Set PIN*, *Use without PIN*, which warns first and asks for a second tap) and *Choose a new PIN* (*Set PIN*, *Cancel*). The field is a numeric password field, six to twelve digits. *Settings → Account → PIN* shows the state and offers *Change PIN* and *Turn off the PIN* (two taps, then the PIN), or *Set a PIN* when it is off.
+
 ### 4.13 Print
 
 *Print* (settings) first asks what to print, *Events and tasks* or *Memos* (one of the two, in the style of the facet bar; the choice is remembered), and for the facets to include (checkboxes, all selected the first time; the selection is remembered in browser storage). It then prints one A4 page, portrait, through the browser's print dialog (*Save as PDF* there gives the PDF). The page is a working sheet to tick by hand, photograph and hand back:
