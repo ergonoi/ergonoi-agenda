@@ -709,7 +709,10 @@
   html.minimal #tabFilter { border:0; border-radius:0; margin:0; min-height:var(--tap); border-bottom:2px solid transparent; }
   html.minimal #tabFilter[aria-pressed="true"] { border:0; border-bottom:2px solid var(--fg); }
   html.minimal .recic { min-height:18px; min-width:20px; border:.5px solid var(--line); border-radius:4px; color:var(--fg2); }
-  html.minimal .item { border-left-width:2px; }
+  /* Facet stripes as wide as without minimal colours (6 px); the text keeps its place. */
+  html.minimal .item { border-left-width:6px; padding-left:6px; }
+  html.minimal.compact .item { padding-left:9px; }
+  @media (max-width: 600px) { html.minimal #bnav button[aria-pressed="true"] { color:var(--fg); font-weight:600; } }
   html.minimal #agenda section h2, html.minimal #agenda .more, html.minimal #agenda > .hint, html.minimal section.calday .hint { border-left:2px solid transparent; }
 </style>
 </head>

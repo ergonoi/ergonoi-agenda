@@ -191,7 +191,8 @@ From 1100 px window width the content column is at most 1200 px wide; the areas 
 - **Header:** a light Wisteria (`#E2C8E8`, 50 % on white; dark mode: the plain surface) with a 0.5 px `--line` bottom border instead of Pearl Aqua (decided 21 November 2026, white was too empty); title in the body font. *List* / *Month* / *Text* as small grey buttons, the active one with a 1 px `--fg` border, instead of underlined tabs.
 - **Buttons:** a light grey fill (`--btn`, `#EFEEEE`, dark `#2C2C2C`) sets them off from the ground; no Wisteria, no Dark Amethyst, no Teal. The primary action has a 1 px `--fg` border and 500 weight. Danger keeps its Scarlet outline. Icon buttons, the fold chevron and menu rows stay without fill.
 - **Tags stay unfilled** (outlined chips, facet choice buttons), so that values are not mistaken for actions.
-- The recurring icon sits in a small outlined box; the facet stripe is 2 px.
+- The recurring icon sits in a small outlined box; the facet stripe is 6 px as without minimal colours (2 px until 0.9.3, too narrow to be seen), the text keeps its place.
+- **Bottom bar** on phones: the active view in Charcoal and 600 weight instead of Teal, which stays for the sync state.
 
 ## 3. Layout
 

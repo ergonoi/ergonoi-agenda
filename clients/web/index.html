@@ -709,7 +709,10 @@
   html.minimal #tabFilter { border:0; border-radius:0; margin:0; min-height:var(--tap); border-bottom:2px solid transparent; }
   html.minimal #tabFilter[aria-pressed="true"] { border:0; border-bottom:2px solid var(--fg); }
   html.minimal .recic { min-height:18px; min-width:20px; border:.5px solid var(--line); border-radius:4px; color:var(--fg2); }
-  html.minimal .item { border-left-width:2px; }
+  /* Facet stripes as wide as without minimal colours (6 px); the text keeps its place. */
+  html.minimal .item { border-left-width:6px; padding-left:6px; }
+  html.minimal.compact .item { padding-left:9px; }
+  @media (max-width: 600px) { html.minimal #bnav button[aria-pressed="true"] { color:var(--fg); font-weight:600; } }
   html.minimal #agenda section h2, html.minimal #agenda .more, html.minimal #agenda > .hint, html.minimal section.calday .hint { border-left:2px solid transparent; }
 </style>
 </head>
@@ -862,7 +865,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.9.3</span>
+    <span class="ver">v0.9.4</span>
     <a href="#" id="aboutLink">About</a>
     <a href="https://outheis-labs.github.io/outheis-agenda/" target="_blank" rel="noopener">Documentation <svg width="7" height="7" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
   </footer>
@@ -923,7 +926,7 @@
     <strong>οὐθείς Agenda</strong>
     <p>οὐθείς Agenda is an <b>ergonoi</b> project:</p>
     <p style="margin-top:14px">Technology is potential. Accessibility makes it matter.</p>
-    <p class="hint">Version 0.9.3 · outheis-labs</p>
+    <p class="hint">Version 0.9.4 · outheis-labs</p>
     <div class="btnrow" style="justify-content:flex-end"><button class="primary">Close</button></div>
   </form>
 </dialog>
@@ -5533,7 +5536,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.9.3, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.4, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -5741,7 +5744,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.9.3";
+const APP_VERSION = "0.9.4";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
