@@ -581,7 +581,7 @@ Two places, one rule: a filter **hides values**. Within one kind of tag an item 
 - The query is matched in the client only, against the text, the note and the tags (`#dim-value`) of the entries of all journals, ignoring case and accents (`brucke` finds *Brücke*); several words must all occur. Tag definitions and comments are not entries and are not found.
 - While a query is set, the list shows every match: open entries beyond the 30-day and three-month horizons (group *After 30 days*), groups without their limits. The facet bar and the filter tab still apply.
 - A line below the facet bar reads "Search: *query* · n entries", adding "m more hidden by the filter" where the filter hides matches, and *Reset*, which closes the search.
-- With *include done*, closed entries still in the journal (until compaction) are found too, in a group *Done*, greyed and not editable from the list.
+- With *include done*, closed entries still in the journal (until compaction) are found too, in a group *Done*, greyed but usable: their note opens, their tags can be changed, and removing `#done` reopens them (decided 19 November 2026; before, they could not be touched).
 
 
 

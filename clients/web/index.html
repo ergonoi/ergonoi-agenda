@@ -82,7 +82,8 @@
   #sline { display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; padding:4px 16px; font-size:14px; color:var(--fg2); border-bottom:.5px solid var(--line); }
   #sline b { font-weight:500; color:var(--fg); }
   #sline button { min-height:var(--bs); font-size:14px; margin-left:auto; }
-  .item.isdone { opacity:.45; pointer-events:none; }
+  /* Closed entries found by the search stay usable: a note can be read, a tag changed, and removing #done reopens them. */
+  .item.isdone { opacity:.55; }
   .pastbtns { display:flex; gap:8px; margin:8px 0 0; }
   .pastbtns button { min-height:var(--bs); padding:0 10px; font-size:14px; }
   section[data-g="past"] .item .text { color:var(--fg2); }
@@ -666,7 +667,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.7.3</span>
+    <span class="ver">v0.7.4</span>
     <a href="#" id="aboutLink">About</a>
     <a href="https://outheis-labs.github.io/outheis-agenda/" target="_blank" rel="noopener">Documentation <svg width="7" height="7" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
   </footer>
@@ -696,7 +697,7 @@
     <strong>οὐθείς Agenda</strong>
     <p>οὐθείς Agenda is an <b>ergonoi</b> project:</p>
     <p style="margin-top:14px">Technology is potential. Accessibility makes it matter.</p>
-    <p class="hint">Version 0.7.3 · outheis-labs</p>
+    <p class="hint">Version 0.7.4 · outheis-labs</p>
     <div class="btnrow" style="justify-content:flex-end"><button class="primary">Close</button></div>
   </form>
 </dialog>
@@ -3721,7 +3722,7 @@ function renderAgenda() {
       if (searching && !matchesSearch(e, terms)) return;
       if (!passesFacet(e, flt) || !passesOther(e, flt)) { if (searching) hiddenHits++; return; }
       if (searching) hits++;
-      if (closed) { groups.done.push({ e, idx: "", j, d: get(e, "done") || "", local: false, overdue: false, closed: true }); return; }
+      if (closed) { groups.done.push({ e, idx: j + "|" + idx, j, d: get(e, "done") || "", local: false, overdue: false, closed: true }); return; }
       let d = shownDate(e, t0);
       // Over today (architecture 5.5): a single entry whose time span has ended has passed
       // like one of an earlier day. A single time without an end does not pass by itself, and
@@ -3748,7 +3749,9 @@ function renderAgenda() {
       groups[g].push({ e, idx: j + "|" + idx, j, d, local, overdue: d < t0, carried });
     });
     // Closed entries are kept in the snapshot until compaction, not in the working copy;
-    // found by the search, they are shown greyed and cannot be changed from the list.
+    // found by the search, they are shown greyed. The first tap brings such an entry into the
+    // working copy unchanged (nothing is written), so that its note, tags and date can be
+    // used; removing #done reopens it.
     if (searching && SEARCH.done) {
       const open = new Set(parseLines(S.wc).map(e => e.id).filter(Boolean));
       for (const e of currentOf(parseLines(S.snap)).values()) {
@@ -3757,7 +3760,7 @@ function renderAgenda() {
         if (!matchesSearch(e, terms)) continue;
         if (!passesFacet(e, flt) || !passesOther(e, flt)) { hiddenHits++; continue; }
         hits++;
-        groups.done.push({ e, idx: "", j, d: get(e, "done") || "", local: false, overdue: false, closed: true });
+        groups.done.push({ e, idx: "", j, d: get(e, "done") || "", local: false, overdue: false, closed: true, snapId: e.id });
       }
     }
   });
@@ -3867,7 +3870,7 @@ function renderMonth() {
   $("addLine").placeholder = calDay === t0 ? "New item — talk or type" : "New item on " + fmtDate(calDay);
 }
 
-function itemHtml({ e, idx, j, d, local, overdue, closed, carried }, g) {
+function itemHtml({ e, idx, j, d, local, overdue, closed, carried, snapId }, g) {
   const ro = !!(j && readOnly(j));
   if (ro) idx = ""; // read only: no line to change
   // In Today and Tomorrow the date is implied by the group; it is shown only on wide screens (CSS).
@@ -3915,7 +3918,7 @@ function itemHtml({ e, idx, j, d, local, overdue, closed, carried }, g) {
   if (get(e, "rank") === "high") marks.push(`<span class="mk">high</span>`);
   if (has(e, "review")) marks.push(`<span class="mk review">review</span>`);
   if (local) marks.push(`<span class="mk review">not synced</span>`);
-  return `<div class="item${overdue ? " overdue" : ""}${open ? " open" : ""}${closed ? " isdone" : ""}"${ro ? ' data-ro="1"' : ""} data-line="${idx}" data-key="${esc(key)}" style="border-left-color:${bar}">
+  return `<div class="item${overdue ? " overdue" : ""}${open ? " open" : ""}${closed ? " isdone" : ""}"${ro ? ' data-ro="1"' : ""}${snapId && !ro ? ` data-reopen="${esc(j)}|${esc(snapId)}"` : ""} data-line="${idx}" data-key="${esc(key)}" style="border-left-color:${bar}">
     <div class="swipehint">→ done / reschedule</div>
     <div class="when${implied && !time ? " onlywide" : ""}">${whenHtml}</div>
     <div class="body"><div class="text" data-line="${idx}">${esc(e.text)}${get(e, "recurring") ? `<span class="recic" title="Recurring: ${esc(get(e, "recurring"))}" aria-label="Recurring"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v4.5h-4.5"/></svg></span>` : ""}${e.note ? `<button class="noteic" data-note="${idx}" title="Note" aria-label="Note"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg></button>` : ""}${j ? `<span class="jtag">${esc(journalName(j))}</span>` : ""}</div>
@@ -4449,6 +4452,23 @@ $("agenda").addEventListener("click", ev => {
     if (more.dataset.beyond !== undefined) showBeyond = more.dataset.beyond === "1";
     else { const g = more.dataset.group; if (openGroups.has(g)) openGroups.delete(g); else openGroups.add(g); }
     render(); return;
+  }
+  // A closed entry found in the snapshot only: brought into the working copy first, then the
+  // same tap goes to the same place of the entry as it is drawn now.
+  const closedItem = ev.target.closest(".item[data-reopen]");
+  if (closedItem && ev.target.closest(".chip, .text, [data-note]")) {
+    ev.stopPropagation();
+    const [cj, cid] = closedItem.dataset.reopen.split("|"), key = closedItem.dataset.key;
+    const what = ev.target.closest("[data-note]") ? "[data-note]" : ev.target.closest(".text") ? ".text" : null;
+    const ci = [...closedItem.querySelectorAll(".chip")].indexOf(ev.target.closest(".chip"));
+    const e = withJ(cj, () => currentOf(parseLines(S.snap)).get(cid));
+    if (!e) return;
+    withJ(cj, () => { S.wc = (S.wc ? S.wc + "\n" : "") + toLine(e); });
+    render();
+    const it = [...document.querySelectorAll(".item")].find(x => x.dataset.key === key && !x.dataset.reopen);
+    const target = it && (what ? it.querySelector(what) : it.querySelectorAll(".chip")[ci]);
+    if (target) target.click();
+    return;
   }
   const noteBtn = ev.target.closest("[data-note]");
   if (noteBtn) { ev.stopPropagation(); openNote(noteBtn.dataset.note); return; }
@@ -5046,7 +5066,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.7.3, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.7.4, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -5252,7 +5272,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.7.3";
+const APP_VERSION = "0.7.4";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
