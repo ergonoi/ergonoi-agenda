@@ -114,6 +114,7 @@
   #fpanel details { margin-top:14px; border-top:.5px solid var(--line); }
   #fpanel summary { cursor:pointer; padding:12px 18px 4px; font:600 14px "Inter", var(--font, sans-serif); color:var(--fg2); }
   #fpanel .more { padding:0 18px; }
+  #fpanel .more.jmore { padding:0 0 6px; }
   #fpanel .more h4 { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); font-weight:500; margin:14px 0 2px; }
   #fpanel .vals { display:flex; flex-wrap:wrap; gap:0 18px; }
   #fpanel .vals button { min-height:var(--bm); padding:0; border:0; border-radius:0; background:transparent; font-size:15px; display:inline-flex; align-items:center; gap:7px; color:var(--fg); -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
@@ -4396,12 +4397,22 @@ function renderPanel() {
   // Facets grouped by the journal they belong to, in the order of the journals; within a
   // journal by name, so that each keeps its place.
   const keys = valuesOf("facet").filter(k => k && (total.get(k) || f.facet.includes(k)));
-  for (const j of journals()) {
+  const jblock = j => {
     const ks = keys.filter(k => keyJ(k) === j).sort((a, b) => facetName(a).localeCompare(facetName(b)));
-    if (!ks.length) continue;
+    if (!ks.length) return "";
     const allOff = ks.every(k => f.facet.includes(k));
-    h += `<button type="button" class="jh${allOff ? " off" : ""}" data-fj="${esc(j)}" title="Tap: all facets of this journal on or off. Long press: only this journal.">${esc(journalName(j))}${readOnly(j) ? LOCK_SVG : ""}</button>`;
-    h += ks.map(k => `<button type="button" class="fac${f.facet.includes(k) ? " off" : ""}" data-facetf="${esc(k)}"><span class="sw" style="background:${facetColor(k) || "var(--line)"}"></span>${esc(facetName(k))}<span class="n">${c.get(k) || 0}</span></button>`).join("");
+    return `<button type="button" class="jh${allOff ? " off" : ""}" data-fj="${esc(j)}" title="Tap: all facets of this journal on or off. Long press: only this journal.">${esc(journalName(j))}${readOnly(j) ? LOCK_SVG : ""}</button>`
+      + ks.map(k => `<button type="button" class="fac${f.facet.includes(k) ? " off" : ""}" data-facetf="${esc(k)}"><span class="sw" style="background:${facetColor(k) || "var(--line)"}"></span>${esc(facetName(k))}<span class="n">${c.get(k) || 0}</span></button>`).join("");
+  };
+  h += jblock("");
+  // The further journals folded below the own one (ui.md 4.6): allies first, then guests,
+  // each by name. Open when one of their facets is hidden, so that no filter is out of sight.
+  const others = journals().filter(j => j && keys.some(k => keyJ(k) === j))
+    .sort((a, b) => readOnly(a) - readOnly(b) || journalName(a).localeCompare(journalName(b)));
+  if (others.length) {
+    const hidden = others.some(j => keys.some(k => keyJ(k) === j && f.facet.includes(k)));
+    const jOpen = LS.getItem("agenda.fjour") === "1" || hidden;
+    h += `<details id="fpJour"${jOpen ? " open" : ""}><summary>More journals (${others.length})</summary><div class="more jmore">${others.map(jblock).join("")}</div></details>`;
   }
   if (total.get("") || f.facet.includes("")) h += `<button type="button" class="fac${f.facet.includes("") ? " off" : ""}" data-facetf="" style="margin-top:8px"><span class="sw" style="background:var(--line)"></span>without facet<span class="n">${c.get("") || 0}</span></button>`;
   // The other tags, folded.
@@ -4429,6 +4440,7 @@ function renderPanel() {
   $("fpanel").innerHTML = h; $("fpanel").style.setProperty("--vswn", vswn(vs));
   if (panelNaming) $("panelNewName").focus();
   const det = $("fpMore"); if (det) det.ontoggle = () => LS.setItem("agenda.fmore", det.open ? "1" : "0");
+  const dj = $("fpJour"); if (dj) dj.ontoggle = () => LS.setItem("agenda.fjour", dj.open ? "1" : "0");
 }
 const LOCK_SVG = '<svg class="lock" width="13" height="13" viewBox="0 0 16 16" role="img" aria-label="read only"><title>read only</title><rect x="3.5" y="7" width="9" height="6.5" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>';
 
