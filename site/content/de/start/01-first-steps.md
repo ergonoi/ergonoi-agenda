@@ -16,7 +16,7 @@ Gib deinem Journal einen Namen, etwa deinen Vornamen, und tippe auf *Continue*.
 
 ## Deine PIN
 
-Danach wählst du eine PIN aus sechs bis zwölf Ziffern. Dieser Browser hält deine Journale, ihre Wörter und Codes nur mit ihr verschlüsselt und fragt beim Öffnen der App nach ihr; wer Wörter oder Codes anzeigen will, wird erneut gefragt. Eine vergessene PIN kostet keine Daten: *Forgot PIN* leert diesen Browser, und du richtest ihn mit deinen acht Wörtern neu ein.
+Danach wählst du eine PIN aus sechs bis zwölf Ziffern. Dieser Browser hält deine Journale, ihre Wörter und Codes nur mit ihr verschlüsselt und fragt beim Öffnen der App nach ihr; wer Wörter oder Codes anzeigen will, wird erneut gefragt. Am Telefon zeigt die App für die PIN ein eigenes Ziffernfeld; ✓ bestätigt. Am Rechner tippst du sie ein und drückst die Eingabetaste. Eine vergessene PIN kostet keine Daten: *Forgot PIN* leert diesen Browser, und du richtest ihn mit deinen acht Wörtern neu ein.
 
 ## Der erste Eintrag
 

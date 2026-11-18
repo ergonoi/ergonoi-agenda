@@ -22,6 +22,8 @@ const (
 	// One encrypted item per account for moving something between one's own devices
 	// (architecture 8.15): 4 MB of content plus what encryption and its header add.
 	maxClipBytes = 4<<20 + 64<<10
+	// clipTTL is how long a clipboard item stays; the file's modification time is its age.
+	clipTTL = 24 * time.Hour
 	maxLineBytes = 4096 // decoded size of one encrypted line
 	nonceBytes   = 12
 	tagBytes     = 16
@@ -264,13 +266,28 @@ func (r *Relay) Expire() (int, error) {
 			n++
 		}
 	}
+	// Clipboard items older than clipTTL go as well, read or not.
+	clips, _ := filepath.Glob(filepath.Join(r.dir, "*.clip"))
+	for _, c := range clips {
+		if st, err := os.Stat(c); err == nil && r.now().Sub(st.ModTime()) > clipTTL {
+			acc := strings.TrimSuffix(filepath.Base(c), ".clip")
+			r.ClipDelete(acc)
+		}
+	}
 	return n, nil
 }
 
 // ClipGet returns the stored clipboard item of an account and its ETag; none is empty.
 func (r *Relay) ClipGet(acc string) ([]byte, string, error) {
 	defer r.lock(acc)()
-	data, err := os.ReadFile(r.path(acc, ".clip"))
+	p := r.path(acc, ".clip")
+	if st, err := os.Stat(p); err == nil && r.now().Sub(st.ModTime()) > clipTTL {
+		if err := os.Remove(p); err != nil && !os.IsNotExist(err) {
+			return nil, "", err
+		}
+		return nil, "", nil
+	}
+	data, err := os.ReadFile(p)
 	if err != nil && !os.IsNotExist(err) {
 		return nil, "", err
 	}

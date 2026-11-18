@@ -16,7 +16,7 @@ Give your journal a name, for example your first name, and tap *Continue*.
 
 ## Your PIN
 
-Then choose a PIN of six to twelve digits. This browser keeps your journals, their words and codes only encrypted with it and asks for it when the app opens; showing words or codes asks for it again. A forgotten PIN is no loss of data: *Forgot PIN* clears this browser, and you set it up again with your eight words.
+Then choose a PIN of six to twelve digits. This browser keeps your journals, their words and codes only encrypted with it and asks for it when the app opens; showing words or codes asks for it again. On a phone the app shows its own keypad for the PIN; ✓ confirms. On a computer, type it and press Enter. A forgotten PIN is no loss of data: *Forgot PIN* clears this browser, and you set it up again with your eight words.
 
 ## The first entry
 

@@ -37,6 +37,8 @@
     --fg:#1A1A1A; --fg2:#4A4646; --muted:#7A7676;
     --line:#B8B4B4; --rule:#1A1A1A;
     --teal:#218380; --amber:#FFB400; --scarlet:#FF2E00; --wisteria:#C490D1; --aqua:#97EAD2; --amethyst:#460A46;
+    /* Not a journal colour: only marks a filled clipboard (ui.md 4.16). */
+    --blue:#2B3BD6;
     --tap:44px; --off:.45; --bs:32px; --bm:44px;
     --veil:rgba(255,255,255,.8);
     --side:#F8F7F7; --mist:#E8E6E6;
@@ -118,8 +120,13 @@
   }
   #btnClip, #btnSearch, #btnSync, #btnSettings { border:0; min-width:var(--tap); padding:0 10px; color:var(--fg2); }
   /* The clipboard (ui.md 4.16): grey when empty, Teal with a light fill when it holds something. */
-  #btnClip.filled { color:var(--teal); }
-  #btnClip.filled .fill { fill:var(--aqua); fill-opacity:.45; }
+  #btnClip.filled { color:var(--blue); }
+  /* The keypad of the PIN dialog on touch devices (ui.md 4.12a): iOS opens no keyboard
+     for a field the page focuses itself, so the app brings its own. */
+  #pinPad { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin:12px 0 4px; }
+  #pinPad.hidden { display:none; }
+  #pinPad button { min-height:56px; font-size:22px; }
+  #dlgPin input.padactive { border-bottom-color:var(--teal); }
   #btnClip.over, #dlgClip.over { outline:2px dashed var(--teal); outline-offset:-2px; }
   #clipPreview { margin:10px 0; min-height:48px; display:flex; align-items:center; justify-content:center; border:.5px solid var(--line); border-radius:6px; padding:8px; overflow:hidden; }
   #clipPreview img { max-width:100%; max-height:40vh; display:block; }
@@ -675,7 +682,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.8.1</span>
+    <span class="ver">v0.8.2</span>
     <a href="#" id="aboutLink">About</a>
     <a href="https://outheis-labs.github.io/outheis-agenda/" target="_blank" rel="noopener">Documentation <svg width="7" height="7" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
   </footer>
@@ -690,6 +697,12 @@
     <div id="pin2Row"><label for="pin2">Repeat the PIN</label>
     <input id="pin2" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="12"></div>
     <div class="hint" id="pinMsg" aria-live="polite"></div>
+    <div id="pinPad" class="hidden" aria-label="Keypad">
+      <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
+      <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
+      <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
+      <button type="button" data-k="del" aria-label="Delete">⌫</button><button type="button" data-k="0">0</button><button type="button" data-k="ok" class="primary" aria-label="OK">✓</button>
+    </div>
     <p class="hint hidden" id="pinWithoutWarn">Without a PIN, this browser keeps all your journals, their words and codes unencrypted: whoever uses this device can read them and pass them on. Sensible on a shared device that holds only guest or ally codes. Tap again to continue without a PIN.</p>
     <p class="hint hidden" id="pinForgotWarn">This clears all data in this browser. The journals on the server are not touched; changes not yet sent are lost. Then set up again with your words. Tap again to clear.</p>
     <div class="btnrow" style="justify-content:flex-end">
@@ -703,7 +716,7 @@
 <dialog id="dlgClip">
   <form method="dialog">
     <strong>Clipboard</strong>
-    <p class="hint" id="clipHint">One item for your own devices: a picture, a file or a text, up to 4 MB. Paste it here (Ctrl/Cmd+V), drop it here, or choose it. Only you can read it; a new item replaces the old.</p>
+    <p class="hint" id="clipHint">One item for your own devices: a picture, a file or a text, up to 4 MB. Paste it here (Ctrl/Cmd+V), drop it here, or choose it. Only you can read it; a new item replaces the old. The server removes it after 24 hours.</p>
     <div id="clipPreview"><span class="hint">Empty</span></div>
     <div class="hint" id="clipMsg" aria-live="polite"></div>
     <div class="btnrow">
@@ -721,7 +734,7 @@
     <strong>οὐθείς Agenda</strong>
     <p>οὐθείς Agenda is an <b>ergonoi</b> project:</p>
     <p style="margin-top:14px">Technology is potential. Accessibility makes it matter.</p>
-    <p class="hint">Version 0.8.1 · outheis-labs</p>
+    <p class="hint">Version 0.8.2 · outheis-labs</p>
     <div class="btnrow" style="justify-content:flex-end"><button class="primary">Close</button></div>
   </form>
 </dialog>
@@ -5092,7 +5105,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.8.1, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.8.2, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -5298,7 +5311,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.8.1";
+const APP_VERSION = "0.8.2";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
@@ -7652,7 +7665,32 @@ function pinDialog(mode) {
     };
     $p("pinForgotWarn").classList.add("hidden");
     d.oncancel = e => { if (mode === "unlock" || mode === "choose") e.preventDefault(); else done(null); };
-    for (const id of ["pin1", "pin2"]) $p(id).onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); $p("pinOk").click(); } };
+    // Touch devices: the app's own keypad, the system keyboard stays closed; ✓ goes on to
+    // the repetition or confirms. With a keyboard, Enter does the same.
+    const pad = matchMedia("(pointer: coarse)").matches;
+    let cur = $p("pin1");
+    $p("pinPad").classList.toggle("hidden", !pad);
+    $p("pinOk").classList.toggle("hidden", pad);
+    for (const id of ["pin1", "pin2"]) {
+      const f = $p(id);
+      f.readOnly = pad; f.setAttribute("inputmode", pad ? "none" : "numeric");
+      f.onclick = () => { if (pad) { cur = f; $p("pin1").classList.toggle("padactive", f.id === "pin1"); $p("pin2").classList.toggle("padactive", f.id === "pin2"); } };
+    }
+    $p("pin1").classList.toggle("padactive", pad); $p("pin2").classList.remove("padactive");
+    $p("pinPad").onclick = ev => {
+      const k = ev.target.closest("button")?.dataset.k;
+      if (!k) return;
+      if (k === "del") cur.value = cur.value.slice(0, -1);
+      else if (k === "ok") {
+        if (set && cur.id === "pin1" && !$p("pin2Row").classList.contains("hidden")) { cur = $p("pin2"); $p("pin1").classList.remove("padactive"); $p("pin2").classList.add("padactive"); return; }
+        $p("pinOk").click();
+      } else if (cur.value.length < 12) cur.value += k;
+    };
+    for (const id of ["pin1", "pin2"]) $p(id).onkeydown = e => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      if (set && id === "pin1") $p("pin2").focus(); else $p("pinOk").click();
+    };
     d.showModal(); $p("pin1").focus();
   });
 }

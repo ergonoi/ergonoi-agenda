@@ -22,7 +22,7 @@ Die App hält eine Kopie deiner Journale im Browser und arbeitet auch offline. W
 
 ## Die Ablage
 
-Das Ablagefach links neben der Lupe bringt ein Stück von einem deiner Geräte auf die anderen: ein Bild, eine Datei oder einen Text, bis 4 MB. Zieh es auf das Fach, oder klick auf das Fach und füge mit Strg/Cmd+V ein, oder wähle eine Datei; am Telefon das Fach antippen und *Paste* oder *Choose file or photo*. Auf deinen anderen Geräten wird das Fach bei der nächsten Synchronisation Teal. Dort kopiert ein Klick einen Text oder ein Bild in die Zwischenablage; wer das Fach in einen Ordner zieht, legt dort eine Kopie ab; am iPhone bringen *Save / share* und *Bild sichern* ein Foto in die Fotos-App. Ein neues Stück ersetzt das alte, *Clear* entfernt es. Lesen kannst nur du; wer Journale mit dir teilt, sieht davon nichts.
+Das Ablagefach links neben der Lupe bringt ein Stück von einem deiner Geräte auf die anderen: ein Bild, eine Datei oder einen Text, bis 4 MB. Zieh es auf das Fach, oder klick auf das Fach und füge mit Strg/Cmd+V ein, oder wähle eine Datei; am Telefon das Fach antippen und *Paste* oder *Choose file or photo*. Auf deinen anderen Geräten wird das Fach bei der nächsten Synchronisation blau. Dort kopiert ein Klick einen Text oder ein Bild in die Zwischenablage; wer das Fach in einen Ordner zieht, legt dort eine Kopie ab; am iPhone bringen *Save / share* und *Bild sichern* ein Foto in die Fotos-App. Ein neues Stück ersetzt das alte, *Clear* entfernt es, nach 24 Stunden entfernt es der Server. Lesen kannst nur du; wer Journale mit dir teilt, sieht davon nichts.
 
 ## Ein gemeinsam genutztes Gerät
 

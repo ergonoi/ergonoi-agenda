@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 // v2 holds the tokens of one version 2 journal (architecture 8.11e).
@@ -163,7 +165,8 @@ func TestV2ReplaceOnlyByOwner(t *testing.T) {
 }
 
 func TestClipOwnerOnly(t *testing.T) {
-	relay, _ := newRelay(t.TempDir())
+	dir := t.TempDir()
+	relay, _ := newRelay(dir)
 	h := newServer(relay, newMembers("")).mux()
 	j := newV2()
 	fp := map[string]string{fingerprintHeader: j.fp}
@@ -189,6 +192,15 @@ func TestClipOwnerOnly(t *testing.T) {
 	if rec := doV2(t, h, "GET", "/clip", "Write "+j.w, map[string]string{fingerprintHeader: j.fp, ownerHeader: j.d, "If-None-Match": etag}, ""); rec.Code != 304 {
 		t.Fatalf("unchanged clip: %d", rec.Code)
 	}
+	later := time.Now().Add(clipTTL + time.Minute)
+	relay.now = func() time.Time { return later }
+	if rec := doV2(t, h, "HEAD", "/clip", "Write "+j.w, own, ""); rec.Code != 404 {
+		t.Fatalf("expired clip: %d", rec.Code)
+	}
+	if left, _ := filepath.Glob(filepath.Join(dir, "*.clip")); len(left) != 0 {
+		t.Fatalf("expired clip still on disk: %v", left)
+	}
+	relay.now = time.Now
 	if rec := doV2(t, h, "PUT", "/clip", "Write "+j.w, own, strings.Repeat("a", maxClipBytes+1)); rec.Code != 413 {
 		t.Fatalf("too large: %d", rec.Code)
 	}
