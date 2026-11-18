@@ -23,7 +23,7 @@ The interface changes in steps, each recorded here with its aim. The aim of the 
 
 1. **0.9.0 (20 November 2026): views, facet panel, title.** The facet bar over the list and the filter tab are replaced by named views, chosen from the title, and a facet panel grouped by journal (4.14). Frequent switches between facet combinations take two taps from anywhere; the list gains the rows the bar took; it is visible at once whom a facet belongs to; a read-only journal is marked with a lock instead of a label. Decisions 6.7.
 2. **0.9.1, branch `ui-concept`: phone layout and settings.** On phones a bottom bar *List* / *Month* / *Text*, the menu in the facet panel, settings as pages with a back arrow, rows with switches, PIN levels as a list with a check mark, actions as rows and dangerous ones in Scarlet at the end; journals as rows that open their dialog. *Test connection* under the server address (decisions 6.4b).
-3. **Planned, in a branch:** three columns on wide screens (panel, list, detail of the chosen entry), a bottom bar *List* / *Month* / *Text* on phones, search in the header for the open view, settings as pages of rows.
+3. **Branch `ui-concept`: three columns on wide screens.** From 1440 px the facet panel, the list and a detail column stand side by side. The list shows when, text and markers only; a click chooses an entry, and the detail column shows it with all its tags as rows (dimension left, value right), where text and tags are changed as before, together with *Done or reschedule* and the note. Without a choice the column stays in place with a short hint. Below 1440 px nothing changes. List and month view alike.
 
 ---
 

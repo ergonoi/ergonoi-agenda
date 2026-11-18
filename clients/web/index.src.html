@@ -192,6 +192,9 @@
     #detail .dempty { color:var(--muted); font-size:15px; margin-top:24px; }
     #agenda .item { cursor:pointer; }
     #agenda .item .fold, #agenda .item .chips { display:none !important; }
+    #agenda .item .text { max-width:none; flex:1 1 auto; }
+    #agenda .item .marks { display:flex !important; flex:none; margin:0 0 0 auto; padding:0; }
+    #agenda .item .marks:empty { display:none !important; }
     #agenda .item.sel { background:var(--sel, rgba(0,0,0,.045)); }
   }
   #journalList .chev { display:none; }
