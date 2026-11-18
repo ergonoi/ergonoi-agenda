@@ -161,6 +161,8 @@ Each user keeps their own phrase, and can export their encrypted journal at any 
 
 ### 8a. Nightly versioned backup with restic (prepared, not yet deployed)
 
+The service keeps its own daily backups of every journal (architecture 8.4c) and removes them when a journal is deleted (8.4b). A restic backup of the data directory is the administrator's copy against losing the server; it holds a deleted journal as long as its retention, so keep it short (`--keep-daily 7` is in line with the 7 days in which an owner can undo a deletion).
+
 The files in `deploy/backup/` copy the account directory every night to one or more repositories with [restic](https://restic.net), keeping versions: 14 daily, 8 weekly, 12 monthly. Versions protect also against a client that writes a damaged or emptied journal, which a plain copy would overwrite. As the account files are encrypted by the clients, any storage provider can hold them; restic encrypts once more with its own repository password. Two targets with different providers are recommended, for example a Hetzner Storage Box and Backblaze B2.
 
 What runs: `agenda-backup.timer` starts `agenda-backup.service` at about 03:17 (randomised by up to 20 minutes; a missed run is made up after a reboot). The service runs as the user `agenda` with read-only access to `/var/lib/agenda` and calls `agenda-backup.sh`, which for every file `/etc/agenda-backup/<name>.env` runs `restic backup`, `restic forget --prune` and `restic check`, and reports `<name>: ok` or `<name>: FAILED` in the journal (`journalctl -u agenda-backup`). A failing target does not stop the others.

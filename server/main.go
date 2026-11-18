@@ -6,7 +6,9 @@
 //	POST   /append    append encrypted lines (creates the account on first use)
 //	GET    /journal   the stored file (ETag, If-None-Match)
 //	PUT    /journal   replace the file; requires If-Match (compaction by a client)
-//	DELETE /journal   delete the account
+//	DELETE /journal   delete the account; the owner can undo it for 7 days (backup.go)
+//	POST   /undelete  undo a deletion within those 7 days (owner)
+//	GET    /backups   the daily copies of the journal (backup.go); GET /backups/<n> one of them
 //	GET    /members   who uses the journal: member IDs with last use (members.go)
 //	GET    /clip      the one encrypted clipboard item of the account (ETag; HEAD for presence)
 //	PUT    /clip      replace it (owner only, at most 4 MB of content)
@@ -18,6 +20,7 @@
 // token ("Authorization: Bearer <64 hex>", account = hex(SHA-256(token))) or a
 // version 2 read, write or delete token (owner, ally, guest; architecture 8.11e).
 // Every request also carries a member ID ("X-Agenda-Member: <64 hex>", members.go).
+// A deleted account answers every request with 410 Gone and {"deleted": day}.
 package main
 
 import (
@@ -32,15 +35,17 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/outheis-labs/outheis-agenda/clients/web"
 )
 
 var (
-	listenAddr = flag.String("listen", "127.0.0.1:41380", "listen address")
-	dataDir    = flag.String("data", "accounts", "directory for account files")
-	membersDir = flag.String("members-dir", "", "keep the member table of each journal also in this directory (default: memory only)")
+	listenAddr  = flag.String("listen", "127.0.0.1:41380", "listen address")
+	dataDir     = flag.String("data", "accounts", "directory for account files")
+	membersDir  = flag.String("members-dir", "", "keep the member table of each journal also in this directory (default: memory only)")
+	backupSlots = flag.Int("backup-slots", 9, "places for daily backups, rotated as in the towers of Hanoi (9: about one year back; 0: none)")
 )
 
 // Rate limits (architecture 8.4, open issue 5).
@@ -110,7 +115,75 @@ func (s *server) handleJournal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// A deleted account (backup.go): its owner may delete again or undo; once the deletion
+	// is final the owner may also start anew with the same words. Everyone else learns
+	// that it was deleted.
+	if info, ok := s.relay.gone(acc); ok {
+		ownerWrite := level.canReplace() && ((r.URL.Path == "/append" && r.Method == http.MethodPost) || (r.URL.Path == "/journal" && r.Method == http.MethodPut))
+		switch {
+		case r.URL.Path == "/journal" && r.Method == http.MethodDelete && level.canDelete():
+			w.WriteHeader(http.StatusNoContent)
+			return
+		case r.URL.Path == "/undelete" && r.Method == http.MethodPost && level.canDelete():
+			if err := s.relay.Undelete(acc); err != nil {
+				goneResponse(w, info)
+				return
+			}
+			log.Printf("deletion undone")
+			w.WriteHeader(http.StatusNoContent)
+			return
+		case ownerWrite && !info.Restorable:
+			if err := s.relay.Reopen(acc); err != nil {
+				s.fail(w, err)
+				return
+			}
+		default:
+			goneResponse(w, info)
+			return
+		}
+	}
+
 	switch {
+	case r.URL.Path == "/undelete" && r.Method == http.MethodPost:
+		if !level.canDelete() {
+			forbidden()
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+
+	case (r.URL.Path == "/backups" || strings.HasPrefix(r.URL.Path, "/backups/")) && r.Method == http.MethodGet:
+		if !level.canRead() {
+			forbidden()
+			return
+		}
+		if !s.reads.allow(acc) {
+			tooMany(w, 60)
+			return
+		}
+		if q := strings.TrimPrefix(r.URL.Path, "/backups/"); q != r.URL.Path {
+			k, err := strconv.Atoi(q)
+			if err != nil {
+				http.Error(w, "bad slot", http.StatusBadRequest)
+				return
+			}
+			data, err := s.relay.BackupGet(acc, k)
+			if err != nil {
+				http.Error(w, "no such backup", http.StatusNotFound)
+				return
+			}
+			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+			w.Header().Set("Content-Length", strconv.Itoa(len(data)))
+			w.Write(data)
+			return
+		}
+		list, err := s.relay.Backups(acc)
+		if err != nil {
+			s.fail(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]any{"backups": list})
+
 	case r.URL.Path == "/journal" && (r.Method == http.MethodGet || r.Method == http.MethodHead):
 		if !level.canRead() {
 			forbidden()
@@ -275,7 +348,7 @@ func (s *server) handleJournal(w http.ResponseWriter, r *http.Request) {
 			forbidden()
 			return
 		}
-		if err := s.relay.Delete(acc); err != nil {
+		if err := s.relay.SoftDelete(acc); err != nil {
 			s.fail(w, err)
 			return
 		}
@@ -285,6 +358,13 @@ func (s *server) handleJournal(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+// goneResponse tells that the journal was deleted, and until when its owner can undo it.
+func goneResponse(w http.ResponseWriter, info goneInfo) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusGone)
+	w.Write(goneJSON(info))
 }
 
 // tooMany refuses a request and says after how many seconds to ask again.
@@ -305,9 +385,20 @@ func (s *server) fail(w http.ResponseWriter, err error) {
 	}
 }
 
-// housekeeping deletes inactive accounts and clears rate-limit state once a day.
+// housekeeping makes the daily backups, removes deleted journals whose grace period has
+// passed, deletes inactive accounts and clears rate-limit state once a day.
 func (s *server) housekeeping() {
 	for {
+		if slot, n, err := s.relay.Backup(*backupSlots); err != nil {
+			log.Printf("backup: %v", err)
+		} else if n > 0 {
+			log.Printf("backed up %d journals into place %d", n, slot)
+		}
+		if n, err := s.relay.sweepDeleted(); err != nil {
+			log.Printf("purge: %v", err)
+		} else if n > 0 {
+			log.Printf("removed %d deleted journals for good", n)
+		}
 		if n, err := s.relay.Expire(); err != nil {
 			log.Printf("expire: %v", err)
 		} else if n > 0 {
@@ -345,6 +436,9 @@ func (s *server) mux() *http.ServeMux {
 	mux.HandleFunc("/append", s.handleJournal)
 	mux.HandleFunc("/members", s.handleJournal)
 	mux.HandleFunc("/clip", s.handleJournal)
+	mux.HandleFunc("/backups", s.handleJournal)
+	mux.HandleFunc("/backups/", s.handleJournal)
+	mux.HandleFunc("/undelete", s.handleJournal)
 	mux.HandleFunc("/health", handleHealth)
 	files := http.FileServer(http.FS(web.FS))
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

@@ -431,7 +431,7 @@ With logging on, the client writes what it did to the local log: lines before an
 
 ### 6.4a Deleted on the server
 
-A journal that had content and comes back empty from the server was deleted there: by its owner, or by the administrator removing its file. Every browser keeps its last state, shows it, and writes nothing into the journal, not even meta lines, so that the deletion is not undone by accident. A notice says so; the journal dialog explains it. Whoever may write the journal (in version 1 every holder of the phrase, in version 2 owner and allies) is offered *Restore on the server*: the browser writes its last state back, every stored line with its id and revision, the lines it cannot read unchanged. The other browsers then see the journal again and add what they have that is missing, by the usual synchronisation; nothing is doubled. *Remove from my journals* takes it out of the browser instead. That any writer can restore a deleted journal is intended: in an asynchronous system every copy is a backup. A journal is gone for good only when nobody restores it, or after *Stop sharing* (8.11b), which makes the old codes void.
+Since 0.9.18 a deletion by the owner is answered with `410 Gone` (8.4b): every browser then removes its copy and its backups. What follows applies when the file is gone without that answer, for instance because the administrator removed it. A journal that had content and comes back empty from the server was deleted there. Every browser keeps its last state, shows it, and writes nothing into the journal, not even meta lines, so that the deletion is not undone by accident. A notice says so; the journal dialog explains it. Whoever may write the journal (in version 1 every holder of the phrase, in version 2 owner and allies) is offered *Restore on the server*: the browser writes its last state back, every stored line with its id and revision, the lines it cannot read unchanged. The other browsers then see the journal again and add what they have that is missing, by the usual synchronisation; nothing is doubled. *Remove from my journals* takes it out of the browser instead. That any writer can restore a deleted journal is intended: in an asynchronous system every copy is a backup. A journal is gone for good only when nobody restores it, or after *Stop sharing* (8.11b), which makes the old codes void.
 
 **Vanished lines.** An open entry may leave the file only through a newer revision, and a closed one by compaction. If an open entry vanishes otherwise, the file was shortened on the server, by the administrator or by a faulty client of the owner. The client keeps what vanished, says so, and offers whoever may write *Restore these lines* (appending them again, with their ids and revisions) or *Let them go*. Lines that come back from another browser are no longer counted as missing. Lines the client cannot read are not compared, since compaction encrypts them anew.
 
@@ -613,10 +613,15 @@ Tokens and hashes are 32 bytes, sent as 64 lowercase hex digits; `F` is 11 bytes
 | `POST /append` | body: one or more encrypted lines; appended in one write; creates the account on first use; returns the new `ETag` |
 | `GET /journal` | the file as stored; `ETag` = hash of the file; supports `If-None-Match` |
 | `PUT /journal` | replaces the file; requires `If-Match: <ETag>`; answers `412` if the file changed since (compaction, 8.5) |
-| `DELETE /journal` | deletes the account (version 2: the owner's delete token only) |
+| `DELETE /journal` | deletes the account (version 2: the owner's delete token only); for 7 days it can be undone (8.4b) |
+| `POST /undelete` | undoes a deletion within those 7 days (the owner's delete token) |
+| `GET /backups` | `{"backups":[{"slot","time","size"}]}`: the daily copies of the journal, newest first (8.4c) |
+| `GET /backups/<n>` | the copy in place `n`, as stored |
 | `GET /members` | the member IDs (first 16 hex characters) that used the journal, each with its last use, and since when the service counts (8.4a) |
 | `GET /health` | `{"service":"outheis-agenda","version":"…"}`, no account, no member ID, nothing stored; for the connection test of the clients (decisions 6.4b) |
 | `GET /` | web application |
+
+A deleted account answers every request with `410 Gone` and `{"deleted":"<day>","restorable":…,"until":"<time>"}`, except a repeated `DELETE`, the owner's `POST /undelete`, and, once the deletion is final, the owner's first write, which starts the account anew.
 
 Every request except `GET /health` also carries the member ID `X-Agenda-Member: <64 hex digits>` (8.4a); a request without member ID is refused (`400`). Query parameters are not accepted, so tokens do not end up in logs or browser histories.
 
@@ -627,11 +632,29 @@ Every request except `GET /health` also carries the member ID `X-Agenda-Member: 
 - pacing per journal and member: a burst of six requests (one synchronisation), then one per second; a request beyond waits for its turn (up to 10 seconds) instead of being refused, so that a client that asks too often is slowed down without errors. Whether the journal has changed is asked with its ETag (`If-None-Match`); an unchanged journal is answered with 304 and no data;
 - rate limits: 60 writes and 240 reads per account per minute, 1200 requests per IP address per minute (against abuse only: the devices of a household share one address), 10 new accounts per IP address per day (`X-Forwarded-For` is trusted only from the local reverse proxy). A refusal (429) says in `Retry-After` when to ask again; the client waits that long;
 - no unauthenticated read access to any file;
-- accounts without any access for 5 years are deleted.
+- accounts without any access for 5 years are deleted, with their backups.
 
 Short encrypted texts exchanged between two parties who share a phrase remain possible; no service that cannot read its content can prevent that. Files, images and video are excluded by the admission rules.
 
 `GET /` serves the web client; in the page the placeholder for its own address is replaced by the scheme and host of the request, for the absolute image address of link previews (`ui.md` 2.7a). The host is accepted only if it consists of letters, digits, dots, hyphens and a port.
+
+### 8.4b Deleting a journal
+
+Deleting is a decision of the owner, and it ends every access at once: from then on the service answers every other request for the journal with `410 Gone`. A client that receives it removes the journal from its list, its copy and its backups (8.4c), and says so. For the default journal of the account the browser is cleared, and the start page says why.
+
+So that a deletion by mistake can be undone, the encrypted file and its backups stay on the server for 7 days, readable by nobody. Within that time the owner undoes it: the browser that deleted it keeps the words and the delete token as long, and offers *Undo deletion* in Settings → Journals; for the account itself, entering its words on the start page does it. Then the file and its backups are removed for good.
+
+What remains is a marker with the day of the deletion and nothing else, kept for 5 years. Without it a client could not tell a deletion from a server that lost or reset its files; in that case it must keep everything (6.4a). Once the deletion is final, its owner may use the same words again; the journal then starts empty.
+
+No system can take back what someone downloaded, exported or copied before, nor reach a device that never comes online again. The deletion reaches every copy that is still connected.
+
+### 8.4c Backups
+
+The service keeps up to 9 copies of every journal, made once a day and rotated as in the towers of Hanoi: on day `d` (days since 1970) the copy goes into the place given by the number of trailing zero bits of `d`, at most 8. Place 0 is written every second day, place 1 every fourth, place `k` every `2^(k+1)`th; the copies are thus about 1, 2, 4, 8 … days old and reach back about a year, at most 9 × 5 MB per account. They are the encrypted files as stored; the service reads none of them. The number of places is set with `-backup-slots` (0: none).
+
+Every browser keeps the same rotation of its own, once a day for each journal, as encrypted files in its database (IndexedDB), so that someone who works offline for weeks still has staggered states. The journal dialog lists both, newest first: *Download* gives the encrypted file, which *Work locally* opens; *Restore* (the owner, two taps) replaces the journal with that state. The other devices then notice entries that are missing now and may add them again (6.4a).
+
+When a journal is deleted, its backups go with it: on the server after the 7 days, in every browser as soon as it learns of the deletion.
 
 ### 8.4a Members of a journal
 
