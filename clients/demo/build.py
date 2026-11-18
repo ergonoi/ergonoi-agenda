@@ -2,6 +2,7 @@
 # adds a demo bar and a simulated server (fetch override) that keeps data in localStorage.
 # Usage: python3 clients/demo/build.py  ->  clients/demo/dist/agenda-click-dummy.html
 import os
+import re
 HERE = os.path.dirname(os.path.abspath(__file__))
 s = open(os.path.join(HERE, '..', 'web', 'index.html')).read()
 def rep(a, b):
@@ -10,7 +11,7 @@ def rep(a, b):
     s = s.replace(a, b, 1)
 rep('<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">', '<meta name="viewport" content="width=device-width, initial-scale=1">')
 rep('<link rel="manifest" href="manifest.webmanifest">\n', '')
-rep('<title>οὐθείς Agenda</title>', '<title>οὐθείς Agenda — click dummy</title>')
+s = re.sub(r'<title>([^<]*)</title>', r'<title>\1 — click dummy</title>', s, count=1)  # either brand (brand.json)
 rep('if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});\n', '')
 rep('</style>', '''  #demobar { background:var(--amethyst); color:#fff; font-size:12px; padding:6px 16px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
   #demobar button { color:#fff; border-color:rgba(255,255,255,.5); min-height:30px; padding:0 8px; font-size:12px; }

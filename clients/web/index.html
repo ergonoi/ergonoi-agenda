@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#97EAD2">
-<script>try { if (localStorage.getItem("agenda.compact") === "1") document.documentElement.classList.add("compact"); if (localStorage.getItem("agenda.minimal") === "1") { document.documentElement.classList.add("minimal"); document.querySelector('meta[name="theme-color"]').content = "#E2C8E8"; document.title = "ergonoi Agenda"; } } catch {}</script>
+<!-- The default theme is set at build time (brand.json, docs/rebrand.md); the choice in Settings wins per device. -->
+<script>(function () { let m = null; try { if (localStorage.getItem("agenda.compact") === "1") document.documentElement.classList.add("compact"); m = localStorage.getItem("agenda.minimal"); } catch {} const on = m ? m === "1" : "outheis" === "ergonoi"; document.documentElement.classList.toggle("minimal", on); document.querySelector('meta[name="theme-color"]').content = on ? "#E2C8E8" : "#97EAD2"; })();</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="οὐθείς Agenda">
 <link rel="manifest" href="manifest.webmanifest">
@@ -876,7 +877,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.9.6</span>
+    <span class="ver">v0.9.7</span>
     <a href="#" id="aboutLink">About</a>
     <a href="https://outheis-labs.github.io/outheis-agenda/" target="_blank" rel="noopener">Documentation <svg width="7" height="7" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
   </footer>
@@ -935,7 +936,7 @@
     <strong id="aboutName">οὐθείς Agenda</strong>
     <p id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project:</p>
     <p style="margin-top:14px">Technology is potential. Accessibility makes it matter.</p>
-    <p class="hint">Version 0.9.6 · outheis-labs</p>
+    <p class="hint">Version 0.9.7 · outheis-labs</p>
     <div class="btnrow" style="justify-content:flex-end"><button class="primary">Close</button></div>
   </form>
 </dialog>
@@ -5557,7 +5558,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.9.6, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.7, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -5765,7 +5766,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.9.6";
+const APP_VERSION = "0.9.7";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
