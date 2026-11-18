@@ -480,6 +480,12 @@
   #agenda section.calday h2 { text-transform:none; letter-spacing:0; font-size:15px; color:var(--fg); font-weight:500; }
   #notices { padding:0 16px; }
   #toast { position:fixed; left:50%; transform:translateX(-50%); bottom:calc(16px + env(safe-area-inset-bottom)); z-index:25; display:flex; align-items:center; gap:12px; max-width:min(560px, 92vw); padding:4px 4px 4px 16px; background:var(--bg); border:.5px solid var(--line); border-radius:6px; box-shadow:0 6px 20px rgba(0,0,0,.12); font-size:14px; color:var(--fg2); }
+  /* After adding (ui.md 4.2a): the new item, with a way to it, for a few
+     seconds, below the add field; it stays while touched or hovered. */
+  #added { position:fixed; left:50%; transform:translateX(-50%); top:calc(var(--hh, 56px) + 10px); z-index:26; /* top: set below the add field when shown */ display:flex; align-items:center; gap:12px; max-width:min(560px, 92vw); padding:4px 4px 4px 16px; background:var(--bg); border:.5px solid var(--line); border-radius:6px; box-shadow:0 6px 20px rgba(0,0,0,.12); font-size:14px; color:var(--fg2); }
+  #added span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #added b { font-weight:500; color:var(--fg); }
+  #added button { flex:none; font-weight:500; color:var(--fg); }
   #toast span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   #toast button { flex:none; font-weight:500; color:var(--fg); }
   .notice { border-left:3px solid var(--amber); padding:8px 12px; margin:12px 0 0; font-size:15px; }
@@ -759,6 +765,7 @@
 <main>
   <div id="notices"></div>
   <div id="toast" class="hidden" role="status"></div>
+  <div id="added" class="hidden" role="status"></div>
 
   <div id="viewAgenda">
     <form id="add">
@@ -4379,7 +4386,36 @@ function addLine(v, jForce) {
   if (e) for (const fv of facetsOf(e)) fuSignal("assign", fv, t);
   $("addLine").value = ""; addClearShow();
   render();
+  if (e) showAdded(t, e.text);
   sync();
+}
+// The card after adding: "Added: …" with Go to item, which opens the new item where it is
+// listed, so that more tags can be set at once.
+let addedTimer = null, addedHold = false, addedWhat = null;
+function showAdded(j, text) {
+  addedWhat = { j, text };
+  $("added").innerHTML = `<span>Added: <b>${esc(text)}</b></span><button type="button" class="ghost" id="addedGo">Go to item</button>`;
+  const f = $("add").getBoundingClientRect();
+  $("added").style.top = Math.max(f.bottom + 8, 8) + "px"; // below the add field, which stays free for the next item
+  $("added").classList.remove("hidden");
+  $("addedGo").onclick = goToAdded;
+  clearTimeout(addedTimer); addedTimer = setTimeout(hideAdded, 4000);
+}
+function hideAdded() { if (addedHold) { addedTimer = setTimeout(hideAdded, 1000); return; } $("added").classList.add("hidden"); }
+$("added").addEventListener("pointerenter", () => { addedHold = true; });
+$("added").addEventListener("pointerleave", () => { addedHold = false; });
+function goToAdded() {
+  $("added").classList.add("hidden"); addedHold = false;
+  const w = addedWhat; if (!w) return;
+  // the newest open line of that journal with this text (it gets its id at the sync)
+  let key = null;
+  withJ(w.j, () => { S.wc.split("\n").forEach((l, idx) => { const e = parse(l); if (e && !has(e, "done") && e.text === w.text) key = (w.j ? w.j + ":" : "") + (e.id || "line:" + idx); }); });
+  if (!key) return;
+  openItems.add(key); render();
+  const el = [...document.querySelectorAll("#agenda .item")].find(x => x.dataset.key === key);
+  if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1600); return; }
+  // hidden by the filter or beyond the shown days: the search finds it
+  openSearch(true); $("searchQ").value = w.text; $("searchQ").dispatchEvent(new Event("input"));
 }
 // Date and time chosen in the facet choice (ui.md 4.2); without a date, today applies.
 let sheetWhen = { date: "", from: "", to: "" };
