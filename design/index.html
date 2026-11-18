@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ergonoi design contract · draft 0.1</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="components.css">
+<link rel="stylesheet" href="contract.css">
+</head>
+<body class="k">
+
+<div class="doc-head">
+  <header class="k-header">
+    <div class="brand"><span class="k-mark">ergonoi</span> design contract</div>
+    <div class="ver">Draft 0.1 · 28 November 2026</div>
+  </header>
+</div>
+
+<div class="doc">
+<nav class="toc" aria-label="Contents">
+  <a href="#scope"><span class="no">1</span>Scope and status</a>
+  <a href="#principles"><span class="no">2</span>Principles</a>
+  <a href="#colour"><span class="no">3</span>Colour</a>
+  <a href="#type"><span class="no">4</span>Type</a>
+  <a href="#space"><span class="no">5</span>Space</a>
+  <a href="#lines"><span class="no">6</span>Lines, sticks, corners</a>
+  <a href="#icons"><span class="no">7</span>Icons</a>
+  <a href="#controls"><span class="no">8</span>Controls</a>
+  <a href="#surfaces"><span class="no">9</span>Surfaces</a>
+  <a href="#devices"><span class="no">10</span>Phone and desktop</a>
+  <a href="#writing"><span class="no">11</span>Writing</a>
+  <a href="#dark"><span class="no">12</span>Dark mode</a>
+  <a href="#enforce"><span class="no">13</span>Enforcement</a>
+  <a href="#state"><span class="no">14</span>Current deviations</a>
+  <a href="#open"><span class="no">15</span>Open decisions</a>
+  <a href="#shots"><span class="no">A</span>Screenshots 0.9.34</a>
+</nav>
+
+<main>
+
+<section id="scope">
+  <h1>Design contract</h1>
+  <p class="lead">The values and rules every ergonoi interface follows: colours, type, spacing, lines, controls and surfaces. Whoever changes the interface checks the change against this contract. A change the contract does not cover first changes the contract.</p>
+  <h2><span class="no">1</span>Scope and status</h2>
+  <ul class="rules">
+    <li>Applies to ergonoi Agenda (web client, all widths, both colour schemes). ergonoi Map and the documentation site follow once this draft is accepted (<a href="#open">15</a>).</li>
+    <li>Status: draft 0.1. It records the state of version 0.9.34 and proposes the target. Values marked <span class="badge">open</span> wait for a decision.</li>
+    <li>Source of truth: <code>tokens.css</code> for values, <code>components.css</code> for how they combine, this page for the rules. The apps take their values from <code>tokens.css</code> and define none of their own (<a href="#enforce">13</a>).</li>
+    <li>The outheis variants of the apps are out of scope.</li>
+  </ul>
+</section>
+
+<section id="principles">
+  <h2><span class="no">2</span>Principles</h2>
+  <ul class="rules">
+    <li><span class="must">One system for all widths.</span> Phone and desktop use the same type sizes, controls, lines and colours. Only the arrangement of columns differs. The desktop gets no smaller buttons, no other frames and no extra fills.</li>
+    <li><span class="must">Colour points to something.</span> Facets, overdue, now, sync state, review and danger carry colour. Decoration does not.</li>
+    <li><span class="must">Lines and sticks.</span> Hairlines separate, sticks mark belonging. Controls have corners of 6 px, dialogs of 8 px. Everything that runs across a column (rows, fields, tabs, sticks) stays square.</li>
+    <li><span class="must">Every control has one form per role.</span> A button for danger looks the same wherever it stands. The variants are listed in <a href="#controls">8</a>, and there are no others.</li>
+    <li><span class="must">Everything that takes a tap is 44 px high,</span> on the desktop as well. Inline controls next to text are 32 px.</li>
+    <li><span class="must">Centred on one line.</span> Icons, dots, rings, labels and numbers that stand in one row share one centre line, on the phone and on the desktop. Every change to the interface is checked for it.</li>
+  </ul>
+</section>
+
+<section id="colour">
+  <h2><span class="no">3</span>Colour</h2>
+  <h3>Neutrals</h3>
+  <div class="swatches">
+    <div class="sw" style="--c:var(--c-ground)"><div class="chip"></div><b>Ground</b><span>Page, columns, dialogs</span><code>--c-ground #FFFFFF</code></div>
+    <div class="sw" style="--c:var(--c-ink)"><div class="chip"></div><b>Ink</b><span>Text, icons, primary frame, focus</span><code>--c-ink #1A1A1A</code></div>
+    <div class="sw" style="--c:var(--c-ink-2)"><div class="chip"></div><b>Ink 2</b><span>Secondary text, labels, inactive tabs</span><code>--c-ink-2 #4A4646</code></div>
+    <div class="sw" style="--c:var(--c-muted)"><div class="chip"></div><b>Muted</b><span>Hints, counts. Never on the header</span><code>--c-muted #767272</code></div>
+    <div class="sw" style="--c:var(--c-line)"><div class="chip"></div><b>Line</b><span>Hairlines and frames. Never text</span><code>--c-line #B8B4B4</code></div>
+    <div class="sw" style="--c:var(--c-fill)"><div class="chip"></div><b>Fill</b><span>Button surface</span><code>--c-fill #EFEEEE</code></div>
+    <div class="sw" style="--c:var(--c-hover)"><div class="chip"></div><b>Hover</b><span>Row under the pointer, chosen row</span><code>--c-hover #F4F3F3</code></div>
+    <div class="sw" style="--c:var(--c-header)"><div class="chip"></div><b>Header</b><span>Wisteria at 50 % on white. Per person in the Agenda</span><code>--c-header #E2C8E8</code></div>
+  </div>
+  <h3>Signal colours</h3>
+  <p>Each signal colour has one meaning. Danger is the only one used for text. It replaces Scarlet as a text colour because Scarlet reaches only 3.7 : 1 on white.</p>
+  <div class="swatches">
+    <div class="sw" style="--c:var(--c-danger)"><div class="chip"></div><b>Danger</b><span>Overdue, now, irreversible actions</span><code>--c-danger #D42600</code></div>
+    <div class="sw" style="--c:var(--c-ok)"><div class="chip"></div><b>OK</b><span>In sync, chosen value</span><code>--c-ok #218380</code></div>
+    <div class="sw" style="--c:var(--c-attention)"><div class="chip"></div><b>Attention</b><span>Review needed, unsent changes. Never text</span><code>--c-attention #FFB400</code></div>
+    <div class="sw" style="--c:var(--c-clip)"><div class="chip"></div><b>Clipboard</b><span>Ring around the sync dot only</span><code>--c-clip #2B3BD6</code></div>
+  </div>
+  <h3>Facet colours</h3>
+  <p>For sticks and dots only, never for text or surfaces. A journal assigns them, in shown below.</p>
+  <div class="swatches">
+    <div class="sw" style="--c:var(--f-amethyst)"><div class="chip"></div><b>Dark Amethyst</b><code>#460A46</code></div>
+    <div class="sw" style="--c:var(--f-teal)"><div class="chip"></div><b>Teal</b><code>#218380</code></div>
+    <div class="sw" style="--c:var(--f-robin)"><div class="chip"></div><b>Robin</b><code>#97EAD2</code></div>
+    <div class="sw" style="--c:var(--f-amber)"><div class="chip"></div><b>Amber</b><code>#FFB400</code></div>
+    <div class="sw" style="--c:var(--f-scarlet)"><div class="chip"></div><b>Scarlet</b><code>#FF2E00</code></div>
+    <div class="sw" style="--c:var(--f-wisteria)"><div class="chip"></div><b>Wisteria</b><code>#C490D1</code></div>
+  </div>
+  <h3>Contrast</h3>
+  <p>Text needs 4.5 : 1 against its ground (WCAG AA), sticks and dots need 1.5 : 1 against the ground at least.</p>
+  <table>
+    <thead><tr><th>Colour</th><th>on Ground</th><th>on Fill</th><th>on Header</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td>Ink #1A1A1A</td><td class="num">17.4</td><td class="num">15.0</td><td class="num">11.3</td><td>all text</td></tr>
+      <tr><td>Ink 2 #4A4646</td><td class="num">9.3</td><td class="num">8.0</td><td class="num">6.1</td><td>secondary text, also on the header</td></tr>
+      <tr><td>Muted #767272</td><td class="num">4.75</td><td class="num">4.1</td><td class="num fail">3.1</td><td>hints on ground only</td></tr>
+      <tr><td>Muted 0.9.34 #7A7676</td><td class="num fail">4.49</td><td class="num fail">3.9</td><td class="num fail">2.9</td><td>used today in the header status: fails</td></tr>
+      <tr><td>Danger #D42600</td><td class="num">5.2</td><td class="num">4.5</td><td class="num fail">3.4</td><td>text and frames on ground</td></tr>
+      <tr><td>Scarlet #FF2E00</td><td class="num fail">3.7</td><td class="num fail">3.2</td><td class="num fail">2.4</td><td>used today for overdue dates and Now: fails as text</td></tr>
+      <tr><td>Teal #218380</td><td class="num">4.5</td><td class="num fail">3.9</td><td class="num fail">3.0</td><td>dots and check marks, today also a link (14)</td></tr>
+      <tr><td>Robin #97EAD2</td><td class="num">1.4</td><td>&nbsp;</td><td>&nbsp;</td><td>stick on ground: weak, see 15</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="type">
+  <h2><span class="no">4</span>Type</h2>
+  <table>
+    <thead><tr><th>Family</th><th>Use</th><th>Licence</th></tr></thead>
+    <tbody>
+      <tr><td style="font-family:var(--font-text)">IBM Plex Sans</td><td>All running text, controls, entries</td><td>SIL OFL</td></tr>
+      <tr><td style="font-family:var(--font-head);font-weight:600">Inter</td><td>Titles, the product name after the word mark, headings</td><td>SIL OFL</td></tr>
+      <tr><td><span class="k-mark">ergonoi</span></td><td>Mona Sans Mono 700, tracking 0.025 em: the word ergonoi, nothing else</td><td>SIL OFL</td></tr>
+      <tr><td style="font-family:var(--font-mono)">IBM Plex Mono</td><td>Text view, keys, file lines</td><td>SIL OFL</td></tr>
+    </tbody>
+  </table>
+  <p>All fonts are self-hosted from <code>fonts/</code>. No web font service, no commercial font.</p>
+  <h3>Scale</h3>
+  <p>Five sizes. Version 0.9.34 uses thirteen on screen: 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22 and 24 px. The compact layout uses the same five steps and shrinks space, not type.</p>
+  <div class="scale">
+    <div><span class="t">Label · 12 / 500 caps</span><span class="k-label">Today · Reschedule · Journals</span></div>
+    <div><span class="t">Small · 14</span><span style="font-size:var(--t-small);color:var(--c-ink-2)">Secondary text, hints, tabs, the date column of the list</span></div>
+    <div><span class="t">Control · 15</span><span style="font-size:var(--t-control)">Buttons, value buttons, rows of the panel</span></div>
+    <div><span class="t">Body · 17</span><span style="font-size:var(--t-body);font-weight:500">Send the invoice to the joinery</span></div>
+    <div><span class="t">Title · 22 / 600 Inter</span><span class="k-title">Send the invoice to the joinery</span></div>
+  </div>
+  <ul class="rules">
+    <li>Weights: 400 regular, 500 for the text of entries and the label of a primary button, 600 for titles and the chosen tab. No other weights.</li>
+    <li>Inputs use Body (17 px). iOS zooms into fields below 16 px.</li>
+    <li>Caps only for labels at 12 px with 0.08 em tracking. Badges such as DEFAULT are labels, not boxes (<a href="#state">14</a>).</li>
+    <li>Numbers that stand in columns (counts, times, week numbers) use tabular figures.</li>
+  </ul>
+</section>
+
+<section id="space">
+  <h2><span class="no">5</span>Space</h2>
+  <p>Steps of 4 px. Every column, on every width, has an inner edge of 16 px (the gutter). The side panel today has 18 px, the settings column 16 px, the detail column 24 px.</p>
+  <div class="spacing">
+    <div><span>--s-1 · 4</span><i style="width:4px"></i></div>
+    <div><span>--s-2 · 8</span><i style="width:8px"></i></div>
+    <div><span>--s-3 · 12</span><i style="width:12px"></i></div>
+    <div><span>--s-4 · 16 gutter</span><i style="width:16px"></i></div>
+    <div><span>--s-6 · 24</span><i style="width:24px"></i></div>
+    <div><span>--s-8 · 32</span><i style="width:32px"></i></div>
+  </div>
+  <ul class="rules">
+    <li>Between controls in a row: 8. Between a group label and its first row: 8. Above a group label: 24. Between sections of a column: 32.</li>
+    <li>Rows of the list and of definition lists are at least 44 px high, their content is centred vertically.</li>
+  </ul>
+</section>
+
+<section id="lines">
+  <h2><span class="no">6</span>Lines, sticks, corners</h2>
+  <div class="lines">
+    <div><span>Hair · 0.5</span><div class="bar" style="height:.5px;background:var(--c-line)"></div><span>Separators between rows and sections, frames of fields, tags and the dialog</span></div>
+    <div><span>Firm · 1</span><div class="bar" style="height:1px"></div><span>Frame of the primary button, today in the month, focused field</span></div>
+    <div><span>Mark · 2</span><div class="bar" style="height:2px"></div><span>Chosen tab, focus ring, clipboard ring</span></div>
+    <div><span>Stick S · 3</span><div class="bar" style="height:3px;background:var(--f-teal)"></div><span>Facets in the panel and in settings, view swatches, header colour in dark mode</span></div>
+    <div><span>Stick · 6</span><div class="bar" style="height:6px;background:var(--f-teal)"></div><span>Entries in the list and the month, the detail card, notices</span></div>
+  </div>
+  <ul class="rules">
+    <li><span class="must">6 px</span> for buttons, chips, tags, badges, calendar days, popups, the toast and text areas of several lines. This is the phone's measure and holds on every width.</li>
+    <li><span class="must">8 px</span> for dialogs, and for the phone's sheet at its two upper corners.</li>
+    <li><span class="must">Square</span> for single-line fields (a hairline below), tabs, list rows, the rows of the panel and of definition lists, sticks and hairlines. A chosen week in the month is one band, rounded only at its two ends.</li>
+    <li>Circles only for the facet dot (8), the calendar dots (4), the sync dot (8) and its ring.</li>
+    <li>No shadows. Depth comes from the veil behind dialogs and sheets (white at 92 %).</li>
+    <li>A stick always stands at the left edge and runs the full height of what it marks.</li>
+  </ul>
+</section>
+
+<section id="icons">
+  <h2><span class="no">7</span>Icons</h2>
+  <div class="spec">
+    <div class="row">
+      <button class="k-icon" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <button class="k-icon" aria-label="Memos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 4h10v16l-5-4-5 4z"/></svg></button>
+      <button class="k-icon" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4"/></svg></button>
+      <button class="k-icon" aria-label="Sync"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 12a7 7 0 0 1-12 5M5 12a7 7 0 0 1 12-5M17 3v4h-4M7 21v-4h4"/></svg></button>
+      <button class="k-icon" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></button>
+      <button class="k-icon" aria-label="Lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="6" y="11" width="12" height="9"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></svg></button>
+      <span class="k-sync" title="In sync"><i></i></span>
+      <span class="k-sync clip" title="In sync, clipboard filled"><i></i></span>
+      <span class="k-sync pending" title="Changes not sent"><i></i></span>
+    </div>
+  </div>
+  <ul class="rules">
+    <li>Line icons, 24 grid, drawn at 22 px, stroke 1.6, square ends, in Ink. Inside tabs 18 px.</li>
+    <li>Every icon button is a 44 × 44 box with the icon centred on both axes. Icons of one row sit on one centre line.</li>
+    <li>The clipboard ring has a diameter of 18 px at 2 px (today 12 px at 1.5 px, too tight, and off the centre line on the desktop).</li>
+    <li>An icon without a label has an <code>aria-label</code> and a <code>title</code>.</li>
+  </ul>
+</section>
+
+<section id="controls">
+  <h2><span class="no">8</span>Controls</h2>
+  <h3>Buttons</h3>
+  <p>Four variants and one modifier for size. The variant changes surface and frame only: height, type and corners stay.</p>
+  <div class="spec tint">
+    <div class="states">
+      <span class="h"></span><span class="h">Rest</span><span class="h">Hover</span><span class="h">Pressed</span><span class="h">Focus</span><span class="h">Disabled</span>
+      <span class="lbl">Default</span><button class="k-btn">Next day</button><button class="k-btn is-hover">Next day</button><button class="k-btn is-press">Next day</button><button class="k-btn is-focus">Next day</button><button class="k-btn" disabled>Next day</button>
+      <span class="lbl">Primary</span><button class="k-btn primary">Add</button><button class="k-btn primary is-hover">Add</button><button class="k-btn primary is-press">Add</button><button class="k-btn primary is-focus">Add</button><button class="k-btn primary" disabled>Add</button>
+      <span class="lbl">Quiet</span><button class="k-btn quiet">More filters</button><button class="k-btn quiet is-hover">More filters</button><button class="k-btn quiet is-press">More filters</button><button class="k-btn quiet is-focus">More filters</button><button class="k-btn quiet" disabled>More filters</button>
+      <span class="lbl">Danger</span><button class="k-btn danger">Delete series</button><button class="k-btn danger is-hover">Delete series</button><button class="k-btn danger confirm">Delete now</button><button class="k-btn danger is-focus">Delete series</button><button class="k-btn danger" disabled>Delete series</button>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Variant</th><th>Surface</th><th>Frame</th><th>Text</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td>Default</td><td>Fill</td><td>none (1 px in Fill)</td><td>15 / 400 Ink</td><td>Every action that is not one of the others</td></tr>
+      <tr><td>Primary</td><td>Fill</td><td>1 px Ink</td><td>15 / 500 Ink</td><td>The one action a surface is for: Add, Save, Continue. At most one per surface</td></tr>
+      <tr><td>Quiet</td><td>none</td><td>none</td><td>15 / 400 Ink</td><td>Folds, header actions, actions inside text</td></tr>
+      <tr><td>Danger</td><td>none, the confirming tap fills Danger</td><td>1 px Danger</td><td>15 / 400 Danger</td><td>Delete, clear, delete series. Two taps</td></tr>
+      <tr><td>Small</td><td colspan="3">any variant at 32 px height and 12 px side padding</td><td>Inline next to text: + and −, Edit, All, None</td></tr>
+    </tbody>
+  </table>
+  <div class="spec">
+    <span class="k-label cap">Grid of choices (sheet and detail column)</span>
+    <div class="k-grid3"><button class="k-btn">Next day</button><button class="k-btn">1 week</button><button class="k-btn">1 month</button><button class="k-btn">2 days</button><button class="k-btn">2 weeks</button><button class="k-btn">3 months</button></div>
+    <div class="row" style="margin-top:var(--s-4)"><button class="k-btn small">+</button><button class="k-btn small">−</button><button class="k-btn small quiet">Edit</button><button class="k-btn small">All</button><button class="k-btn small">None</button></div>
+  </div>
+
+  <h3>Value buttons</h3>
+  <p>A choice of one among few. The chosen value is in Ink with a check mark in OK, the others in Muted. Used for the PIN level, the date format and the header colour.</p>
+  <div class="spec">
+    <div class="k-values" role="radiogroup" aria-label="Date format">
+      <button role="radio" aria-checked="true"><span class="ck">✓</span>Automatic</button>
+      <button role="radio" aria-checked="false"><span class="ck">✓</span>Browser</button>
+      <button role="radio" aria-checked="false"><span class="ck">✓</span>ISO</button>
+    </div>
+    <div class="k-values" role="radiogroup" aria-label="Header colour" style="margin-top:var(--s-2)">
+      <button role="radio" aria-checked="true"><span class="sw" style="color:var(--f-wisteria)"></span>Wisteria</button>
+      <button role="radio" aria-checked="false"><span class="sw" style="color:var(--f-amethyst)"></span>Dark Amethyst</button>
+      <button role="radio" aria-checked="false"><span class="sw" style="color:var(--f-teal)"></span>Teal</button>
+      <button role="radio" aria-checked="false"><span class="sw" style="color:var(--f-amber)"></span>Amber</button>
+    </div>
+  </div>
+
+  <h3>Tabs</h3>
+  <p>Switch between views of the same content. Text with an icon where there is one, underline 2 px when chosen, no frame and no surface. The settings sections (Data, Account, Device, System) are tabs as well.</p>
+  <div class="spec">
+    <div class="k-tabs" role="tablist">
+      <button aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6h11M9 12h11M9 18h11M4 6h1M4 12h1M4 18h1"/></svg>List</button>
+      <button aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="5" width="16" height="15"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>Month</button>
+      <button aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 6h14M5 11h14M5 16h9"/></svg>Text</button>
+    </div>
+    <div class="k-tabs" style="margin-top:var(--s-4)">
+      <button aria-pressed="true">Data</button><button aria-pressed="false">Account</button><button aria-pressed="false">Device</button><button aria-pressed="false">System</button>
+    </div>
+  </div>
+
+  <h3>Fields</h3>
+  <div class="spec stack">
+    <input class="k-field" placeholder="New item, talk or type">
+    <textarea class="k-area" placeholder="Add a note"></textarea>
+    <label class="k-check"><input type="checkbox" checked> Compact layout: smaller spacing, the time left of the entry. This device only.</label>
+    <div class="row"><span class="k-tag">Josef</span><span class="k-tag">school</span><span class="k-tag">high</span></div>
+  </div>
+  <ul class="rules">
+    <li>A single-line field has no frame: a hairline below it, 1 px Ink when focused. A field of several lines has a hairline frame, 1 px Ink when focused.</li>
+    <li>Placeholders in Muted describe the content, they do not instruct. A counter (0 / 500) stands below right in Label size.</li>
+    <li>Checkboxes in Ink, square, 18 px, the label beside them at Small size. Today they are Dark Amethyst.</li>
+    <li>Tags in an entry are unfilled with a hairline frame, 12 px.</li>
+  </ul>
+</section>
+
+<section id="surfaces">
+  <h2><span class="no">9</span>Surfaces</h2>
+  <h3>Header</h3>
+  <div class="spec flush">
+    <header class="k-header" style="padding-left:var(--gutter)">
+      <button class="k-icon" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div class="brand"><span class="k-mark">ergonoi</span> Agenda</div>
+      <span style="flex:1"></span>
+      <button class="k-icon" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4"/></svg></button>
+      <span class="k-sync clip"><i></i></span>
+    </header>
+  </div>
+  <ul class="rules">
+    <li>Header colour behind, a hairline below. 60 px on the desktop, 52 px on the phone. Brand, tabs, icons and the sync dot share one centre line.</li>
+    <li>The brand starts at the gutter of the window, not at the list column: on the desktop it stands above the side panel.</li>
+    <li>Status text in the header in Ink 2 at Label size. Muted does not reach 4.5 : 1 on the header colour.</li>
+  </ul>
+
+  <h3>List</h3>
+  <div class="spec flush">
+    <div class="k-group"><span class="k-label">Today</span></div>
+    <div class="k-row" style="--f:var(--f-scarlet)"><span class="when">Sat, 28.11. <b>08:00</b></span><span class="text">School</span><span class="meta"></span></div>
+    <div class="k-row" style="--f:var(--f-teal)"><span class="when over">Thu, 26.11.</span><span class="text">Send the invoice to the joinery</span><span class="meta"><span class="now">now</span><span>high</span></span></div>
+    <div class="k-row" style="--f:var(--f-amethyst)"><span class="when">Sat, 28.11.</span><span class="text">Plumber</span><span class="meta"></span></div>
+    <div class="k-group"><span class="k-label">Next 7 days</span></div>
+    <div class="k-row" style="--f:var(--f-robin)"><span class="when">Tue, 01.12. <b>13:45–14:00</b></span><span class="text">Trombone lesson</span><span class="meta"></span></div>
+  </div>
+  <ul class="rules">
+    <li>Stick 6 px in the facet colour, a hairline below each row, 44 px at least, content centred vertically.</li>
+    <li>Date column at Small size in Ink 2, the time in Ink at 500. Today the date column is bold when the entry has a time and regular when not.</li>
+    <li>Entry text at Body / 500. Overdue dates and Now in Danger.</li>
+    <li>On the phone the date stands above the text. The column widths are the only difference.</li>
+  </ul>
+
+  <h3>Side panel</h3>
+  <div class="spec flush" style="max-width:var(--w-panel)">
+    <div class="k-group"><span class="k-label">Facets</span></div>
+    <div class="k-frow" style="--f:var(--f-scarlet)"><span class="st"></span>family<span class="n">4</span></div>
+    <div class="k-frow" style="--f:var(--f-robin)"><span class="st"></span>music<span class="n">2</span></div>
+    <div class="k-frow off" style="--f:var(--f-amber)"><span class="st"></span>school<span class="n">0</span></div>
+    <div class="k-frow" style="--f:var(--f-teal)"><span class="st"></span>work<span class="n">4</span></div>
+  </div>
+  <ul class="rules">
+    <li>Ground as the other columns, a hairline on its right. Today it is grey (#F8F7F7) on the desktop and white on the phone.</li>
+    <li>Rows 40 px, stick 3 px, name at Control size, count right at Label size in Muted. A facet switched off is Muted with its stick at 45 %.</li>
+  </ul>
+
+  <h3>Detail column</h3>
+  <div class="spec">
+    <div class="k-card" style="--f:var(--f-teal)">
+      <div style="color:var(--c-danger);font-size:var(--t-control);font-weight:500">Thu, 26.11.</div>
+      <p class="k-title" style="margin:var(--s-1) 0 var(--s-4)">Send the invoice to the joinery</p>
+      <dl class="k-dl"><dt>facet</dt><dd>work</dd><dt>date</dt><dd>2026-11-26</dd><dt>rank</dt><dd>high</dd></dl>
+    </div>
+    <div style="margin-top:var(--s-8)"><span class="k-label cap">Status</span><button class="k-btn wide">Mark as done</button></div>
+  </div>
+  <ul class="rules">
+    <li>The card has the 6 px stick of the list, not a narrower one, on the same ground as the list. Title at Title size, the tags as a definition list with hairlines and 44 px rows.</li>
+    <li>Labels of sections at Label size in caps, as in the list. Today they are 14 px in sentence case.</li>
+    <li>Gutter 16 like every column.</li>
+  </ul>
+
+  <h3>Dialogs and sheets</h3>
+  <div class="spec tint">
+    <div class="k-dialog" style="margin:0 auto">
+      <p class="k-title">Rename tag</p>
+      <input class="k-field" value="familie">
+      <p class="k-hint" style="margin-top:var(--s-2)">35 entries in Markus · 2 in Johann</p>
+      <div class="actions"><button class="k-btn">Cancel</button><button class="k-btn primary">Rename</button></div>
+    </div>
+  </div>
+  <ul class="rules">
+    <li>Phone: a sheet from the bottom edge, full width, hairline above. Desktop and tablet: a centred dialog of 520 px at most, hairline frame. In both cases the veil behind.</li>
+    <li>Actions right-aligned, the primary one last. Cancel is a Default button, not a framed white one.</li>
+    <li>A sheet never appears as a box anchored at the top of the list column (today on the desktop, see 14).</li>
+  </ul>
+
+  <h3>Month</h3>
+  <div class="spec" style="max-width:480px">
+    <div class="k-cal">
+      <span></span><span class="wd">Mon</span><span class="wd">Tue</span><span class="wd">Wed</span><span class="wd">Thu</span><span class="wd">Fri</span><span class="wd">Sat</span><span class="wd">Sun</span>
+      <span class="wk">48</span><span class="d">23</span><span class="d">24</span><span class="d">25</span><span class="d">26<span class="dots"><i style="--f:var(--f-teal)"></i></span></span><span class="d">27</span><span class="d today">28<span class="dots"><i style="--f:var(--f-scarlet)"></i><i style="--f:var(--f-teal)"></i><i style="--f:var(--f-amethyst)"></i></span></span><span class="d">29<span class="dots"><i style="--f:var(--f-scarlet)"></i><i style="--f:var(--f-amber)"></i></span></span>
+      <span class="wk">49</span><span class="d sel">30<span class="dots"><i style="--f:var(--f-teal)"></i></span></span><span class="d out">1</span><span class="d out">2</span><span class="d out">3</span><span class="d out">4</span><span class="d out">5</span><span class="d out">6</span>
+    </div>
+  </div>
+  <ul class="rules">
+    <li>Days 44 px high with corners of 6 px. Today framed 1 px Ink, the chosen day filled. Week numbers at Label size in Muted, centred with the row.</li>
+    <li>The calendar fills its column up to 7 × 72 px. Month name and the buttons back, forward and Today stand on one line above it.</li>
+  </ul>
+</section>
+
+<section id="devices">
+  <h2><span class="no">10</span>Phone and desktop</h2>
+  <div class="layouts">
+    <div><div class="lay" style="grid-template-rows:26px 200px 22px"><div class="hd">header 52</div><div>list</div><div>tabs</div></div><div class="lay-cap">Phone ≤ 600: one column, tabs at the bottom, panel and detail as sheets</div></div>
+    <div><div class="lay" style="grid-template-columns:90px 1fr;grid-template-rows:26px 196px"><div class="hd" style="grid-column:1 / -1">header 60</div><div>panel 280</div><div>list</div></div><div class="lay-cap">Tablet 601 to 1099: panel docked, detail as dialog</div></div>
+    <div><div class="lay" style="grid-template-columns:80px 1fr 110px;grid-template-rows:26px 196px"><div class="hd" style="grid-column:1 / -1">header 60</div><div>panel 280</div><div>list</div><div>detail 400</div></div><div class="lay-cap">Desktop ≥ 1100: panel, list and detail side by side</div></div>
+  </div>
+  <table>
+    <thead><tr><th>May differ</th><th>May not differ</th></tr></thead>
+    <tbody>
+      <tr><td>Number and width of columns</td><td>Type sizes and weights</td></tr>
+      <tr><td>Where the view tabs stand (bottom bar or header)</td><td>Height, frame, surface and corners of controls</td></tr>
+      <tr><td>Sheet or dialog for the same content</td><td>Colours of grounds, lines and sticks</td></tr>
+      <tr><td>Hover states (pointer only), swipe gestures (touch only)</td><td>Gutter, spacing steps, row heights</td></tr>
+      <tr><td>The lock button (desktop only)</td><td>Labels and their order</td></tr>
+    </tbody>
+  </table>
+  <p>Media queries change layout only. A rule inside a media query that sets a colour, a size of type, a frame or a corner breaks the contract.</p>
+</section>
+
+<section id="writing">
+  <h2><span class="no">11</span>Writing in the interface</h2>
+  <ul class="rules">
+    <li>English in the interface of the apps, German only in content and in the German documentation.</li>
+    <li>Sentence case for labels and buttons, caps only through the Label style.</li>
+    <li>No “…” in dialogs, buttons and labels. The one exception is the state <i>Loading …</i>.</li>
+    <li>No semicolons in interface texts. Two sentences instead.</li>
+    <li>Buttons name the action (Delete series, Rename), not the confirmation (OK, Yes).</li>
+    <li>Hints say what happens, in one or two short sentences. No praise, no marketing tone.</li>
+  </ul>
+</section>
+
+<section id="dark">
+  <h2><span class="no">12</span>Dark mode</h2>
+  <ul class="rules">
+    <li>The same roles with the values in <code>tokens.css</code>: ground #1A1A1A, ink #F0F0F0, ink 2 #A8A4A4, muted #8A8686, fill #2C2C2C.</li>
+    <li>The header keeps the ground colour, and the header colour of the person appears as a 3 px stick below it.</li>
+    <li>Dark Amethyst becomes Wisteria (#C490D1) so that it stays visible. Danger becomes #FF5A3A (5.6 : 1).</li>
+    <li>No other changes: frames, corners, sizes stay.</li>
+  </ul>
+</section>
+
+<section id="enforce">
+  <h2><span class="no">13</span>Enforcement</h2>
+  <ul class="rules">
+    <li><code>design/tokens.css</code> is the only place for values. <code>clients/web/build.py</code> inlines it into the app, and the app's own <code>:root</code> block goes. Map and the documentation site take the same file.</li>
+    <li>A new e2e test <code>26-contract</code> checks the computed styles of the running app on a phone (390 px) and on a desktop (1440 px), for the list, month, detail, panel, settings and every dialog:</li>
+  </ul>
+  <table>
+    <thead><tr><th>Check</th><th>Rule</th></tr></thead>
+    <tbody>
+      <tr><td>Corners</td><td><code>border-radius</code> 6 for controls, 8 for dialogs, 0 for fields, tabs and rows, 50 % for dots and rings</td></tr>
+      <tr><td>Type</td><td><code>font-size</code> one of 12, 14, 15, 17, 22. <code>font-weight</code> one of 400, 500, 600. Family one of the four</td></tr>
+      <tr><td>Colours</td><td>text, background and border colours from the token set only</td></tr>
+      <tr><td>Controls</td><td>every visible button and field 44 px high, or 32 px with the small modifier</td></tr>
+      <tr><td>Lines</td><td>border widths 0, 0.5, 1, 2, 3 or 6 px</td></tr>
+      <tr><td>Centre line</td><td>icons, dots and labels of the header and of rows: vertical centres within 1 px</td></tr>
+      <tr><td>Contrast</td><td>every text at least 4.5 : 1 against its computed ground</td></tr>
+      <tr><td>Same on both</td><td>the same control computes to the same size, frame and surface on phone and desktop</td></tr>
+      <tr><td>Texts</td><td>no “…” except Loading …, no “;” in buttons, labels and dialogs</td></tr>
+    </tbody>
+  </table>
+  <p>Until all deviations are removed, the test reports them and fails only on new ones (a list of known deviations in the test, shrinking with every fix).</p>
+</section>
+
+<section id="state">
+  <h2><span class="no">14</span>Current deviations (0.9.34)</h2>
+  <p>Found in the screenshots of 28 November 2026 and in the stylesheet. Most of them concern the desktop.</p>
+
+  <div class="dev">
+    <h3>D1 · The sheet floats over the list on the desktop</h3>
+    <figure><img src="img/sheet-desktop.png" alt="Phone sheet shown as a box at the top of the list column on the desktop"><figcaption>The phone's bottom sheet appears as an unanchored box at the top of the list column, unrelated to the row it belongs to. On the desktop the detail column already holds the same actions.</figcaption></figure>
+    <div class="fix"><b>Target:</b> on widths ≥ 601 a centred dialog (9). On the desktop with the detail column open, a row action opens the detail instead.</div>
+  </div>
+
+  <div class="dev">
+    <h3>D2 · Danger has four forms</h3>
+    <figure class="pair"><div><img src="img/danger-delete-series.png" alt="Delete series with a scarlet frame"><figcaption>Delete series: scarlet frame.</figcaption></div><div><img src="img/danger-delete-amber.png" alt="Delete with an amber fill and Keep with a white frame"><figcaption>Delete: amber fill, Keep: white with a frame.</figcaption></div></figure>
+    <p>In addition Clear data in this browser (scarlet frame on white) and the view delete (<code>.warn</code>). Amber means attention, not danger.</p>
+    <div class="fix"><b>Target:</b> one Danger button (8), Keep and Cancel as Default buttons.</div>
+  </div>
+
+  <div class="dev">
+    <h3>D3 · Corners outside the measure</h3>
+    <p>Most controls have 6 px, as on the phone. Outliers: 10 px for the view menu, 8 px for a box in the setup, 4 px for journal tags, the DEFAULT badge and the update notice, 2 px for colour swatches. Until 0.9.34 the danger buttons, Other date, the desktop sheet and the week button were square. 0.9.35 gives them 6 px (the sheet 8 px).</p>
+    <div class="fix"><b>Target:</b> 6 and 8 px as in 6, the outliers adjusted.</div>
+  </div>
+
+  <div class="dev">
+    <h3>D4 · Header on the desktop</h3>
+    <figure><img src="img/header-desktop.png" alt="Desktop header"><figcaption>The brand starts above the list column, the area above the panel stays empty. The status text is 13 px in Muted on the header colour (2.9 : 1). Tabs, icons and status form three groups without a common rule.</figcaption></figure>
+    <div class="fix"><b>Target:</b> brand at the window's gutter, tabs after the brand, icons and sync dot at the right end, status in Ink 2 (9).</div>
+  </div>
+
+  <div class="dev">
+    <h3>D5 · Side panel differs between phone and desktop</h3>
+    <figure class="pair"><div><img src="img/panel-desktop.png" alt="Side panel on the desktop"><figcaption>Desktop: grey ground, gutter 18, Save current as view in Teal.</figcaption></div><div><img src="img/panel-phone.png" alt="Side panel on the phone"><figcaption>Phone: white ground, navigation to settings below the facets.</figcaption></div></figure>
+    <div class="fix"><b>Target:</b> white ground with a hairline on both, gutter 16, actions such as Save current as view in Ink (Teal is a facet colour).</div>
+  </div>
+
+  <div class="dev">
+    <h3>D6 · Date column of the list</h3>
+    <figure><img src="img/list-desktop.png" alt="List rows on the desktop"><figcaption>Dates with a time are bold at 15 px, dates without one regular. The date column competes with the text. Overdue and Now in Scarlet (3.7 : 1).</figcaption></figure>
+    <div class="fix"><b>Target:</b> date at Small size in Ink 2, the time in Ink at 500, overdue in Danger (9).</div>
+  </div>
+
+  <div class="dev">
+    <h3>D7 · Detail column</h3>
+    <figure><img src="img/detail-desktop.png" alt="Detail column on the desktop" style="width:400px"><figcaption>Card stick 4 px against 6 px in the list, on the grey ground of the panel. Section labels Status, Reschedule and Note at 14 px in sentence case, unlike the caps labels of the list. A header line Journal with a close button above the card. Gutter 24.</figcaption></figure>
+    <div class="fix"><b>Target:</b> stick 6, labels in the Label style, gutter 16.</div>
+  </div>
+
+  <div class="dev">
+    <h3>D8 · Month on the desktop</h3>
+    <figure><img src="img/month-desktop.png" alt="Month on the desktop"><figcaption>The calendar keeps the phone's width inside a wide column, the navigation buttons stand apart from it. Today is a rounded frame.</figcaption></figure>
+    <div class="fix"><b>Target:</b> calendar fills the column up to 7 × 72 px, navigation on one line with the month name, today framed (9).</div>
+  </div>
+
+  <div class="dev">
+    <h3>D9 · Settings sections as small framed buttons <span class="badge">fixed in 0.9.35</span></h3>
+    <figure><img src="img/settings-desktop.png" alt="Settings on the desktop"><figcaption>Data, Account, Device and System are small filled buttons with a frame on the chosen one. The badge DEFAULT is a framed box in caps.</figcaption></figure>
+    <div class="fix"><b>Target:</b> tabs (8), DEFAULT as a label without frame.</div>
+  </div>
+
+  <div class="dev">
+    <h3>D10 · Sizes and lines</h3>
+    <p>Thirteen type sizes on screen, line widths of 0.5, 1, 1.5, 2, 3, 4 and 6 px without fixed roles, checkboxes in Dark Amethyst, nine button classes (<code>sec</code>, <code>ghost</code>, <code>warn</code>, <code>danger</code>, <code>off</code>, <code>pick</code>, <code>tag</code>, <code>qm</code>, <code>tab</code>), 28 media queries of which several change sizes and colours instead of layout.</p>
+    <div class="fix"><b>Target:</b> the scale (4), the line roles (6), four button variants (8), media queries for layout only (10).</div>
+  </div>
+</section>
+
+<section id="open">
+  <h2><span class="no">15</span>Open decisions</h2>
+  <div class="open"><h3>O1 · Scope</h3><p>Agenda only, or Agenda, Map and the documentation site from the start. The tokens do not depend on the app, but the components of Map (outline, nodes) would need a section of their own.</p></div>
+  <div class="open"><h3>O2 · Stronger palette</h3><p>The alternative after the festival poster: Violet #A47DA3, Green #3BAE76, Red #FB6263, Blue #6880B0, with black on light grey. As facet colours all four work as sticks (2.8 to 4.0 : 1 on white), none of them reaches 4.5 : 1 as text. Keep the current facet colours, replace them, or offer the second set per journal.</p>
+    <div class="swatches"><div class="sw" style="--c:#A47DA3"><div class="chip"></div><b>Violet</b><code>#A47DA3</code></div><div class="sw" style="--c:#3BAE76"><div class="chip"></div><b>Green</b><code>#3BAE76</code></div><div class="sw" style="--c:#FB6263"><div class="chip"></div><b>Red</b><code>#FB6263</code></div><div class="sw" style="--c:#6880B0"><div class="chip"></div><b>Blue</b><code>#6880B0</code></div></div></div>
+  <div class="open"><h3>O3 · Robin as a stick</h3><p>Robin #97EAD2 reaches 1.4 : 1 on white and falls below the 1.5 : 1 this contract sets for sticks. Darken it to about #6FD4B8, or accept it as the light end of the set.</p></div>
+  <div class="open"><h3>O4 · Danger as a text colour</h3><p>#D42600 instead of Scarlet for overdue, Now and danger buttons. Scarlet stays a facet colour.</p></div>
+  <div class="open"><h3>O5 · Compact layout</h3><p>Keep it as an option that reduces space only, or remove it once the default layout follows the contract.</p></div>
+  <div class="open"><h3>O6 · Desktop sheet</h3><p>Centred dialog everywhere above 600 px, or, on the desktop, open the detail column instead of the sheet.</p></div>
+</section>
+
+<section id="shots">
+  <h2><span class="no">A</span>Screenshots 0.9.34</h2>
+  <p>ergonoi theme, light, 28 November 2026. Desktop at 1440 × 900, phone at 390 × 844.</p>
+  <h3>Desktop</h3>
+  <div class="gallery">
+    <a href="shots/desktop-list.png"><img src="shots/desktop-list.png" alt="">List</a>
+    <a href="shots/desktop-detail.png"><img src="shots/desktop-detail.png" alt="">List with detail</a>
+    <a href="shots/desktop-month.png"><img src="shots/desktop-month.png" alt="">Month</a>
+    <a href="shots/desktop-sheet.png"><img src="shots/desktop-sheet.png" alt="">Sheet</a>
+    <a href="shots/desktop-settings.png"><img src="shots/desktop-settings.png" alt="">Settings</a>
+  </div>
+  <h3>Phone</h3>
+  <div class="gallery phones">
+    <a href="shots/phone-list.png"><img src="shots/phone-list.png" alt="">List</a>
+    <a href="shots/phone-panel.png"><img src="shots/phone-panel.png" alt="">Panel</a>
+    <a href="shots/phone-month.png"><img src="shots/phone-month.png" alt="">Month</a>
+    <a href="shots/phone-sheet.png"><img src="shots/phone-sheet.png" alt="">Sheet</a>
+    <a href="shots/phone-settings.png"><img src="shots/phone-settings.png" alt="">Settings</a>
+  </div>
+</section>
+
+</main>
+</div>
+</body>
+</html>
