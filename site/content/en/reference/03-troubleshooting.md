@@ -14,9 +14,13 @@ The circular arrows turn while a sync runs and turn red when it failed. Below th
 
 *Forgot PIN* on the PIN screen clears this browser. The journals on the server stay; only changes that were not yet sent are lost. Set up again with your eight words and choose a new PIN. After five wrong attempts the app waits a minute, then longer each time.
 
+## Testing the connection
+
+*Settings → Account → Test connection* checks step by step whether the address is valid and uses https, whether the browser can encrypt, whether the server answers, whether it is an agenda server and in which version, and whether your journal is found there and can be read with your words. The setup offers the same test for the address you enter. Each step is marked ✓ or ✗ with a short reason. The test changes nothing. The server can also be given by its IP address, provided its certificate is issued for that address.
+
 ## The diagnostic log
 
-*Settings → Log*: tick *Write a log in this browser*, repeat what went wrong, then *Copy log* or *Save log*. The log contains requests, errors and the state of your journals, never the text of entries, words or keys. Journals appear by the first four characters of their identifier. Send it to whoever runs your server.
+*Settings → System*: switch on *Diagnostic log*, repeat what went wrong, then *Copy log* or *Save log*. The log contains requests, errors and the state of your journals, never the text of entries, words or keys. Journals appear by the first four characters of their identifier. Send it to whoever runs your server.
 
 ## Lines that vanished, journals that are gone
 

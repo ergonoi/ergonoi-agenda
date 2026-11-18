@@ -14,9 +14,13 @@ Die kreisförmigen Pfeile drehen sich, solange eine Synchronisation läuft, und 
 
 *Forgot PIN* auf dem PIN-Bildschirm leert diesen Browser. Die Journale auf dem Server bleiben; verloren geht nur, was noch nicht gesendet war. Richte den Browser mit deinen acht Wörtern neu ein und wähle eine neue PIN. Nach fünf falschen Versuchen wartet die App eine Minute, danach jeweils länger.
 
+## Die Verbindung prüfen
+
+*Settings → Account → Test connection* prüft Schritt für Schritt, ob die Adresse gültig ist und https verwendet, ob der Browser verschlüsseln kann, ob der Server antwortet, ob es ein Agenda-Server ist und in welcher Version, und ob dein Journal dort gefunden wird und mit deinen Wörtern lesbar ist. Die Einrichtung bietet denselben Test für die eingegebene Adresse. Jeder Schritt ist mit ✓ oder ✗ und einem kurzen Grund markiert. Der Test ändert nichts. Der Server kann auch mit seiner IP-Adresse angegeben werden, sofern sein Zertifikat auf diese Adresse ausgestellt ist.
+
 ## Das Diagnoseprotokoll
 
-*Settings → Log*: *Write a log in this browser* anhaken, wiederholen, was schiefging, dann *Copy log* oder *Save log*. Das Protokoll enthält Anfragen, Fehler und den Zustand deiner Journale, nie den Text von Einträgen, Wörter oder Schlüssel. Journale erscheinen mit den ersten vier Zeichen ihrer Kennung. Schick es dem, der deinen Server betreibt.
+*Settings → System*: *Diagnostic log* einschalten, wiederholen, was schiefging, dann *Copy log* oder *Save log*. Das Protokoll enthält Anfragen, Fehler und den Zustand deiner Journale, nie den Text von Einträgen, Wörter oder Schlüssel. Journale erscheinen mit den ersten vier Zeichen ihrer Kennung. Schick es dem, der deinen Server betreibt.
 
 ## Verschwundene Zeilen, gelöschte Journale
 

@@ -8,7 +8,7 @@
 
 ## Deine acht Wörter
 
-Die App zeigt acht Wörter. Sie sind dein Journal: Wer sie kennt, kann es lesen und ändern, und nichts anderes gibt Zugang. Schreib sie auf Papier und bewahre sie dort auf, wo auch wichtige Dokumente liegen. Die App fragt zur Sicherheit zwei davon ab.
+Die App zeigt acht Wörter. Sie sind dein Journal: Wer sie kennt, kann es lesen und ändern, und nichts anderes gibt Zugang. Schreib sie auf Papier und bewahre sie dort auf, wo auch wichtige Dokumente liegen. Die App fragt zur Sicherheit zwei davon ab. Die Wörter stammen aus der Sprache, die beim Einrichten unter *Words in* gewählt ist (Englisch, Deutsch, Französisch, Spanisch, Italienisch, Portugiesisch oder Tschechisch; zunächst die Sprache deines Browsers). Sie behalten diese Sprache; Akzente kann man tippen oder weglassen.
 
 Verlorene Wörter kann niemand wiederherstellen, auch nicht der Betreiber des Servers. Das ist der Preis eines Servers, der dein Journal nicht lesen kann.
 
@@ -16,7 +16,7 @@ Gib deinem Journal einen Namen, etwa deinen Vornamen, und tippe auf *Continue*.
 
 ## Deine PIN
 
-Danach wählst du eine PIN aus sechs bis zwölf Ziffern. Dieser Browser hält deine Journale, ihre Wörter und Codes nur mit ihr verschlüsselt. Er fragt nach der PIN, wenn der Browser oder das Gerät neu gestartet wurde, nicht bei jedem Öffnen der App; wer Wörter oder Codes anzeigen will, wird erneut gefragt. Unter *Settings → Account → PIN* lässt sich einstellen, dass jedes Mal gefragt wird, oder gar nicht. Am Telefon zeigt die App für die PIN ein eigenes Ziffernfeld; ✓ bestätigt. Am Rechner tippst du sie ein und drückst die Eingabetaste. Eine vergessene PIN kostet keine Daten: *Forgot PIN* leert diesen Browser, und du richtest ihn mit deinen acht Wörtern neu ein.
+Danach wählst du eine PIN aus sechs bis zwölf Ziffern. Dieser Browser hält deine Journale, ihre Wörter und Codes nur mit ihr verschlüsselt. Er fragt nach der PIN, wenn der Browser oder das Gerät neu gestartet wurde, nicht bei jedem Öffnen der App; wer Wörter oder Codes anzeigen will, wird erneut gefragt. Unter *Settings → Device → PIN* lässt sich einstellen, dass jedes Mal gefragt wird, oder gar nicht. Am Telefon zeigt die App für die PIN ein eigenes Ziffernfeld; ✓ bestätigt. Am Rechner tippst du sie ein und drückst die Eingabetaste. Eine vergessene PIN kostet keine Daten: *Forgot PIN* leert diesen Browser, und du richtest ihn mit deinen acht Wörtern neu ein.
 
 ## Der erste Eintrag
 

@@ -8,7 +8,7 @@ Open the address of an agenda server in your browser. If you do not run one your
 
 ## Your eight words
 
-The app shows eight words. They are your journal: whoever has them can read and change it, and nothing else gives access. Write them down on paper and keep them where you keep important documents. The app asks for two of them to make sure.
+The app shows eight words. They are your journal: whoever has them can read and change it, and nothing else gives access. Write them down on paper and keep them where you keep important documents. The app asks for two of them to make sure. The words come from the language chosen under *Words in* when you set up (English, German, French, Spanish, Italian, Portuguese or Czech; at first the language of your browser). They keep that language; accents may be typed or left out.
 
 Nobody can restore lost words, not even the operator of the server. This is the price of a server that cannot read your journal.
 
@@ -16,7 +16,7 @@ Give your journal a name, for example your first name, and tap *Continue*.
 
 ## Your PIN
 
-Then choose a PIN of six to twelve digits. This browser keeps your journals, their words and codes only encrypted with it. It asks for the PIN after the browser or the device was restarted, not each time the app opens; showing words or codes asks for it again. Under *Settings → Account → PIN* it can ask every time instead, or not at all. On a phone the app shows its own keypad for the PIN; ✓ confirms. On a computer, type it and press Enter. A forgotten PIN is no loss of data: *Forgot PIN* clears this browser, and you set it up again with your eight words.
+Then choose a PIN of six to twelve digits. This browser keeps your journals, their words and codes only encrypted with it. It asks for the PIN after the browser or the device was restarted, not each time the app opens; showing words or codes asks for it again. Under *Settings → Device → PIN* it can ask every time instead, or not at all. On a phone the app shows its own keypad for the PIN; ✓ confirms. On a computer, type it and press Enter. A forgotten PIN is no loss of data: *Forgot PIN* clears this browser, and you set it up again with your eight words.
 
 ## The first entry
 

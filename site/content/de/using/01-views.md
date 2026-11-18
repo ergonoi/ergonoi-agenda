@@ -10,6 +10,8 @@ Die Liste gruppiert, was ansteht: *Today* (mit dem Überfälligen), *Tomorrow*, 
 - **Auf den Text tippen**, um ihn zu ändern, **auf ein Tag tippen**, um es zu ändern, **`+`**, um eines hinzuzufügen.
 - Nach jeder Änderung erscheint kurz *Undo*.
 
+Am Telefon stehen *List*, *Month* und *Text* am unteren Rand; das Menü oben links enthält Ansichten, Facetten, Einstellungen und die Dokumentation. Auf breiten Bildschirmen (ab etwa 1440 Pixeln) zeigt die Liste nur Datum, Text und Markierungen; ein Klick auf einen Eintrag zeigt ihn mit allen Tags in einer Spalte rechts, wo Text und Tags geändert werden.
+
 ## Monat
 
 *Month* zeigt dieselben Einträge als Kalender: Punkte in den Facettenfarben unter jedem Tag, und unter dem Raster die Einträge des angetippten Tages. Eine Serie erscheint an jedem ihrer Tage. Ist ein Tag gewählt, bekommt ein neuer Eintrag dieses Datum.
@@ -22,4 +24,4 @@ Die Textansicht ist auch der Ort für Zeilen, die das Journal selbst beschreiben
 
 ## Suche
 
-Die Lupe oben (oder `/` am Rechner) durchsucht Text, Notizen und Tags aller Journale, auch über die nächsten 30 Tage hinaus. *include done* findet auch abgeschlossene Einträge; *Memos* zeigt die Memos. Das `×` im Suchfeld leert es.
+Die Lupe oben (oder `/` am Rechner) macht den Kopf zum Suchfeld. Gesucht wird in Text, Notizen und Tags der offenen Ansicht, auch über die nächsten 30 Tage hinaus; eine Zeile über der Liste nennt die Treffer und wie viele der Filter verbirgt. *include done* in dieser Zeile findet auch abgeschlossene Einträge. Das `×` leert das Feld, der Pfeil links oder Escape schließt die Suche.

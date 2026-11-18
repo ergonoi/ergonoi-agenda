@@ -10,6 +10,8 @@ The list groups what is coming: *Today* (with what is overdue), *Tomorrow*, *Nex
 - **Tap the text** to change it, **tap a tag** to change it, **`+`** to add one.
 - *Undo* appears for a moment after every change.
 
+On a phone, *List*, *Month* and *Text* are at the bottom of the screen; the menu at the top left holds views, facets, settings and the documentation. On a wide screen (from about 1440 pixels) the list shows date, text and markers only; a click on an entry shows it with all its tags in a column on the right, where text and tags are changed.
+
 ## Month
 
 *Month* shows the same entries as a calendar: dots in the facet colours under each day, and below the grid the entries of the day you tap. A series appears on each of its days. With a day chosen, a new entry gets that date.
@@ -22,4 +24,4 @@ The text view is also the place for lines that describe the journal itself, such
 
 ## Search
 
-The magnifier at the top (or `/` on a computer) searches text, notes and tags of all journals, beyond the next 30 days. *include done* finds closed entries as well; *Memos* lists the memos. The `×` in the search field clears it.
+The magnifier at the top (or `/` on a computer) turns the header into a search field. It searches text, notes and tags in the open view, beyond the next 30 days; a line above the list says how many entries match and how many more the filter hides. *include done* in that line finds closed entries as well. The `×` clears the field, the arrow on the left or Escape closes the search.
