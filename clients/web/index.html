@@ -14,10 +14,10 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <title>οὐθείς Agenda</title>
 <!-- Link preview (Open Graph). The service replaces the origin placeholder with the address the page was requested from. -->
-<meta name="description" content="An open and lightweight planning journal, cross-device and confidential by design.">
+<meta name="description" content="An open planning journal, lightweight, cross-device and confidential by design.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="οὐθείς Agenda">
-<meta property="og:description" content="An open and lightweight planning journal, cross-device and confidential by design.">
+<meta property="og:description" content="An open planning journal, lightweight, cross-device and confidential by design.">
 <meta property="og:url" content="@@ORIGIN@@/">
 <meta property="og:image" content="@@ORIGIN@@/og-image.png">
 <meta property="og:image:width" content="1200">
@@ -892,7 +892,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.9.9</span>
+    <span class="ver">v0.9.10</span>
     <a href="#" id="aboutLink">About</a>
     <a href="https://outheis-labs.github.io/outheis-agenda/" target="_blank" rel="noopener">Documentation <svg width="7" height="7" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
   </footer>
@@ -951,7 +951,7 @@
     <strong id="aboutName">οὐθείς Agenda</strong>
     <p id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project:</p>
     <p style="margin-top:14px">Technology is potential. Accessibility makes it matter.</p>
-    <p class="hint">Version 0.9.9 · outheis-labs</p>
+    <p class="hint">Version 0.9.10 · outheis-labs</p>
     <div class="btnrow" style="justify-content:flex-end"><button class="primary">Close</button></div>
   </form>
 </dialog>
@@ -5606,7 +5606,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.9.9, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.10, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -5814,7 +5814,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.9.9";
+const APP_VERSION = "0.9.10";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)

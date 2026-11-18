@@ -1,5 +1,6 @@
 // Renders the app icons from icon.html for both themes in ../brand.json into
-// icons/<theme>-<size>.png and icons/<theme>.ico (16, 32, 48 px). build.py copies the set of
+// icons/<theme>-<size>.png and icons/<theme>.ico (16, 32, 48 px), and the link preview from
+// og.html into icons/<theme>-og.png. build.py copies the set of
 // the default theme to the names the page and the manifest use. Needs Chrome, puppeteer-core
 // (from ../e2e: npm install there) and Python with Pillow for the .ico.
 // Usage: node clients/web/icon-src/render.mjs
@@ -23,6 +24,10 @@ for (const t of themes) {
     await (await p.$("#icon")).screenshot({ path: join(here, "icons", `${t}-${s}.png`) });
   }
   execFileSync("python3", ["-c", `from PIL import Image; Image.open("${join(here, "icons", t + "-48.png")}").save("${join(here, "icons", t + ".ico")}", sizes=[(16,16),(32,32),(48,48)])`]);
-  console.log("icons for " + t);
+  await p.setViewport({ width: 1200, height: 630 });
+  await p.goto(`file://${join(here, "og.html")}?t=${t}`);
+  await p.evaluate(() => document.fonts.ready);
+  await p.screenshot({ path: join(here, "icons", `${t}-og.png`) });
+  console.log("icons and link preview for " + t);
 }
 await b.close();

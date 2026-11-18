@@ -49,7 +49,7 @@ manifest = {
 }
 (here / "manifest.webmanifest").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 icons = here / "icon-src" / "icons"
-for src_name, dst in ((f"{theme}-192.png", "icon-192.png"), (f"{theme}-512.png", "icon-512.png"), (f"{theme}-180.png", "apple-touch-icon.png"), (f"{theme}-32.png", "favicon-32.png"), (f"{theme}.ico", "favicon.ico")):
+for src_name, dst in ((f"{theme}-192.png", "icon-192.png"), (f"{theme}-512.png", "icon-512.png"), (f"{theme}-180.png", "apple-touch-icon.png"), (f"{theme}-32.png", "favicon-32.png"), (f"{theme}.ico", "favicon.ico"), (f"{theme}-og.png", "og-image.png")):
     shutil.copy(icons / src_name, here / dst)
 # The service reports the same version at GET /health (server/main.go).
 (here / "version.txt").write_text(version + "\n", encoding="utf-8")
