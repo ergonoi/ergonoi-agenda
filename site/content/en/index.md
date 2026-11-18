@@ -1,6 +1,6 @@
 # ergonoi Agenda
 
-Appointments, tasks and notes in one place, as in a paper notebook – but rearranged and moved to another day with a simple swipe. On every device, in any browser, readable only by you and by those you share it with.
+Appointments, tasks and notes in one place, just like in a paper notebook – but rearranged and moved to another day with a simple swipe. On every device, in any browser, readable only by you and by those you share it with.
 
 **ergonoi Agenda is a planning journal that is light enough to understand completely: one encrypted text file per journal, a small server that cannot read it, and an app that runs in the browser.**
 

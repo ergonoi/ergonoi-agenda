@@ -4,7 +4,7 @@ An open and lightweight planning journal, cross-device and confidential by desig
 
 ![ergonoi Agenda in the browser](docs/screenshot.png)
 
-Appointments, tasks and notes in one journal, as in a paper notebook, but rearranged and moved with a tap. It runs in any browser and can be installed as an app. Journals are encrypted in the browser: the server stores and relays lines it cannot read.
+Appointments, tasks and notes in one journal, just like in a paper notebook, but rearranged and moved with a tap. It runs in any browser and can be installed as an app. Journals are encrypted in the browser: the server stores and relays lines it cannot read.
 
 - **Documentation:** https://ergonoi.github.io/ergonoi-agenda/ (English, German)
 - **ergonoi:** https://ergonoi.com
