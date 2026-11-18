@@ -159,56 +159,9 @@ rsync -a root@SERVER:/var/lib/agenda/accounts/ /backup/agenda-accounts/
 
 Each user keeps their own phrase, and can export their encrypted journal at any time from the settings of the web application.
 
-### 8a. Nightly versioned backup with restic (prepared, not yet deployed)
+### 8a. Backups
 
-The service keeps its own daily backups of every journal (architecture 8.4c) and removes them when a journal is deleted (8.4b). A restic backup of the data directory is the administrator's copy against losing the server; it holds a deleted journal as long as its retention, so keep it short (`--keep-daily 7` is in line with the 7 days in which an owner can undo a deletion).
-
-The files in `deploy/backup/` copy the account directory every night to one or more repositories with [restic](https://restic.net), keeping versions: 14 daily, 8 weekly, 12 monthly. Versions protect also against a client that writes a damaged or emptied journal, which a plain copy would overwrite. As the account files are encrypted by the clients, any storage provider can hold them; restic encrypts once more with its own repository password. Two targets with different providers are recommended, for example a Hetzner Storage Box and Backblaze B2.
-
-What runs: `agenda-backup.timer` starts `agenda-backup.service` at about 03:17 (randomised by up to 20 minutes; a missed run is made up after a reboot). The service runs as the user `agenda` with read-only access to `/var/lib/agenda` and calls `agenda-backup.sh`, which for every file `/etc/agenda-backup/<name>.env` runs `restic backup`, `restic forget --prune` and `restic check`, and reports `<name>: ok` or `<name>: FAILED` in the journal (`journalctl -u agenda-backup`). A failing target does not stop the others.
-
-1. Install restic and the files:
-
-   ```
-   apt install restic
-   install -m 755 deploy/backup/agenda-backup.sh /usr/local/bin/agenda-backup
-   install -m 644 deploy/backup/agenda-backup.service deploy/backup/agenda-backup.timer /etc/systemd/system/
-   install -d -m 750 -o agenda -g agenda /etc/agenda-backup
-   ```
-
-2. One target per `.env` file, from the examples `storagebox.env.example` and `b2.env.example`; each with its own repository password (keep a copy of the passwords off the server, e.g. in a password manager — without it the repository cannot be read):
-
-   ```
-   openssl rand -base64 32 > /etc/agenda-backup/storagebox.password
-   # edit /etc/agenda-backup/storagebox.env from the example
-   chown agenda:agenda /etc/agenda-backup/*; chmod 600 /etc/agenda-backup/*
-   ```
-
-   For a Storage Box (SFTP, port 23): create a key for the service and give its public part to the Storage Box (Hetzner Robot, or `ssh-copy-id -p 23 -s`):
-
-   ```
-   sudo -u agenda ssh-keygen -t ed25519 -N '' -f /etc/agenda-backup/id_ed25519
-   sudo -u agenda ssh -p 23 -i /etc/agenda-backup/id_ed25519 -o UserKnownHostsFile=/etc/agenda-backup/known_hosts u123456@u123456.your-storagebox.de exit
-   ```
-
-3. Initialise each repository once, then test and enable:
-
-   ```
-   sudo -u agenda sh -c 'set -a; . /etc/agenda-backup/storagebox.env; restic -o sftp.args="$RESTIC_SFTP_ARGS" init'
-   sudo -u agenda sh -c 'set -a; . /etc/agenda-backup/b2.env; restic init'
-   systemctl daemon-reload
-   systemctl start agenda-backup && journalctl -u agenda-backup -n 20
-   systemctl enable --now agenda-backup.timer
-   ```
-
-**Restoring.** List the versions and restore one into a new directory, then put the files back while the service is stopped:
-
-```
-sudo -u agenda sh -c 'set -a; . /etc/agenda-backup/b2.env; restic snapshots; restic restore latest --target /tmp/agenda-restore'
-systemctl stop agenda-service
-cp -a /tmp/agenda-restore/var/lib/agenda/accounts/. /var/lib/agenda/accounts/
-systemctl start agenda-service
-```
+The service keeps its own daily backups of every journal in `/var/lib/agenda/accounts/backups` (architecture 8.4c) and removes them when a journal is deleted (8.4b). There is no further backup of the data directory: it would keep deleted journals.
 
 A single journal can also be restored without a server: its file `<account id>.enc` opens in the web application with *Settings → Work locally → Open local journal* and the account phrase. Changes made after the backup are not in the restored file.
 

@@ -242,7 +242,7 @@ A single item (a picture, a file or a text) to move between one's own devices, o
 
 A journal deleted by its owner must not stay readable for anyone, neither on the server nor in the backups nor in the copies of others. That anyone may still hold a copy is good only when the deletion was a mistake; that case is covered by 7 days in which the owner can undo it, not by copies with others. So the service answers `410 Gone` at once, every client that learns of it removes its copy and its backups, and after 7 days the file and its backups go (architecture 8.4b). Making allies guests was considered and not taken: the owner may not want anyone to know anything of the journal any more.
 
-Backups on the server and in every browser, rotated as towers of Hanoi with 9 places (about one year back, at most 9 copies): fixed space, no thinning (architecture 8.4c). They are, with the marker of a deletion, further exceptions to the rule that the server keeps nothing but the journal file; both hold nothing readable. Restic backups of the server's data directory (7, item 10) hold deleted journals as long as their retention; it must fit the rule.
+Backups on the server and in every browser, rotated as towers of Hanoi with 9 places (about one year back, at most 9 copies): fixed space, no thinning (architecture 8.4c). They are, with the marker of a deletion, further exceptions to the rule that the server keeps nothing but the journal file; both hold nothing readable. A further backup of the server's data directory would keep deleted journals; the restic backup once prepared for it is dropped (7, item 10).
 
 ## 6.7 Views instead of the facet bar (18 November 2026)
 
@@ -283,7 +283,7 @@ Chosen: only clients that hold the key fetch. The web client does so where the p
 7. **To decide:** keep the member tables across restarts (`-members-dir /var/lib/agenda/members` in `deploy/agenda-service.service`) or memory only (default).
 8. **To decide later:** the product name, *οὐθείς Agenda* or *outheis Journal*.
 9. **Proposed, mockup shown:** *Show* in the undo bar, jumping to the entry just added or moved.
-10. **Backups, server:** nightly versioned restic backup to two providers, prepared in `deploy/backup/` and described in `deploy/DEPLOY.md` 8a; to be deployed. Until then the deploy script takes a copy that is fetched by `scp`.
+10. **Backups, server:** the service's own (architecture 8.4c, 6.6a). The restic backup of the data directory that was prepared in `deploy/backup/` is dropped: it would keep deleted journals. **Later, if wanted:** a secondary server that the user adds, and to which the client also sends everything; the servers do not talk to each other, the client alone decides where its data goes.
 11. **Backups, users:** the Node client's nightly run also writes the encrypted file of each journal into a folder of the user's choice (cloud drive, NAS), so that copies exist independently of the server.
 12. **Evaluate the experiment** (ui.md 4.14b) after a few weeks of use from saved logs: share of uses in the folded bar, unfolds per day; then adjust weights and half-life, adopt or drop it.
 13. Done: the repository is public, Pages publishes `site/` on every push.
