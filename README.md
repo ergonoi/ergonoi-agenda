@@ -6,6 +6,8 @@ One line per entry. A handful of tags. A file that can be read and written by ha
 
 **outheis-agenda is the agenda layer of outheis, reduced to its format: a grammar for items, an append-only change model, and the smallest service and client that make it usable every day.**
 
+Author: Markus Schatzl
+
 ---
 
 ## The Problem
