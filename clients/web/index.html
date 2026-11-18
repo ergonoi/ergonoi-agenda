@@ -1014,7 +1014,7 @@
     <section data-st="system">
       <h3>About</h3>
       <div class="about">
-        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.26</p>
+        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.27</p>
         <p>Author: Markus Schatzl</p>
         <p class="am"><span id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project: </span><span class="one">Technology is potential. Accessibility makes it matter.</span></p>
         <p class="al"><a href="https://ergonoi.github.io/ergonoi-agenda/" target="_blank" rel="noopener">Documentation <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://github.com/ergonoi/ergonoi-agenda" target="_blank" rel="noopener">Source code on GitHub <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://ergonoi.com" target="_blank" rel="noopener">ergonoi.com <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
@@ -1050,7 +1050,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.9.26</span>
+    <span class="ver">v0.9.27</span>
   </footer>
 </main>
 <nav id="bnav" aria-label="View">
@@ -4411,7 +4411,9 @@ function renderPanel() {
   h += `<h3>Facets</h3><div class="fall"><button type="button" data-fall="1">All</button><button type="button" data-fnone="1">None</button></div>`;
   // Facets grouped by the journal they belong to, in the order of the journals; within a
   // journal by name, so that each keeps its place.
-  const keys = valuesOf("facet").filter(k => k && (total.get(k) || f.facet.includes(k)));
+  // Every facet of the journals, with entries or not: switched on it must stay in the list,
+  // since its first entry may come any moment (ui.md 4.6).
+  const keys = valuesOf("facet").filter(k => k);
   const jblock = j => {
     const ks = keys.filter(k => keyJ(k) === j).sort((a, b) => facetName(a).localeCompare(facetName(b)));
     if (!ks.length) return "";
@@ -6343,7 +6345,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.9.26, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.27, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -6551,7 +6553,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.9.26";
+const APP_VERSION = "0.9.27";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)

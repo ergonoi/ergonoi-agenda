@@ -3521,7 +3521,9 @@ function renderPanel() {
   h += `<h3>Facets</h3><div class="fall"><button type="button" data-fall="1">All</button><button type="button" data-fnone="1">None</button></div>`;
   // Facets grouped by the journal they belong to, in the order of the journals; within a
   // journal by name, so that each keeps its place.
-  const keys = valuesOf("facet").filter(k => k && (total.get(k) || f.facet.includes(k)));
+  // Every facet of the journals, with entries or not: switched on it must stay in the list,
+  // since its first entry may come any moment (ui.md 4.6).
+  const keys = valuesOf("facet").filter(k => k);
   const jblock = j => {
     const ks = keys.filter(k => keyJ(k) === j).sort((a, b) => facetName(a).localeCompare(facetName(b)));
     if (!ks.length) return "";

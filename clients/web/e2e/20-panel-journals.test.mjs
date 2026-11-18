@@ -54,5 +54,11 @@ export default async function ({ svc, b }) {
   await A.evaluate(() => { S.wc += "\nLoose note #date-" + today(); render(); }); await sleep(200);
   await A.evaluate(() => openPanel(true)); await sleep(200);
   check(await A.evaluate(() => { const r = document.querySelector('#fpanel [data-facetf=""]'); return r && r.nextElementSibling && r.nextElementSibling.id === "fpJour"; }), "with one, the row stands below the own journal, before More journals");
+  // A facet without current entries stays in the list when switched on.
+  await A.evaluate(() => { S.wc += "\nAbout quiet #facet-quiet #type-meta"; render(); });
+  await A.evaluate(() => document.querySelector('#fpanel [data-fnone]').click()); await sleep(150);
+  await A.evaluate(() => [...document.querySelectorAll("#fpanel .fac")].find(x => /quiet/.test(x.textContent)).click()); await sleep(150);
+  check(await A.evaluate(() => { const b = [...document.querySelectorAll("#fpanel .fac")].find(x => /quiet/.test(x.textContent)); return b && !b.classList.contains("off"); }), "a facet without entries stays in the list when switched on");
+  await A.evaluate(() => document.querySelector('#fpanel [data-fall]').click());
   check(!A.errors.length && !B.errors.length, "no page errors " + A.errors.concat(B.errors).join(" | "));
 }
