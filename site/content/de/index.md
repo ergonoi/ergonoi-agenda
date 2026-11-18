@@ -1,6 +1,6 @@
 # οὐθείς Agenda
 
-Termine, Aufgaben und Notizen in einer Liste, wie in einem Notizbuch aus Papier – nur dass sich Einträge mit einem einfachen Wisch umordnen und auf einen anderen Tag verschieben lassen. Auf jedem Gerät, in jedem Browser, lesbar nur für dich und für die, mit denen du sie teilst.
+Termine, Aufgaben und Notizen an einem Ort, wie in einem Notizbuch aus Papier – mit der Möglichkeit, sie mit einfachen Gesten neu zu sortieren oder zu verschieben. Auf jedem Gerät, in jedem Browser, lesbar nur für dich und für die, mit denen du sie teilst.
 
 **οὐθείς Agenda ist ein Planungsjournal, das leicht genug ist, um es ganz zu verstehen: eine verschlüsselte Textdatei je Journal, ein kleiner Server, der sie nicht lesen kann, und eine App, die im Browser läuft.**
 
