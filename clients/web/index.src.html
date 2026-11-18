@@ -378,6 +378,10 @@
   #btnClip.over, #dlgClip.over { outline:2px dashed var(--teal); outline-offset:-2px; }
   #clipPreview { margin:10px 0; min-height:48px; display:flex; align-items:center; justify-content:center; border:.5px solid var(--line); border-radius:6px; padding:8px; overflow:hidden; }
   #clipPreview img { max-width:100%; max-height:40vh; display:block; }
+  #clipPreview.sending img { opacity:.55; }
+  /* Sending (ui.md 4.15): a stick that fills with the share already sent. */
+  #clipProg { height:4px; background:var(--line); margin:-4px 0 8px; }
+  #clipProg i { display:block; height:100%; width:0; background:var(--teal); transition:width .2s; }
   #clipPreview pre { white-space:pre-wrap; word-break:break-word; margin:0; font:inherit; font-size:14px; max-height:30vh; overflow:auto; width:100%; }
   #btnSync.spin svg { animation:syncspin .8s linear infinite; }
   #btnSync.failed { color:var(--scarlet); }
@@ -1104,6 +1108,7 @@
     <strong>Clipboard</strong>
     <p class="hint" id="clipHint">One item for your own devices: a picture, a file or a text, up to 4 MB. Paste it here (Ctrl/Cmd+V), drop it here, or choose it. Only you can read it; a new item replaces the old. The server removes it after 24 hours.</p>
     <div id="clipPreview"><span class="hint">Empty</span></div>
+    <div id="clipProg" class="hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100"><i></i></div>
     <div class="hint" id="clipMsg" aria-live="polite"></div>
     <div class="btnrow">
       <button type="button" class="sec" id="clipPaste">Paste</button>
@@ -6861,10 +6866,51 @@ async function clipLoad() {
   clipSet(new Blob([plain.subarray(4 + n)], { type: meta.type }), meta, r.headers.get("ETag") || "");
   return CLIP.blob;
 }
+// Sending shows the item at once and a stick with the share sent (ui.md 4.15); XHR, since
+// fetch reports no upload progress.
+function clipProgress(f) {
+  const p = $("clipProg");
+  p.classList.toggle("hidden", f === null);
+  if (f !== null) { p.firstElementChild.style.width = Math.round(f * 100) + "%"; p.setAttribute("aria-valuenow", String(Math.round(f * 100))); }
+}
+function clipSend(body, headers) {
+  return new Promise((res, rej) => {
+    const x = new XMLHttpRequest();
+    x.open("PUT", serverBackend.base() + "/clip");
+    for (const [k, v] of Object.entries(headers)) x.setRequestHeader(k, v);
+    x.upload.onprogress = ev => { if (ev.lengthComputable) { clipProgress(ev.loaded / ev.total); clipMsg("Sending " + Math.round(100 * ev.loaded / ev.total) + " %"); } };
+    x.onload = () => res({ status: x.status, ok: x.status >= 200 && x.status < 300, etag: x.getResponseHeader("ETag") || "", text: x.responseText || "" });
+    x.onerror = () => rej(new Error("no connection to the server"));
+    x.ontimeout = () => rej(new Error("the server did not answer in time"));
+    x.timeout = 120000;
+    x.send(body);
+  });
+}
+// A picture above 4 MB is made smaller before sending: at most 2560 px on its longer side, JPEG.
+async function clipShrink(blob, name) {
+  let img;
+  try { img = await createImageBitmap(blob); }
+  catch { img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error("picture not readable")); i.src = URL.createObjectURL(blob); }); }
+  const w = img.width, h = img.height, k = Math.min(1, 2560 / Math.max(w, h));
+  const c = document.createElement("canvas"); c.width = Math.round(w * k); c.height = Math.round(h * k);
+  c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+  const out = await new Promise(res => c.toBlob(res, "image/jpeg", 0.85));
+  return { blob: out, name: (name || "picture").replace(/\.[^.]+$/, "") + ".jpg" };
+}
 async function clipPut(blob, name) {
+  log("clipboard: chosen " + (name || "item") + ", " + (blob.type || "?") + ", " + blob.size + " bytes");
+  if (blob.size > CLIP_MAX && (blob.type || "").startsWith("image/")) {
+    clipMsg("Making the picture smaller");
+    try { ({ blob, name } = await clipShrink(blob, name)); log("clipboard: made smaller to " + blob.size + " bytes"); }
+    catch (err) { log("clipboard: not made smaller, " + err.message); }
+  }
   const type = blob.type || "application/octet-stream";
-  if (blob.size > CLIP_MAX) { clipMsg("Too large for the clipboard (" + (blob.size / 1048576).toFixed(1) + " MB, at most 4 MB). Nothing was sent."); return; }
-  clipMsg("Sending");
+  if (blob.size > CLIP_MAX) { clipMsg("Too large for the clipboard (" + (blob.size / 1048576).toFixed(1) + " MB, at most 4 MB). Nothing was sent."); log("clipboard: too large"); return; }
+  // The item shows at once, pale until it is sent.
+  const box = $("clipPreview"), local = type.startsWith("image/") ? URL.createObjectURL(blob) : "";
+  box.innerHTML = local ? `<img alt="" src="${local}">` : `<span>${esc(name || "item")} · ${clipSize(blob.size)}</span>`;
+  box.classList.add("sending");
+  clipProgress(0); clipMsg("Encrypting");
   const meta = { name: name || (type.startsWith("image/") ? "picture." + (type.split("/")[1] || "png") : type === "text/plain" ? "text.txt" : "file"), type, size: blob.size, t: new Date().toISOString() };
   const head = new TextEncoder().encode(JSON.stringify(meta)), body = new Uint8Array(await blob.arrayBuffer());
   const plain = new Uint8Array(4 + head.length + body.length);
@@ -6872,14 +6918,16 @@ async function clipPut(blob, name) {
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await clipKey(), plain));
   const out = new Uint8Array(12 + ct.length); out.set(iv); out.set(ct, 12);
+  const done = () => { box.classList.remove("sending"); clipProgress(null); if (local) URL.revokeObjectURL(local); };
   try {
-    const r = await fetch(serverBackend.base() + "/clip", { method: "PUT", headers: { ...(await clipHeaders()), "Content-Type": "application/octet-stream" }, body: out });
-    if (r.status === 413) { clipMsg("Too large for the clipboard (at most 4 MB). Nothing was sent."); return; }
-    if (!r.ok) { clipMsg("Not sent: " + (await r.text()).trim()); return; }
-    clipSet(new Blob([body], { type }), meta, r.headers.get("ETag") || "");
+    const r = await clipSend(out, { ...(await clipHeaders()), "Content-Type": "application/octet-stream" });
+    done();
+    if (r.status === 413) { clipRender(); clipMsg("Too large for the server. Nothing was sent."); log("clipboard: 413 from the server, " + out.length + " bytes"); return; }
+    if (!r.ok) { clipRender(); clipMsg("Not sent: " + (r.text.trim() || "server " + r.status)); log("clipboard: not sent, " + r.status); return; }
+    clipSet(new Blob([body], { type }), meta, r.etag);
     clipMsg("In the clipboard: " + meta.name + " (" + clipSize(meta.size) + "). Your other devices see it at their next synchronisation.");
-    log("clipboard: " + type + ", " + meta.size + " bytes");
-  } catch (err) { clipMsg("Not sent: " + err.message); }
+    log("clipboard: sent, " + type + ", " + meta.size + " bytes");
+  } catch (err) { done(); clipRender(); clipMsg("Not sent: " + err.message); log("clipboard: not sent, " + err.message); }
 }
 const clipSize = n => n < 1024 ? n + " bytes" : n < 1048576 ? Math.round(n / 1024) + " KB" : (n / 1048576).toFixed(1) + " MB";
 function clipMsg(t) { $("clipMsg").textContent = t; }
