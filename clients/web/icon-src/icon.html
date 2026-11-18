@@ -18,5 +18,9 @@ html, body { margin:0; }
 const q = new URLSearchParams(location.search), s = Number(q.get("s")) || 512, t = q.get("t") || "outheis";
 const el = document.getElementById("icon");
 el.className = t; el.style.width = el.style.height = s + "px";
-el.querySelector("span").style.fontSize = (s * 150 / 180) + "px";
+const sp = el.querySelector("span");
+sp.style.fontSize = (s * 150 / 180 * (t === "ergonoi" ? 0.9 : 1)) + "px";
+// ergonoi: the A of Mona Sans Mono is set at 90 % and stretched back to full height, so that
+// its legs weigh as much as the strokes of the M in the Map icon
+if (t === "ergonoi") sp.style.transform = "translateY(-50%) scaleY(1.111)";
 </script></body></html>

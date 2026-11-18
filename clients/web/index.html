@@ -628,6 +628,7 @@
   #sheet .title { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); margin:14px 0 8px; }
   #sheet .grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:12px; }
   #sheet .sheetpick { position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; width:100%; min-height:var(--tap); margin:0 0 12px; border:1px solid var(--line); border-radius:6px; background:var(--wisteria); border-color:var(--wisteria); color:#1A1A1A; font-size:16px; cursor:pointer; }
+  #sheet .sheetpick, #sheet .sheetpick input, #sheet .sheetpick input::-webkit-calendar-picker-indicator, #sheet .sheetpick input::-webkit-datetime-edit { cursor:pointer; } /* a button like the others */
   #sheet .sheetpick input { position:absolute; inset:0; opacity:0; width:100%; height:100%; min-width:0; max-width:100%; border:0; padding:0; margin:0; font-size:16px; -webkit-appearance:none; appearance:none; }
   #sheet button { min-height:var(--bm); font-size:15px; }
   #sheet .done { width:100%; background:var(--amethyst); border-color:var(--amethyst); color:#fff; }
@@ -892,7 +893,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.9.10</span>
+    <span class="ver">v0.9.11</span>
     <a href="#" id="aboutLink">About</a>
     <a href="https://outheis-labs.github.io/outheis-agenda/" target="_blank" rel="noopener">Documentation <svg width="7" height="7" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
   </footer>
@@ -951,7 +952,7 @@
     <strong id="aboutName">οὐθείς Agenda</strong>
     <p id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project:</p>
     <p style="margin-top:14px">Technology is potential. Accessibility makes it matter.</p>
-    <p class="hint">Version 0.9.10 · outheis-labs</p>
+    <p class="hint">Version 0.9.11 · outheis-labs</p>
     <div class="btnrow" style="justify-content:flex-end"><button class="primary">Close</button></div>
   </form>
 </dialog>
@@ -4835,7 +4836,9 @@ const sheetDateApply = () => { const v = $("sheetDate").value; if (v && !$("shee
 $("sheetDate").addEventListener("focus", () => { sheetDateOpen = true; });
 $("sheetDate").addEventListener("change", () => { if (matchMedia("(pointer: fine)").matches) sheetDateApply(); });
 $("sheetDate").addEventListener("blur", () => { if (sheetDateOpen) { sheetDateOpen = false; sheetDateApply(); } });
-$("sheetDate").addEventListener("click", ev => ev.stopPropagation());
+// A click on the (invisible) field opens the picker: desktop browsers open it only from their
+// own calendar symbol, which is hidden here; touch browsers open it by themselves.
+$("sheetDate").addEventListener("click", ev => { ev.stopPropagation(); try { if (matchMedia("(pointer: fine)").matches && $("sheetDate").showPicker) $("sheetDate").showPicker(); } catch {} });
 
 // Swipe right on an item. Direction is decided after a few pixels: vertical movement
 // hands the gesture back to scrolling; horizontal movement moves the item.
@@ -5606,7 +5609,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.9.10, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.11, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -5814,7 +5817,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.9.10";
+const APP_VERSION = "0.9.11";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
