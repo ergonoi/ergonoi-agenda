@@ -307,6 +307,16 @@
   /* The clipboard has no symbol of its own (0.9.15): a ring around the sync dot shows that it holds something. */
   header #btnClip { display:none !important; }
   #status .dot[data-clip] { cursor:pointer; }
+  dialog.person { max-width:440px; width:calc(100% - 32px); }
+  dialog.person strong { display:block; font-size:18px; margin-bottom:8px; }
+  dialog.person #personList .er:last-child { border-bottom:.5px solid var(--line); }
+  dialog.person .er > .pstick + span { flex:1; }
+  dialog.person .er svg:not(.chev) { color:var(--muted); }
+  dialog.person #personAdd { border-bottom:.5px solid var(--line); }
+  dialog.person .er span.pstick { display:block; width:4px; height:26px; flex:none; }
+  dialog.person .er:focus:not(:focus-visible) { outline:none; }
+  #viewMenu .person { display:flex; align-items:center; gap:10px; font-weight:600; }
+  #viewMenu .person .pstick { display:inline-block; width:4px; height:18px; }
   .srvlist .srv { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:4px 0; border-bottom:.5px solid var(--line); font-size:14px; overflow-wrap:anywhere; }
   .srvadd { display:flex; gap:8px; align-items:center; margin-top:8px; }
   .srvadd input { flex:1; min-width:0; }
@@ -614,13 +624,13 @@
   #dlgSetup .srvrow .st.ok { color:var(--teal); } #dlgSetup .srvrow .st.bad { color:var(--scarlet); }
   #dlgSetup .srvrow button { flex:none; min-height:36px; }
   #srvEdit { padding:0 0 12px; }
-  #dlgSetup .er { display:flex; align-items:center; gap:14px; width:100%; min-height:64px; padding:10px 4px; border:0; border-top:.5px solid var(--line); border-radius:0; background:transparent; text-align:left; color:var(--fg); cursor:pointer; }
+  #dlgSetup .er, dialog.person .er { display:flex; align-items:center; gap:14px; width:100%; min-height:64px; padding:10px 4px; border:0; border-top:.5px solid var(--line); border-radius:0; background:transparent; text-align:left; color:var(--fg); cursor:pointer; }
   #dlgSetup .er + .smore { border-top:.5px solid var(--line); }
-  #dlgSetup .er > svg { flex:none; width:22px; height:22px; color:var(--fg2); }
-  #dlgSetup .er span { display:flex; flex-direction:column; gap:2px; flex:1; }
-  #dlgSetup .er b { font-weight:500; font-size:16px; }
-  #dlgSetup .er small { font-size:13px; color:var(--muted); }
-  #dlgSetup .er .chev { color:var(--muted); }
+  #dlgSetup .er > svg, dialog.person .er > svg { flex:none; width:22px; height:22px; color:var(--fg2); }
+  #dlgSetup .er span, dialog.person .er span { display:flex; flex-direction:column; gap:2px; flex:1; }
+  #dlgSetup .er b, dialog.person .er b { font-weight:500; font-size:16px; }
+  #dlgSetup .er small, dialog.person .er small { font-size:13px; color:var(--muted); }
+  #dlgSetup .er .chev, dialog.person .er .chev { color:var(--muted); }
   #dlgSetup .smore + .smore { padding-top:6px; border-top:0; }
   #dlgSetup .smore { margin:0; padding:14px 0 0; font-size:14px; color:var(--fg2); display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; }
   #dlgSetup .smore .lnk { border:0; min-height:0; padding:0; background:none; color:var(--fg2); text-decoration:underline; text-underline-offset:2px; font-size:14px; cursor:pointer; }
@@ -937,7 +947,7 @@
     <section data-st="system">
       <h3>About</h3>
       <div class="about">
-        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.19</p>
+        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.20</p>
         <p>Author: Markus Schatzl</p>
         <p class="am"><span id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project: </span><span class="one">Technology is potential. Accessibility makes it matter.</span></p>
         <p class="al"><a href="https://ergonoi.github.io/ergonoi-agenda/" target="_blank" rel="noopener">Documentation <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://github.com/ergonoi/ergonoi-agenda" target="_blank" rel="noopener">Source code on GitHub <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://ergonoi.com" target="_blank" rel="noopener">ergonoi.com <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
@@ -973,7 +983,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.9.19</span>
+    <span class="ver">v0.9.20</span>
   </footer>
 </main>
 <nav id="bnav" aria-label="View">
@@ -986,6 +996,18 @@
 <aside id="detail" aria-label="Entry"></aside>
 
 
+<dialog id="dlgPerson" class="person">
+  <form method="dialog">
+    <strong>Who is using this browser?</strong>
+    <div id="personList"></div>
+    <button type="button" class="er" id="personAdd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span><b>Someone new</b><small>Your own journals on this browser, kept apart from the others</small></span></button>
+    <div id="personNew" class="hidden">
+      <label for="personName">Your name on this browser</label>
+      <div class="srvadd"><input id="personName" maxlength="30" autocomplete="off"><button type="button" id="personGo">Continue</button></div>
+    </div>
+    <p class="hint">Each person keeps their journals apart and opens them with their own PIN.</p>
+  </form>
+</dialog>
 <dialog id="dlgPin">
   <form method="dialog">
     <strong id="pinTitle">Enter your PIN</strong>
@@ -4219,9 +4241,26 @@ function renderViewTitle() {
   $("homeLink").title = v ? "View: " + v.name + (d ? " (changed)" : "") : "Views";
 }
 let viewNaming = false;
+// Who is using the browser, and switching to someone else (ui.md 4.11e).
+let personNaming = false;
+function personMenu() {
+  const me = Persons.me();
+  // The first time, the person who is here gives a name, under which the chooser shows them.
+  if (personNaming) return `<form class="vname" data-pname="1"><input id="personFirstName" placeholder="Your name on this browser" autocomplete="off" maxlength="30"><button type="submit">Continue</button></form><div class="vsep"></div>`;
+  return (me && multiPerson() ? `<div class="vrow person"><span class="pstick" style="background:${esc(me.color)}"></span>${esc(me.name)}</div>` : "") +
+    `<button type="button" class="vact" data-person="1">Switch person …</button><div class="vsep"></div>`;
+}
+function switchPerson(firstName) {
+  if (!Persons.list().length) Persons.ensureFirst(firstName);
+  log("switch person");
+  Vault.flush().then(() => {
+    try { sessionStorage.removeItem(pinSkey()); sessionStorage.setItem("agenda.person", "?"); } catch {}
+    location.reload();
+  });
+}
 function renderViewMenu() {
   const vs = viewLines(), cur = LS.getItem("agenda.view");
-  let h = vs.map(v => `<button type="button" role="menuitem" class="vrow${v.name === cur ? " on" : ""}" data-view="${esc(v.name)}">${viewSw(v)}${esc(v.name)}${v.name === cur ? '<span class="ck" aria-hidden="true">✓</span>' : ""}</button>`).join("");
+  let h = personMenu() + vs.map(v => `<button type="button" role="menuitem" class="vrow${v.name === cur ? " on" : ""}" data-view="${esc(v.name)}">${viewSw(v)}${esc(v.name)}${v.name === cur ? '<span class="ck" aria-hidden="true">✓</span>' : ""}</button>`).join("");
   if (vs.length) h += `<div class="vsep"></div>`;
   h += viewNaming
     ? `<form class="vname" data-vnew="1"><input id="viewNewName" placeholder="Name of the view" autocomplete="off" maxlength="40"><button type="submit">Save</button></form>`
@@ -4230,7 +4269,7 @@ function renderViewMenu() {
   $("viewMenu").innerHTML = h; $("viewMenu").style.setProperty("--vswn", vswn(vs));
   if (viewNaming) $("viewNewName").focus();
 }
-function openViewMenu() { viewNaming = false; renderViewMenu(); $("viewMenu").classList.remove("hidden"); $("homeLink").setAttribute("aria-expanded", "true"); }
+function openViewMenu() { viewNaming = false; personNaming = false; renderViewMenu(); $("viewMenu").classList.remove("hidden"); $("homeLink").setAttribute("aria-expanded", "true"); }
 function closeViewMenu() { $("viewMenu").classList.add("hidden"); $("homeLink").setAttribute("aria-expanded", "false"); viewNaming = false; }
 $("homeLink").onclick = ev => {
   ev.preventDefault();
@@ -4238,12 +4277,17 @@ $("homeLink").onclick = ev => {
 };
 $("viewMenu").addEventListener("click", ev => {
   const b = ev.target.closest("button"); if (!b) return;
+  if (b.dataset.person) {
+    if (!Persons.list().length) { personNaming = true; renderViewMenu(); $("personFirstName").focus(); return; }
+    closeViewMenu(); switchPerson(); return;
+  }
   if (b.dataset.view !== undefined) { applyView(b.dataset.view); return; }
   if (b.dataset.vsave) { viewNaming = true; renderViewMenu(); return; }
   if (b.dataset.vedit) { closeViewMenu(); panelEdit = true; openPanel(true); }
 });
 $("viewMenu").addEventListener("submit", ev => {
   ev.preventDefault();
+  if (ev.target.dataset.pname) { const n = $("personFirstName").value.trim(); if (!n) return; personNaming = false; closeViewMenu(); switchPerson(n); return; }
   const n = $("viewNewName").value.trim(); if (!n) return;
   writeView(n); closeViewMenu();
 });
@@ -6049,7 +6093,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.9.19, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.20, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -6257,7 +6301,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.9.19";
+const APP_VERSION = "0.9.20";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
@@ -6409,11 +6453,23 @@ $("btnPinChange").onclick = async () => {
   if ((await pinDialog("change")) === "set") { log("PIN changed"); addNotice("The PIN is changed."); render(); }
 };
 // Everything this browser keeps, encrypted or not, and the PIN with it.
-function clearThisBrowser(keepLog) {
+// Clears what the current person keeps in this browser; with several persons the others
+// stay, and so do their backups (ui.md 4.11e).
+async function clearThisBrowser(keepLog) {
+  const others = multiPerson();
+  let accts = [];
+  if (others) { try { accts = await Promise.all(journals().map(j => withJ(j, () => S.keys ? acctOf(S.keys) : ""))); } catch {} }
   clearTimeout(Vault.timer); Vault.mem = null; Vault.key = null; Vault.mode = "";
-  try { sessionStorage.removeItem(PIN_SKEY); } catch {}
-  for (const k of Object.keys(localStorage)) if (k.startsWith("agenda.") || k.startsWith(VAULT)) localStorage.removeItem(k);
-  if (keepLog != null) { localStorage.setItem("agenda.logOn", "1"); localStorage.setItem("agenda.log", keepLog); log("data in this browser cleared"); }
+  try { sessionStorage.removeItem(pinSkey()); } catch {}
+  for (const k of PS.keys()) if (k.startsWith("agenda.") || k.startsWith(VAULT)) PS.removeItem(k);
+  if (keepLog != null) { PS.setItem("agenda.logOn", "1"); PS.setItem("agenda.log", keepLog); log("data in this browser cleared"); }
+  if (others) {
+    for (const a of accts) if (a) await BK.drop(a).catch(() => {});
+    Persons.remove(Persons.id());
+    try { sessionStorage.removeItem("agenda.person"); } catch {}
+    location.reload();
+    return;
+  }
   // The backups in this browser go too (architecture 8.4c).
   BK.clear().then(() => location.reload());
 }
@@ -8756,17 +8812,78 @@ if (!S.keys) {
 // Display preferences stay plain so that the page looks right before the PIN is entered.
 // The storage layer is the one place a native app would replace (with a hardware keystore).
 // ---------------------------------------------------------------------------
+// Persons (ui.md 4.11e): several people may use one browser, as is usual in a family. Each
+// keeps everything apart under a prefix of its own ("p<6 letters>/") with a PIN of its own;
+// the first person of a browser keeps its keys without a prefix. Shared are only the list of
+// persons (name and colour, shown before anyone is unlocked) and the display preferences.
+const PERSON_RE = /^p[0-9a-z]{6}\//;
+const PS_GLOBAL = new Set(["agenda.compact", "agenda.minimal", "agenda.fbar.open", "agenda.stab", "agenda.persons"]);
+const PERSON_COLORS = ["#460A46", "#218380", "#FFB400", "#C490D1", "#2EC4C6", "#F2A7D8", "#FF2E00"];
+let PFX = "";
+const Persons = {
+  list() { try { return JSON.parse(localStorage.getItem("agenda.persons") || "[]"); } catch { return []; } },
+  save(l) { localStorage.setItem("agenda.persons", JSON.stringify(l)); },
+  cur() { try { return sessionStorage.getItem("agenda.person"); } catch { return null; } },
+  set(id) { try { sessionStorage.setItem("agenda.person", id); } catch {} },
+  id() { return PFX ? PFX.slice(0, -1) : ""; },
+  me() { return this.list().find(x => x.id === this.id()) || null; },
+  // The first person of the browser enters the list once a second one comes.
+  ensureFirst(name) {
+    const l = this.list();
+    if (!l.some(x => x.id === "")) { l.unshift({ id: "", name: String(name || "").trim().slice(0, 30) || "Person 1", color: PERSON_COLORS[0] }); this.save(l); }
+    return l;
+  },
+  add(name) {
+    const l = this.list(), id = "p" + Array.from(crypto.getRandomValues(new Uint8Array(6)), b => "0123456789abcdefghijklmnopqrstuvwxyz"[b % 36]).join("");
+    const used = new Set(l.map(x => x.color));
+    l.push({ id, name: String(name).trim().slice(0, 30) || "Person " + (l.length + 1), color: PERSON_COLORS.find(c => !used.has(c)) || PERSON_COLORS[l.length % PERSON_COLORS.length] });
+    this.save(l); return id;
+  },
+  remove(id) { this.save(this.list().filter(x => x.id !== id)); },
+};
+// localStorage of the current person.
+const PS = {
+  k(k) { return PS_GLOBAL.has(k) ? k : PFX + k; },
+  getItem(k) { return localStorage.getItem(this.k(k)); },
+  setItem(k, v) { localStorage.setItem(this.k(k), v); },
+  removeItem(k) { localStorage.removeItem(this.k(k)); },
+  keys() { return Object.keys(localStorage).filter(k => PFX ? k.startsWith(PFX) : !PERSON_RE.test(k)).map(k => PFX ? k.slice(PFX.length) : k).filter(k => !PS_GLOBAL.has(k)); },
+};
+const multiPerson = () => Persons.list().length > 1;
+// Who is using this browser: chosen before anything is unlocked.
+function personChooser() {
+  const d = document.getElementById("dlgPerson"), list = document.getElementById("personList");
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const lock = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="3.5" y="7" width="9" height="6.5"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2"/></svg>';
+  const chev = '<svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>';
+  list.innerHTML = Persons.list().map(x => `<button type="button" class="er" data-person="${esc(x.id)}"><span class="pstick" style="background:${esc(x.color)}"></span><span><b>${esc(x.name)}</b></span>${lock}${chev}</button>`).join("");
+  document.getElementById("personNew").classList.add("hidden");
+  document.getElementById("personName").value = "";
+  return new Promise(resolve => {
+    list.onclick = ev => { const b = ev.target.closest("[data-person]"); if (b) { d.close(); resolve(b.dataset.person); } };
+    document.getElementById("personAdd").onclick = () => { document.getElementById("personNew").classList.remove("hidden"); document.getElementById("personName").focus(); };
+    document.getElementById("personGo").onclick = () => {
+      const n = document.getElementById("personName").value.trim();
+      if (!n) { document.getElementById("personName").focus(); return; }
+      const id = Persons.add(n); d.close(); resolve(id);
+    };
+    document.getElementById("personName").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); document.getElementById("personGo").click(); } };
+    d.oncancel = e => e.preventDefault();
+    d.showModal();
+  });
+}
 const PIN_PLAIN = new Set(["agenda.compact", "agenda.minimal", "agenda.month", "agenda.fbar.open", "agenda.stab", "agenda.pin", "agenda.pinWait"]);
 const VAULT = "agv:";          // prefix of the encrypted entries in localStorage
 const PIN_ITER = 600000;       // PBKDF2 rounds: about half a second on a phone
 const PIN_IDLE = 5 * 60e3;     // "every time": locked again after this long in the background
-const PIN_SKEY = "agenda.vk";  // "once per session": the key in sessionStorage, which the browser drops on restart
+const PIN_SKEY0 = "agenda.vk";
+const pinSkey = () => PIN_SKEY0 + (PFX ? ":" + PFX : ""); // "once per session": the key in sessionStorage, which the browser drops on restart
 const pinB64 = u => { let s = ""; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
 const pinUnb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 const Vault = {
   mode: "",        // "on" (PIN), "off" (switched off), "" (not decided yet: plain until the user chooses)
   key: null, mem: null, dirty: new Set(), timer: null, shownAt: 0,
-  cfg() { try { return JSON.parse(localStorage.getItem("agenda.pin") || "null"); } catch { return null; } },
+  cfg() { try { return JSON.parse(PS.getItem("agenda.pin") || "null"); } catch { return null; } },
   async derive(pin, salt) {
     const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pin), "PBKDF2", false, ["deriveKey"]);
     return crypto.subtle.deriveKey({ name: "PBKDF2", hash: "SHA-256", salt, iterations: PIN_ITER }, base, { name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
@@ -8774,28 +8891,28 @@ const Vault = {
   level() { const c = this.cfg(); return c && c.level === "strict" ? "strict" : "session"; },
   async setLevel(l) {
     const c = this.cfg(); if (!c || c.mode !== "on") return;
-    c.level = l; localStorage.setItem("agenda.pin", JSON.stringify(c));
+    c.level = l; PS.setItem("agenda.pin", JSON.stringify(c));
     await this.keepSession();
   },
   // Once per session: the key stays in sessionStorage until the browser ends the session.
   async keepSession() {
     try {
-      if (this.mode === "on" && this.key && this.level() === "session") sessionStorage.setItem(PIN_SKEY, pinB64(new Uint8Array(await crypto.subtle.exportKey("raw", this.key))));
-      else sessionStorage.removeItem(PIN_SKEY);
+      if (this.mode === "on" && this.key && this.level() === "session") sessionStorage.setItem(pinSkey(), pinB64(new Uint8Array(await crypto.subtle.exportKey("raw", this.key))));
+      else sessionStorage.removeItem(pinSkey());
     } catch { /* no sessionStorage: asked each time */ }
   },
   async load(key) {
     const c = this.cfg();
     try { if (await this.open(key, c.check) !== "agenda-vault") throw 0; } catch { return false; }
     const mem = new Map();
-    for (const k of Object.keys(localStorage)) if (k.startsWith(VAULT)) mem.set(k.slice(VAULT.length), await this.open(key, localStorage.getItem(k)));
+    for (const k of PS.keys()) if (k.startsWith(VAULT)) mem.set(k.slice(VAULT.length), await this.open(key, PS.getItem(k)));
     this.key = key; this.mem = mem; this.mode = "on";
     return true;
   },
   // Opens without asking when this session already holds the key.
   async resume() {
-    if (this.level() !== "session") { try { sessionStorage.removeItem(PIN_SKEY); } catch {} return false; }
-    let raw = null; try { raw = sessionStorage.getItem(PIN_SKEY); } catch {}
+    if (this.level() !== "session") { try { sessionStorage.removeItem(pinSkey()); } catch {} return false; }
+    let raw = null; try { raw = sessionStorage.getItem(pinSkey()); } catch {}
     if (!raw) return false;
     try { const key = await crypto.subtle.importKey("raw", pinUnb64(raw), { name: "AES-GCM" }, true, ["encrypt", "decrypt"]); return await this.load(key); }
     catch { return false; }
@@ -8833,25 +8950,25 @@ const Vault = {
     if (this.mem) await this.flush();
     const salt = crypto.getRandomValues(new Uint8Array(16)), key = await this.derive(pin, salt);
     const mem = this.mem || new Map();
-    if (!this.mem) for (const k of Object.keys(localStorage)) if (k.startsWith("agenda.") && !PIN_PLAIN.has(k)) mem.set(k, localStorage.getItem(k));
+    if (!this.mem) for (const k of PS.keys()) if (k.startsWith("agenda.") && !PIN_PLAIN.has(k)) mem.set(k, PS.getItem(k));
     const sealed = [];
     for (const [k, v] of mem) sealed.push([k, await this.seal(key, v)]);
-    for (const k of Object.keys(localStorage)) if (k.startsWith(VAULT)) localStorage.removeItem(k);
-    for (const [k, v] of sealed) localStorage.setItem(VAULT + k, v);
+    for (const k of PS.keys()) if (k.startsWith(VAULT)) PS.removeItem(k);
+    for (const [k, v] of sealed) PS.setItem(VAULT + k, v);
     const level = this.cfg() && this.cfg().level === "strict" ? "strict" : "session";
-    localStorage.setItem("agenda.pin", JSON.stringify({ v: 1, mode: "on", level, salt: pinB64(salt), check: await this.seal(key, "agenda-vault") }));
-    for (const k of Object.keys(localStorage)) if (k.startsWith("agenda.") && !PIN_PLAIN.has(k)) localStorage.removeItem(k);
+    PS.setItem("agenda.pin", JSON.stringify({ v: 1, mode: "on", level, salt: pinB64(salt), check: await this.seal(key, "agenda-vault") }));
+    for (const k of PS.keys()) if (k.startsWith("agenda.") && !PIN_PLAIN.has(k)) PS.removeItem(k);
     this.key = key; this.mem = mem; this.mode = "on"; this.shownAt = Date.now();
     await this.keepSession();
   },
   // Switched off on purpose: the data goes back to plain localStorage.
   async disable() {
     await this.flush();
-    if (this.mem) for (const [k, v] of this.mem) localStorage.setItem(k, v);
-    for (const k of Object.keys(localStorage)) if (k.startsWith(VAULT)) localStorage.removeItem(k);
-    localStorage.setItem("agenda.pin", JSON.stringify({ v: 1, mode: "off" }));
+    if (this.mem) for (const [k, v] of this.mem) PS.setItem(k, v);
+    for (const k of PS.keys()) if (k.startsWith(VAULT)) PS.removeItem(k);
+    PS.setItem("agenda.pin", JSON.stringify({ v: 1, mode: "off" }));
     this.key = null; this.mem = null; this.mode = "off";
-    try { sessionStorage.removeItem(PIN_SKEY); } catch {}
+    try { sessionStorage.removeItem(pinSkey()); } catch {}
   },
   flushSoon() { clearTimeout(this.timer); this.timer = setTimeout(() => this.flush(), 150); },
   async flush() {
@@ -8860,8 +8977,8 @@ const Vault = {
     const ks = [...this.dirty]; this.dirty.clear();
     for (const k of ks) {
       try {
-        if (this.mem.has(k)) localStorage.setItem(VAULT + k, await this.seal(this.key, this.mem.get(k)));
-        else localStorage.removeItem(VAULT + k);
+        if (this.mem.has(k)) PS.setItem(VAULT + k, await this.seal(this.key, this.mem.get(k)));
+        else PS.removeItem(VAULT + k);
       } catch (e) { console.warn("storage:", k, e); }
     }
   },
@@ -8869,18 +8986,18 @@ const Vault = {
   recent() { return this.mode !== "on" || Date.now() - this.shownAt < 5 * 60e3; },
 };
 const LS = {
-  getItem(k) { return Vault.mem && !PIN_PLAIN.has(k) ? (Vault.mem.has(k) ? Vault.mem.get(k) : null) : localStorage.getItem(k); },
+  getItem(k) { return Vault.mem && !PIN_PLAIN.has(k) ? (Vault.mem.has(k) ? Vault.mem.get(k) : null) : PS.getItem(k); },
   setItem(k, v) {
     v = String(v);
     if (Vault.mem && !PIN_PLAIN.has(k)) { Vault.mem.set(k, v); Vault.dirty.add(k); Vault.flushSoon(); }
-    else localStorage.setItem(k, v);
+    else PS.setItem(k, v);
   },
   removeItem(k) {
     if (Vault.mem && !PIN_PLAIN.has(k)) { Vault.mem.delete(k); Vault.dirty.add(k); Vault.flushSoon(); }
-    else localStorage.removeItem(k);
+    else PS.removeItem(k);
   },
   keys() {
-    const ks = new Set(Object.keys(localStorage).filter(k => !k.startsWith(VAULT)));
+    const ks = new Set(PS.keys().filter(k => !k.startsWith(VAULT)));
     if (Vault.mem) for (const k of Vault.mem.keys()) ks.add(k);
     return [...ks];
   },
@@ -8899,13 +9016,14 @@ function pinDialog(mode) {
   }[mode];
   $p("pin1").value = ""; $p("pin2").value = ""; $p("pinMsg").textContent = "";
   $p("pin2Row").classList.toggle("hidden", !set);
-  $p("pinWithout").classList.toggle("hidden", mode !== "choose");
+  // With several persons on this browser a PIN is required (ui.md 4.11e); any PIN will do.
+  $p("pinWithout").classList.toggle("hidden", mode !== "choose" || multiPerson());
   $p("pinForgot").classList.toggle("hidden", mode !== "unlock");
   $p("pinCancel").classList.toggle("hidden", mode === "unlock" || mode === "choose");
   $p("pinOk").textContent = set ? "Set PIN" : mode === "unlock" ? "Unlock" : "OK";
   $p("pinWithoutWarn").classList.add("hidden");
   return new Promise(resolve => {
-    const wait = () => { try { return JSON.parse(localStorage.getItem("agenda.pinWait") || "null") || { n: 0, until: 0 }; } catch { return { n: 0, until: 0 }; } };
+    const wait = () => { try { return JSON.parse(PS.getItem("agenda.pinWait") || "null") || { n: 0, until: 0 }; } catch { return { n: 0, until: 0 }; } };
     const done = v => { d.close(); resolve(v); };
     $p("pinOk").onclick = async () => {
       const a = $p("pin1").value.trim(), b = $p("pin2").value.trim();
@@ -8924,9 +9042,9 @@ function pinDialog(mode) {
         if (mode === "unlock") ok = await Vault.unlock(a);
         else { const c = Vault.cfg(); const k = await Vault.derive(a, pinUnb64(c.salt)); ok = await Vault.open(k, c.check).then(t => t === "agenda-vault", () => false); }
       } finally { $p("pinOk").disabled = false; }
-      if (ok) { localStorage.removeItem("agenda.pinWait"); Vault.shownAt = Date.now(); done("ok"); return; }
+      if (ok) { PS.removeItem("agenda.pinWait"); Vault.shownAt = Date.now(); done("ok"); return; }
       const n = w.n + 1;
-      localStorage.setItem("agenda.pinWait", JSON.stringify({ n, until: n >= 5 ? Date.now() + 60e3 * 2 ** (n - 5) : 0 }));
+      PS.setItem("agenda.pinWait", JSON.stringify({ n, until: n >= 5 ? Date.now() + 60e3 * 2 ** (n - 5) : 0 }));
       $p("pinMsg").textContent = n >= 5 ? "Wrong PIN. Wait " + 60 * 2 ** (n - 5) + " s before the next attempt." : "Wrong PIN.";
       $p("pin1").value = "";
     };
@@ -8939,7 +9057,10 @@ function pinDialog(mode) {
     $p("pinForgot").onclick = () => {
       const f = $p("pinForgotWarn");
       if (f.classList.contains("hidden")) { f.classList.remove("hidden"); return; }
-      for (const k of Object.keys(localStorage)) if (k.startsWith("agenda.") || k.startsWith(VAULT)) localStorage.removeItem(k);
+      // Only what this person keeps; with several persons the person leaves the list.
+      for (const k of PS.keys()) if (k.startsWith("agenda.") || k.startsWith(VAULT)) PS.removeItem(k);
+      if (PFX) Persons.remove(Persons.id());
+      try { sessionStorage.removeItem("agenda.person"); } catch {}
       location.reload();
     };
     $p("pinForgotWarn").classList.add("hidden");
@@ -8983,9 +9104,19 @@ document.addEventListener("visibilitychange", () => {
 });
 addEventListener("pagehide", () => Vault.flush());
 (async () => {
+  // Who is using this browser (ui.md 4.11e): asked when there are several persons and this
+  // tab has none yet, or after Switch person.
+  const plist = Persons.list();
+  let who = Persons.cur();
+  if (who === "?" || (plist.length > 1 && !plist.some(x => x.id === who))) who = plist.length ? await personChooser() : "";
+  if (!plist.some(x => x.id === who) && !Persons.list().some(x => x.id === who)) who = "";
+  PFX = who ? who + "/" : "";
+  Persons.set(who);
   const c = Vault.cfg();
   Vault.mode = c ? c.mode : "";
   if (Vault.mode === "on" && !(await Vault.resume())) await pinDialog("unlock");
+  // Several persons: whoever has journals here and no PIN yet chooses one now.
+  if (multiPerson() && Vault.mode !== "on" && PS.keys().some(k => /^agenda\.(keys|phrase|cfg)/.test(k))) await pinDialog("choose");
   const s = document.createElement("script");
   s.textContent = document.getElementById("appMain").textContent;
   document.body.appendChild(s);
