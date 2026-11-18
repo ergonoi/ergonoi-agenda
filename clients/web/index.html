@@ -125,7 +125,8 @@
   #fpanel .hint { padding:0 18px; }
   @media (min-width: 1240px) {
     #fpanel { transform:none; z-index:4; top:var(--hh, 61px); width:280px; background:var(--side, var(--bg)); transition:none; }
-    html main, html header .row { margin-left:max(280px, calc((100vw - 1200px) / 2)); margin-right:auto; max-width:min(1200px, calc(100vw - 280px)); }
+    /* 100 % of the page, not 100vw: with scrollbars that take room (Windows) 100vw is wider than the page and shifts it sideways */
+    html main, html header .row { margin-left:max(280px, calc((100% - 1200px) / 2)); margin-right:auto; max-width:min(1200px, calc(100% - 280px)); }
     #fdim { display:none; }
     #tabFilter { display:none; }
   }
@@ -449,6 +450,9 @@
   .msum { margin:8px 0; padding:8px 12px; border-left:3px solid var(--amber); font-size:14px; line-height:1.5; }
   /* 16 px at least: iOS Safari zooms the page into any field with a smaller font when it gets the focus. */
   @media (max-width: 600px) { select { font-size:16px !important; } }
+  /* Touch screens: iOS zooms the page into any field with text under 16 px when it gets the
+     focus, and the page stays zoomed (PIN at start, setup, journal dialogs, import). */
+  @media (pointer: coarse) { input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]), textarea, select { font-size:max(16px, 1em) !important; } }
   textarea { width:100%; min-height:70vh; font:16px/1.55 "IBM Plex Mono", ui-monospace, "SF Mono", Consolas, monospace; padding:0; border:0; background:transparent; color:var(--fg); white-space:pre; overflow-wrap:normal; overflow-x:auto; outline:none; }
   .hint { font-size:14px; color:var(--muted); }
   #agenda > .hint { padding:16px; }
@@ -569,6 +573,43 @@
   dialog .dclose { position:absolute; top:10px; right:10px; width:36px; height:36px; min-height:0; padding:0; border:0; background:none; color:var(--muted); cursor:pointer; line-height:0; display:flex; align-items:center; justify-content:center; border-radius:6px; }
   dialog .dclose:hover { color:var(--fg); background:var(--mist); }
   dialog { position:fixed; }
+  /* First start (ui.md 4.11): the setup is a page of its own, like the first visit of the map:
+     what it is, the server, two ways in as rows, the rest in one line. */
+  #dlgSetup.first { width:100%; max-width:none; height:100%; max-height:none; margin:0; inset:0; border:0; border-radius:0; padding:0; overflow:auto; }
+  #dlgSetup.first > form { max-width:440px; margin:0 auto; padding:min(6vh, 44px) 20px 28px; }
+  #dlgSetup.first > form > strong { display:none; }
+  #dlgSetup:not(.first) .sh, #dlgSetup:not(.first) .si, #dlgSetup:not(.first) .smotto, #dlgSetup:not(.first) .sinst { display:none; }
+  #dlgSetup .sh { font-size:22px; font-weight:600; line-height:1.25; margin:0 0 10px; }
+  #dlgSetup .shbar { display:none; }
+  #dlgSetup.first .shbar { display:flex; align-items:center; position:sticky; top:0; z-index:2; height:56px; padding:0 16px; background:var(--aqua); border-bottom:.5px solid #1A1A1A; color:#1A1A1A; font-size:20px; font-weight:600; }
+  html.minimal #dlgSetup.first .shbar { background:#E2C8E8; border-bottom-color:var(--line); }
+  #dlgSetup .si { margin:0 0 18px; font-size:15px; line-height:1.5; color:var(--fg2); }
+  #dlgSetup .srvrow { display:flex; align-items:center; gap:10px; min-height:52px; border-top:.5px solid var(--line); font-size:15px; }
+  #dlgSetup .srvrow .k { width:52px; flex:none; color:var(--muted); }
+  #dlgSetup .srvrow .v { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #dlgSetup .srvrow .st { flex:none; width:94px; display:inline-flex; align-items:center; gap:6px; font-size:13px; line-height:1; color:var(--muted); }
+  #dlgSetup .srvrow .st:not(:empty)::before { content:""; width:7px; height:7px; border-radius:50%; background:currentColor; flex:none; }
+  #dlgSetup .srvrow .st.ok { color:var(--teal); } #dlgSetup .srvrow .st.bad { color:var(--scarlet); }
+  #dlgSetup .srvrow button { flex:none; min-height:36px; }
+  #srvEdit { padding:0 0 12px; }
+  #dlgSetup .er { display:flex; align-items:center; gap:14px; width:100%; min-height:64px; padding:10px 4px; border:0; border-top:.5px solid var(--line); border-radius:0; background:transparent; text-align:left; color:var(--fg); cursor:pointer; }
+  #dlgSetup .er + .smore { border-top:.5px solid var(--line); }
+  #dlgSetup .er > svg { flex:none; width:22px; height:22px; color:var(--fg2); }
+  #dlgSetup .er span { display:flex; flex-direction:column; gap:2px; flex:1; }
+  #dlgSetup .er b { font-weight:500; font-size:16px; }
+  #dlgSetup .er small { font-size:13px; color:var(--muted); }
+  #dlgSetup .er .chev { color:var(--muted); }
+  #dlgSetup .smore + .smore { padding-top:6px; border-top:0; }
+  #dlgSetup .smore { margin:0; padding:14px 0 0; font-size:14px; color:var(--fg2); display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; }
+  #dlgSetup .smore .lnk { border:0; min-height:0; padding:0; background:none; color:var(--fg2); text-decoration:underline; text-underline-offset:2px; font-size:14px; cursor:pointer; }
+  #dlgSetup .smore label { margin:0; font-size:14px; color:var(--fg2); }
+  #dlgSetup .smore select.wsel { min-height:32px; font-size:14px; padding:0 2px; }
+  #dlgSetup .sinst { margin:20px 0 0; padding:12px 14px; border-radius:8px; font-size:14px; color:var(--fg); background:color-mix(in srgb, var(--wisteria) 22%, var(--bg)); }
+  html.minimal #dlgSetup .sinst { background:color-mix(in srgb, #E2C8E8 55%, var(--bg)); }
+  #dlgSetup .smotto { margin:22px 0 0; font-size:15px; font-weight:600; color:var(--fg); }
+  /* one line, still within an iPhone 16e (390 px less the margins) */
+  #dlgSetup .smotto .one { display:block; white-space:nowrap; font-size:min(14px, calc((100vw - 40px) / 25.5)); }
+  html.minimal #setupProj { display:none; }
   /* Journal dialog in sections (audit U1) */
   .jsect { border-top:.5px solid var(--line); margin-top:20px; }
   .jsect.first { border-top:0; margin-top:8px; }
@@ -733,6 +774,7 @@
   html.minimal #demoBar button { background:transparent; border-color:currentColor; }
   html.minimal button.tab { min-height:28px; padding:0 10px; font-size:14px; border:1px solid var(--btn); border-radius:6px; color:var(--fg); margin-left:4px; }
   html.minimal button.tab[aria-pressed="true"] { border-color:var(--fg); }
+  html.minimal .stabs button.tab:first-child { padding-left:10px; margin-left:0; } /* a filled tab keeps its inner space; only the underlined tabs start flush */
   html.minimal #tabFilter { border:0; border-radius:0; margin:0; min-height:var(--tap); border-bottom:2px solid transparent; }
   html.minimal #tabFilter[aria-pressed="true"] { border:0; border-bottom:2px solid var(--fg); }
   html.minimal .recic { min-height:18px; min-width:20px; border:.5px solid var(--line); border-radius:4px; color:var(--fg2); }
@@ -893,7 +935,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.9.11</span>
+    <span class="ver">v0.9.12</span>
     <a href="#" id="aboutLink">About</a>
     <a href="https://outheis-labs.github.io/outheis-agenda/" target="_blank" rel="noopener">Documentation <svg width="7" height="7" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
   </footer>
@@ -952,7 +994,7 @@
     <strong id="aboutName">ergonoi Agenda</strong>
     <p id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project:</p>
     <p style="margin-top:14px">Technology is potential. Accessibility makes it matter.</p>
-    <p class="hint">Version 0.9.11 · outheis-labs</p>
+    <p class="hint">Version 0.9.12 · outheis-labs</p>
     <div class="btnrow" style="justify-content:flex-end"><button class="primary">Close</button></div>
   </form>
 </dialog>
@@ -1153,28 +1195,26 @@
 </dialog>
 
 <dialog id="dlgSetup">
+  <div class="shbar"><span class="brand">ergonoi Agenda</span></div>
   <form method="dialog" id="setupForm" onsubmit="return false">
     <strong>Setup</strong>
     <div id="setupStart">
-      <label for="setupServer">Server URL</label>
-      <input id="setupServer" placeholder="https://agenda.example.org">
-      <div class="btnrow"><button type="button" class="ghost" id="btnSetupTest">Test connection</button></div>
-      <ul class="ctest hidden" id="setupTest" aria-live="polite"></ul>
-      <label for="setupWords">Words in</label>
-      <select id="setupWords" class="wsel"></select>
-      <p class="hint">If you are new here, creating your own journal is the best way to start.</p>
-      <div class="btnrow col">
-        <button type="button" class="primary" id="btnNewAccount">New account</button>
-        <button type="button" class="sec" id="btnExistingAccount">I have an account phrase</button>
-        <button type="button" class="sec" id="btnTakeOver">Take over a journal</button>
+      <h2 class="sh"><span class="brand">ergonoi Agenda</span> – an open planning journal</h2>
+      <p class="si">Appointments, tasks and notes on all your devices and shared with whom you choose. Lightweight and confidential by design: everything is encrypted on your device, based on a simple text format, and completely unreadable by the servers involved.</p>
+      <div class="srvrow"><span class="k">Server</span><span class="v" id="srvShown"></span><span class="st" id="srvState" aria-live="polite"></span><button type="button" class="ghost" id="srvChange">Change</button></div>
+      <div id="srvEdit" class="hidden">
+        <label for="setupServer">Server address</label>
+        <input id="setupServer" placeholder="https://agenda.example.org">
+        <div class="btnrow"><button type="button" class="ghost" id="btnSetupTest">Test connection</button></div>
+        <ul class="ctest hidden" id="setupTest" aria-live="polite"></ul>
       </div>
-      <details class="more">
-        <summary>More</summary>
-        <div class="btnrow col">
-          <button type="button" class="sec" id="btnSetupFile">Open a local journal file</button>
-          <button type="button" class="sec" id="btnGetId">Get account ID from a phrase</button>
-        </div>
-      </details>
+      <button type="button" class="er" id="btnNewAccount"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span><b>Start a new journal</b><small>You get eight words that open it on every device</small></span><svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg></button>
+      <button type="button" class="er" id="btnExistingAccount"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="M7 10h10M7 14h6"/></svg><span><b>I have a wordlist</b><small>Your own journal on this device too, or one shared or handed over to you</small></span><svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg></button>
+      <p class="smore">More: <button type="button" class="lnk" id="btnSetupFile">open a local journal file</button> · <button type="button" class="lnk" id="btnGetId">account ID</button></p>
+      <p class="smore"><label for="setupWords">Wordlist in</label> <select id="setupWords" class="wsel"></select></p>
+      <button type="button" class="hidden" id="btnTakeOver">Take over a journal</button>
+      <p class="sinst hidden" id="setupInst"></p>
+      <p class="smotto"><span id="setupProj">οὐθείς Agenda is an <b>ergonoi</b> project:<br></span><span class="one">Technology is potential. Accessibility makes it matter.</span></p>
     </div>
     <div id="setupNew" class="hidden">
       <p>Your account phrase. Write it down; it is shown only here and in the settings of this browser. Whoever has it can read your journal; without it, the journal cannot be recovered.</p>
@@ -1195,6 +1235,13 @@
       <p>The journal is yours now. These are its new words: write them down. Whoever has them owns the journal; without them it cannot be recovered.</p>
       <div class="phrase" id="takenPhrase"></div>
       <div class="btnrow"><button type="button" class="primary" id="btnTakenDone">Done</button></div>
+    </div>
+    <div id="setupShared" class="hidden">
+      <p id="setupSharedText"></p>
+      <div class="btnrow col">
+        <button type="button" class="primary" id="btnSharedOwn">I have my own wordlist</button>
+        <button type="button" class="sec" id="btnSharedNew">Start a new journal</button>
+      </div>
     </div>
     <div id="setupJoin" class="hidden">
       <p id="setupJoinText"></p>
@@ -5609,7 +5656,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.9.11, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.12, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -5817,7 +5864,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.9.11";
+const APP_VERSION = "0.9.12";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
@@ -7437,13 +7484,16 @@ function showSetup(step) {
   $("setupNew").classList.toggle("hidden", step !== "new");
   $("setupExists").classList.toggle("hidden", step !== "exists");
   $("setupJoin").classList.toggle("hidden", step !== "join");
+  $("setupShared").classList.toggle("hidden", step !== "shared");
+  $("dlgSetup").classList.toggle("first", !S.keys);
+  if (step === "start") showServerState();
   $("setupTaken").classList.toggle("hidden", step !== "taken");
   $("setupPhrase").classList.toggle("hidden", step !== "phrase" && step !== "file" && step !== "id" && step !== "take");
-  $("phraseLabel").textContent = step === "take" ? "Handover code (from the journal's owner)" : "Account phrase (8 words)";
+  $("phraseLabel").textContent = step === "take" ? "Handover code (from the journal's owner)" : step === "phrase" ? "Your wordlist: your own words, or the code of a journal shared or handed over to you" : "Account phrase (8 words)";
   $("setupIdOut").classList.add("hidden");
   $("setupOk").textContent = step === "id" ? "Show account ID" : "Continue";
   $("setupNav").classList.toggle("hidden", step === "start" || step === "join" || step === "taken");
-  $("setupOk").classList.toggle("hidden", step === "exists");
+  $("setupOk").classList.toggle("hidden", step === "exists" || step === "shared");
   $("setupMsg").textContent = "";
   fillWordSelects();
   if (!$("dlgSetup").open) $("dlgSetup").showModal();
@@ -7566,6 +7616,33 @@ function serverInput() {
   $("setupServer").value = v;
   return v;
 }
+// The server on the start page: shown with whether it answers; Change opens the address
+// and the full connection test.
+let srvSeq = 0;
+async function showServerState() {
+  const v = normServer($("setupServer").value), seq = ++srvSeq;
+  $("srvShown").textContent = v ? v.replace(/^https?:\/\//, "") : "none set";
+  const st = $("srvState"); st.className = "st"; st.textContent = v ? "checking" : "";
+  if (!v) { $("srvEdit").classList.remove("hidden"); return; }
+  let ok = false;
+  const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 6000);
+  try { const r = await fetch(v + "/health", { cache: "no-store", signal: ctl.signal }); ok = r.ok && (await r.json()).service === "outheis-agenda"; } catch { ok = false; }
+  finally { clearTimeout(timer); }
+  if (seq !== srvSeq) return;
+  st.className = "st " + (ok ? "ok" : "bad"); st.textContent = ok ? "reachable" : "unreachable";
+}
+$("srvChange").onclick = () => { const e = $("srvEdit"); e.classList.toggle("hidden"); if (!e.classList.contains("hidden")) $("setupServer").focus(); };
+$("setupServer").addEventListener("change", () => showServerState());
+(() => {
+  // how to install, on the page itself (not when it already runs as an app)
+  if (matchMedia("(display-mode: standalone)").matches || navigator.standalone) return;
+  const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  $("setupInst").textContent = ios ? "To keep it as an app: Share, then Add to Home Screen." : "To keep it as an app: the install symbol in the address bar, or Install in the browser menu.";
+  $("setupInst").classList.remove("hidden");
+})();
+// A shared journal's code entered first: the own journal comes first, then it is added.
+$("btnSharedOwn").onclick = () => { $("phraseInput").value = ""; showSetup("phrase"); $("setupMsg").textContent = "Now your own words; " + (setupOtherName ? "“" + setupOtherName + "”" : "the journal") + " is added afterwards."; };
+$("btnSharedNew").onclick = () => $("btnNewAccount").onclick();
 $("btnNewAccount").onclick = () => {
   if (!serverInput()) return;
   pendingPhrase = newPhrase(wordLangPref());
@@ -7613,6 +7690,15 @@ $("setupOk").onclick = async () => {
       $("takenPhrase").textContent = phrase;
     } catch (err) { $("setupMsg").textContent = "Taking over failed: " + err.message; }
     finally { $("setupOk").disabled = false; }
+  } else if (setupStep === "phrase" && !setupOther && codeKind($("phraseInput").value.trim()) === "handover") {
+    setupStep = "take"; $("setupOk").onclick(); return;
+  } else if (setupStep === "phrase" && !setupOther && ["ally", "guest"].includes(codeKind($("phraseInput").value.trim()))) {
+    // the code of a journal shared with this person: their own journal first
+    setupOther = $("phraseInput").value.trim(); setupOtherName = "";
+    try { const pk = await peekJournal(serverInput(), setupOther); if (pk && pk.name) setupOtherName = pk.name; } catch { /* name unknown */ }
+    showSetup("shared");
+    $("setupSharedText").textContent = "This code opens " + (setupOtherName ? "the journal “" + setupOtherName + "”" : "a journal") + ", shared with you. To add it, first open your own journal: with your own wordlist, or a new one.";
+    return;
   } else if (setupStep === "phrase") {
     const err = phraseProblem($("phraseInput").value);
     if (err) { $("setupMsg").textContent = err; return; }
@@ -7623,14 +7709,16 @@ $("setupOk").onclick = async () => {
     let peek = null;
     try { peek = await peekJournal(serverInput(), $("phraseInput").value); } catch { /* unreachable: set up as before */ }
     finally { $("setupOk").disabled = false; }
-    if (peek && peek.exists) {
+    if (peek && peek.exists && !setupOther) { // with a shared journal waiting, these are the person's own words
       setupOther = $("phraseInput").value; setupOtherName = peek.name; setupOtherKeys = peek.keys;
       showSetup("exists");
       const jn = peek.name ? "“" + peek.name + "”" : "";
       $("setupExistsText").textContent = "This code opens " + (jn ? "the journal " + jn : "an existing journal") + ". If it isn't yours, please create your own first. You can integrate " + (jn || "it") + " easily into your journal afterwards.";
       return;
     }
+    const other = setupOther;
     await finishSetup($("phraseInput").value, { mode: "server", server: serverInput() });
+    if (other) { showSetup("join"); $("setupJoinText").textContent = "Add " + (setupOtherName ? "“" + setupOtherName + "”" : "the journal you entered first") + " to your journals?"; }
   } else if (setupStep === "id") {
     const code = $("phraseInput").value.trim(), kind = codeKind(code);
     const err = kind === "ally" || kind === "guest" ? "" : phraseProblem(code);
