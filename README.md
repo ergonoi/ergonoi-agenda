@@ -4,6 +4,8 @@
 
 *An open planning journal. Documentation: https://ergonoi.github.io/ergonoi-agenda/*
 
+Author: Markus Schatzl
+
 ### Journal and agenda in plain text
 
 One line per entry. A handful of tags. A file that can be read and written by hand, by voice, by any program and by any language model — and that still works when there is no network, no server and no app.
