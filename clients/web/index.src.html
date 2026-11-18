@@ -193,13 +193,33 @@
     #detail .dhead { display:flex; align-items:center; justify-content:space-between; min-height:52px; border-bottom:.5px solid var(--line); margin-bottom:12px; font:500 13px "Inter", var(--font, sans-serif); color:var(--muted); letter-spacing:.4px; }
     #detail .dx { border:0; background:transparent; font-size:24px; min-height:var(--tap); padding:0 4px; color:var(--fg2); }
     #detail .item { border-left-width:4px; padding-left:12px; margin:0; box-shadow:none; background:transparent; display:block; }
-    #detail .item .fold, #detail .item .swipehint { display:none; }
+    #detail .item .fold, #detail .item .swipehint, #detail .item .notebtn, #detail .item .noteic { display:none; }
+    #detail .dlbl { display:flex; align-items:center; justify-content:space-between; min-height:32px; font:500 13px "Inter", var(--font, sans-serif); color:var(--muted); }
+    #detail .dnote { margin:20px 0 0; }
+    #detail .dexp { border:0; background:transparent; min-height:32px; min-width:32px; padding:0; color:var(--fg2); display:inline-flex; align-items:center; justify-content:center; }
+    #detail #dNote { display:block; width:100%; box-sizing:border-box; min-height:72px; padding:10px 12px; border:.5px solid var(--line); border-radius:0; background:var(--bg); color:var(--fg); font:15px/1.45 "Inter", var(--font, sans-serif); white-space:pre-wrap; overflow-wrap:anywhere; overflow-x:hidden; overflow-y:hidden; resize:none; }
+    #detail .dcount { text-align:right; font-size:12px; color:var(--muted); margin-top:4px; }
+    #detail .dre { margin:20px 0 0; }
+    #detail .dre button, #detail .dre .dpick { min-height:44px; font-size:14px; }
+    #detail .dre .ddone, #detail .dre .dseries { width:100%; }
+    #detail .dre .dseries { margin-top:16px; }
+    #detail .dre .dtop { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    #detail .dre .dlbl { margin-top:12px; }
+    #detail .dre .dgrid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:8px; }
+    #detail .dre .dpick { position:relative; overflow:hidden; border:1px solid var(--wisteria); background:var(--wisteria); color:#1A1A1A; cursor:pointer; display:flex; align-items:center; justify-content:center; width:100%; box-sizing:border-box; }
+    #detail .dre .dpick input { position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer; }
     #detail .item .when { margin-bottom:6px; }
     #detail .item .text { font-size:20px; line-height:1.35; }
     #detail .item .body { margin:0; padding:0; }
     #detail .item .chips { display:flex; flex-direction:column; align-items:stretch; gap:0; margin:16px 0 0; padding:0; border-top:.5px solid var(--line); }
     #detail .item .chip:not(.plus):not(.notebtn) { display:flex; align-items:center; gap:8px; width:100%; min-height:44px; margin:0; padding:0; border:0; border-bottom:.5px solid var(--line); border-radius:0; background:transparent; font-size:15px; color:var(--muted); }
     #detail .item .chip b { margin-left:auto; font-weight:500; color:var(--fg); }
+    #detail .item .chron { display:flex; align-items:flex-start; gap:8px; border-bottom:.5px solid var(--line); padding:6px 0; }
+    #detail .item .chron .clbl { display:block; flex:none; line-height:32px; font-size:15px; color:var(--muted); }
+    #detail .item .chron .cvals { margin-left:auto; display:flex; flex-direction:column; align-items:flex-end; }
+    #detail .item .chron .chip:not(.plus):not(.notebtn) { width:auto; min-height:32px; border-bottom:0; justify-content:flex-end; }
+    #detail .item .chron .chip .dl { display:none; }
+    #detail .item .chron .chip .dl2 { display:inline; }
     #detail .item .cbtns { display:flex; gap:8px; margin-top:12px; }
     #detail .item .cbtns .notebtn { display:none; }
     #detail .dact { display:flex; flex-direction:column; margin-top:20px; border-top:.5px solid var(--line); }
@@ -392,6 +412,13 @@
   #noteText { padding-right:36px; }
   #noteClear { top:18px; right:6px; transform:none; }
   #dlgNote .nrow { display:flex; align-items:center; gap:8px; margin:4px 0 0; min-height:36px; }
+  /* The note dialog can be made larger by its corner, for longer notes (ui.md 4.9). */
+  @media (min-width: 601px) {
+    #dlgNote[open] { resize:both; overflow:hidden; width:460px; min-width:360px; min-height:340px; max-width:96vw; max-height:92vh; display:flex; flex-direction:column; }
+    #dlgNote form { flex:1; display:flex; flex-direction:column; min-height:0; }
+    #dlgNote form > div[style*="relative"] { flex:1; display:flex; min-height:0; }
+    #dlgNote #noteText { flex:1; height:auto; resize:none; white-space:pre-wrap; overflow-wrap:anywhere; overflow-x:hidden; }
+  }
   #dlgNote .nrow #noteCount { margin:0 0 0 auto; }
   #noteMic { border:0; background:none; min-height:var(--tap); min-width:var(--tap); padding:0; margin-left:-10px; display:inline-flex; align-items:center; justify-content:center; color:var(--fg2); }
   #noteMic.hidden { display:none; }
@@ -430,6 +457,10 @@
   /* Reading of a recurring entry with two dates: on its own line below the date. */
   .item .when .until, .item .when .mk { display:block; font-size:13px; font-weight:400; white-space:normal; }
   .item .when .until { color:var(--fg2); }
+  /* Everything about time in one row "date:" of the detail column (ui.md 1a, step 3); the list
+     keeps one chip per tag. */
+  .item .chron { display:contents; }
+  .item .chron .clbl, .item .chip .dl2 { display:none; }
   .chip.ov { border-style:dashed; border-color:var(--fg2); }
   .item.flash { box-shadow:inset 0 0 0 2px var(--teal); }
   .chip.notebtn { min-width:var(--bs); width:var(--bs); padding:0; display:inline-flex; align-items:center; justify-content:center; background:transparent; border:1px solid var(--teal); color:var(--teal); }
@@ -506,7 +537,17 @@
   .cal .nav { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
   .cal .nav b { flex:1; text-align:center; font-weight:500; }
   .cal .nav button { min-height:var(--bs); min-width:var(--bs); padding:0 10px; font-size:14px; }
-  .cal .grid { display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); row-gap:2px; text-align:center; }
+  .cal .grid { display:grid; grid-template-columns:30px repeat(7, minmax(0, 1fr)); row-gap:2px; text-align:center; }
+  /* Calendar weeks (ui.md 4.13b): a narrow column on the left, centred in the row, apart from
+     Monday; a tap shows the whole week. */
+  .cal .cwk { height:46px; display:flex; flex-direction:column; align-items:flex-start; padding:5px 0 0; margin-right:8px; border:1px solid transparent; border-radius:0; background:transparent; color:var(--muted); font:inherit; font-size:15px; text-align:left; }
+  .cal .cwk small { font-size:12px; vertical-align:middle; font-variant-numeric:tabular-nums; }
+  /* Hints about tapping and long presses are for touch screens; with a mouse the titles say it. */
+  @media (pointer: fine) { .touchonly { display:none; } }
+  .cal .cwk.sel { color:var(--fg); font-weight:600; }
+  .cal .cd.wk { background:var(--mist); border-radius:0; }
+  #agenda .wkhead { padding:16px 16px 0; font-size:15px; font-weight:500; }
+  #agenda section.calday.wk .when .d.implied { display:none; }
   .cal .wd { font-size:11px; color:var(--muted); padding-bottom:4px; }
   .cal .cd { height:46px; display:flex; flex-direction:column; align-items:center; gap:4px; padding:5px 0 0; border:1px solid transparent; border-radius:6px; background:transparent; color:var(--fg); font:inherit; font-size:15px; font-variant-numeric:tabular-nums; }
   .cal .cd.out { color:var(--muted); }
@@ -813,7 +854,7 @@
   .brand .bw { font-family:"Mona Sans Mono", ui-monospace, monospace; font-weight:700; letter-spacing:.025em; margin-right:.12em; }
   :where(html.minimal) button { background:var(--btn); border-color:var(--btn); }
   html.minimal header button:not(.tab), html.minimal #tabFilter, html.minimal #btnMic, html.minimal .fold, html.minimal .more, html.minimal .noteic, html.minimal #pop .opt, html.minimal #pop .x, html.minimal #pop .ok, html.minimal #facetSheet .when .x { background:transparent; border-color:transparent; }
-  html.minimal button.sec, html.minimal .chip.plus, html.minimal .chip.notebtn, html.minimal #sheet .sheetpick { background:var(--btn); border:.5px solid var(--btn); color:var(--fg); }
+  html.minimal button.sec, html.minimal .chip.plus, html.minimal .chip.notebtn, html.minimal #sheet .sheetpick, html.minimal #detail .dre .dpick { background:var(--btn); border:.5px solid var(--btn); color:var(--fg); }
   html.minimal #add > button:last-child, html.minimal .primary, html.minimal dialog .primary, html.minimal #viewSettings .primary, html.minimal #facetSheet .primary, html.minimal .jchoice .primary, html.minimal .mbar .primary, html.minimal #sheet .done:not(.series) { background:var(--btn); border:1px solid var(--fg); color:var(--fg); font-weight:500; }
   html.minimal #sheet .done.series { background:var(--btn); }
   html.minimal #demoBar button { background:transparent; border-color:currentColor; }
@@ -1077,7 +1118,7 @@
     <button class="sec" data-act="weeks2">2 weeks</button>
     <button class="sec" data-act="months3">3 months</button>
   </div>
-  <label class="sec sheetpick"><input type="date" id="sheetDate"><span>Other date …</span></label>
+  <label class="sec sheetpick"><input type="date" id="sheetDate"><span>Other date</span></label>
   <button class="ghost" data-act="cancel" style="width:100%">Cancel</button>
 </div></div>
 
@@ -2101,7 +2142,13 @@ function dropNotice(cause) {
 const $ = id => document.getElementById(id);
 let view = "agenda";
 // Month view (ui.md 4.15): a way of showing the agenda, not a view of its own.
-let monthMode = LS.getItem("agenda.month") === "1", calMonth = "", calDay = "";
+let monthMode = LS.getItem("agenda.month") === "1", calMonth = "", calDay = "", calWeek = "";
+// ISO 8601 week number of a date (Monday first; week 1 holds the first Thursday).
+function isoWeek(d) {
+  const t = new Date(d + "T12:00:00"); t.setDate(t.getDate() + 3 - (t.getDay() + 6) % 7);
+  const y = new Date(t.getFullYear(), 0, 4);
+  return 1 + Math.round(((t - y) / 864e5 - 3 + (y.getDay() + 6) % 7) / 7);
+}
 
 function esc(s) { return s.replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c])); }
 
@@ -2477,7 +2524,7 @@ function renderServers(j) {
 $("jSrvGo").addEventListener("click", async () => {
   const j = jEditing, u = $("jSrvInput").value;
   if (j === null || !u.trim()) return;
-  $("jSrvGo").disabled = true; $("jSrvMsg").textContent = "Testing the server and copying the journal …";
+  $("jSrvGo").disabled = true; $("jSrvMsg").textContent = "Testing the server and copying the journal";
   try { await addMirror(j, u); $("jSrvInput").value = ""; $("jSrvMsg").textContent = "Added. Every device that may write sends new lines there too, from its next synchronisation on."; }
   catch (err) { $("jSrvMsg").textContent = "Not added: " + err.message; }
   $("jSrvGo").disabled = false; renderServers(j);
@@ -2575,7 +2622,7 @@ const BK = {
 let bkRows = [];
 async function renderBackups(j) {
   const list = $("jBkList");
-  list.innerHTML = `<p class="hint">Looking for backups …</p>`;
+  list.innerHTML = `<p class="hint">Looking for backups</p>`;
   const keys = withJ(j, () => S.keys), acct = await acctOf(keys), rows = [];
   try { for (const b of await BK.list(acct)) rows.push({ where: "this browser", time: b.time, size: b.size, text: b.text }); } catch {}
   if (S.cfg.mode !== "local" || j) {
@@ -2635,7 +2682,7 @@ $("jBkList").addEventListener("click", async ev => {
       rs.dataset.armed = "1"; rs.textContent = "Tap again: replace the journal with this state";
       return;
     }
-    $("jBkMsg").textContent = "Restoring …";
+    $("jBkMsg").textContent = "Restoring";
     await restoreBackup(j, await backupText(j, b));
     $("jBkMsg").textContent = "Restored: the journal is as it was then.";
     renderBackups(j);
@@ -3174,7 +3221,7 @@ function keyJ(k) { const kj = keyJournal(k); return kj !== null ? kj : ([...(fac
 // holds the state and the scores of all facets, rewritten at most once a day:
 //   Addon function: statistical facet order on 2026-11-16 work@<journal id>:12.40 … #type-meta
 // Signals of the day are collected in the browser and folded in on the next day, with
-// a half-life of 14 days. Every decision is written to the diagnostic log ("fu …"),
+// a half-life of 14 days. Every decision is written to the diagnostic log ("fu"),
 // which is switched on with the experiment, so that the heuristic can be evaluated.
 // ---------------------------------------------------------------------------
 
@@ -3373,7 +3420,7 @@ function personMenu() {
   // The first time, the person who is here gives a name, under which the chooser shows them.
   if (personNaming) return `<form class="vname" data-pname="1"><input id="personFirstName" placeholder="Your name on this browser" autocomplete="off" maxlength="30"><button type="submit">Continue</button></form><div class="vsep"></div>`;
   return (me && multiPerson() ? `<div class="vrow person"><span class="pstick" style="background:${esc(me.color)}"></span>${esc(me.name)}</div>` : "") +
-    `<button type="button" class="vact" data-person="1">Switch person …</button><div class="vsep"></div>`;
+    `<button type="button" class="vact" data-person="1">Switch person</button><div class="vsep"></div>`;
 }
 function switchPerson(firstName) {
   if (!Persons.list().length) Persons.ensureFirst(firstName);
@@ -3389,8 +3436,8 @@ function renderViewMenu() {
   if (vs.length) h += `<div class="vsep"></div>`;
   h += viewNaming
     ? `<form class="vname" data-vnew="1"><input id="viewNewName" placeholder="Name of the view" autocomplete="off" maxlength="40"><button type="submit">Save</button></form>`
-    : `<button type="button" class="vact" data-vsave="1">+ Save current as view …</button>`;
-  if (vs.length) h += `<button type="button" class="vact plain" data-vedit="1">Edit views …</button>`;
+    : `<button type="button" class="vact" data-vsave="1">+ Save current as view</button>`;
+  if (vs.length) h += `<button type="button" class="vact plain" data-vedit="1">Edit views</button>`;
   $("viewMenu").innerHTML = h; $("viewMenu").style.setProperty("--vswn", vswn(vs));
   if (viewNaming) $("viewNewName").focus();
 }
@@ -3453,7 +3500,7 @@ function renderPanel() {
   else h += vs.map(v => `<button type="button" class="vrow${v.name === cur ? " on" : ""}" data-view="${esc(v.name)}">${viewSw(v)}${esc(v.name)}</button>`).join("");
   h += panelNaming
     ? `<form class="vname" data-vnew="1"><input id="panelNewName" placeholder="Name of the view" autocomplete="off" maxlength="40"><button type="submit">Save</button></form>`
-    : `<button type="button" class="vact" data-vsave="1">+ Save current as view …</button>`;
+    : `<button type="button" class="vact" data-vsave="1">+ Save current as view</button>`;
   h += `<h3>Facets</h3><div class="fall"><button type="button" data-fall="1">All</button><button type="button" data-fnone="1">None</button></div>`;
   // Facets grouped by the journal they belong to, in the order of the journals; within a
   // journal by name, so that each keeps its place.
@@ -3487,7 +3534,7 @@ function renderPanel() {
     + `<button type="button" class="mrow" data-mset="system">${ic('<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>')}System${chev}</button>`
     + `<a class="mrow" href="@@DOCS_URL@@" target="_blank" rel="noopener">${ic('<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>')}Documentation</a>`
     + `</div>`;
-  h += `<p class="hint" style="margin-top:18px">Tap a facet to switch it on or off; long press shows only this facet. Tap a journal to switch all its facets.</p>`;
+  h += `<p class="hint touchonly" style="margin-top:18px">Tap a facet to switch it on or off; long press shows only this facet. Tap a journal to switch all its facets.</p>`;
   $("fpanel").innerHTML = h; $("fpanel").style.setProperty("--vswn", vswn(vs));
   if (panelNaming) $("panelNewName").focus();
   const det = $("fpMore"); if (det) det.ontoggle = () => LS.setItem("agenda.fmore", det.open ? "1" : "0");
@@ -3838,21 +3885,40 @@ function renderMonth() {
   const [cy, cm] = calMonth.split("-").map(Number);
   const title = new Date(cy, cm - 1, 15).toLocaleDateString(undefined, { month: "long", year: "numeric" });
   let html = `<div class="cal"><div class="nav"><button data-cnav="-1" title="Previous month">‹</button><b>${esc(title)}</b><button data-cnav="1" title="Next month">›</button><button data-cnav="0">Today</button></div><div class="grid">`;
+  html += `<span class="wd"></span>`;
   for (let i = 0; i < 7; i++) html += `<span class="wd">${esc(new Date(2026, 10, 16 + i).toLocaleDateString(undefined, { weekday: "short" }))}</span>`;
+  const inWeek = d => calWeek && d >= calWeek && d <= addDays(calWeek, 6);
   for (let i = 0; i < 42; i++) {
     const d = addDays(g0, i), its = byDay.get(d) || [];
+    if (i % 7 === 0) html += `<button class="cwk${d === calWeek ? " sel" : ""}" data-cweek="${d}" aria-label="Week ${isoWeek(d)}" title="Show the whole week"><span><small>${isoWeek(d)}</small></span></button>`;
     const cols = its.map(it => { const f = facetsOf(it.e)[0]; return f ? facetColor(facetKey(f, it.j)) : ""; });
     const dots = cols.slice(0, 3).map(c => `<i${c ? ` style="background:${c}"` : ""}></i>`).join("") + (cols.length > 3 ? "<small>+</small>" : "");
-    const cls = ["cd", d.slice(0, 7) !== calMonth.slice(0, 7) ? "out" : "", d === t0 ? "today" : "", d === calDay ? "sel" : ""].filter(Boolean).join(" ");
+    const cls = ["cd", d.slice(0, 7) !== calMonth.slice(0, 7) ? "out" : "", d === t0 ? "today" : "", inWeek(d) ? "wk" : d === calDay ? "sel" : ""].filter(Boolean).join(" ");
     html += `<button class="${cls}" data-cday="${d}" aria-label="${esc(fmtDate(d))}${its.length ? ", " + its.length : ""}"><span>${Number(d.slice(8))}</span><span class="dots">${dots}</span></button>`;
   }
   html += `</div></div>`;
-  const items = (byDay.get(calDay) || []).sort((a, b) => { const ka = orderKey(a), kb = orderKey(b); return ka[0] - kb[0] || ka[1].localeCompare(kb[1]); });
-  const dayTitle = new Date(calDay + "T12:00:00").toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
-  html += `<section class="calday"><h2>${esc(dayTitle)}</h2>`;
-  for (const it of items) html += it.occ ? itemHtml(it, "month").replace('<div class="item', `<div data-occ="${it.occ}" class="item`) : itemHtml(it, "month");
-  if (!items.length) html += `<p class="hint none">Nothing${flt.facet.length || otherActive(flt) ? " with the current filter" : ""}</p>`;
-  html += `</section>`;
+  const dayItems = d => (byDay.get(d) || []).sort((a, b) => { const ka = orderKey(a), kb = orderKey(b); return ka[0] - kb[0] || ka[1].localeCompare(kb[1]); });
+  const dayTitle = d => new Date(d + "T12:00:00").toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
+  const itemsOf = items => items.map(it => it.occ ? itemHtml(it, "month").replace('<div class="item', `<div data-occ="${it.occ}" class="item`) : itemHtml(it, "month")).join("");
+  const none = `<p class="hint none">Nothing${flt.facet.length || otherActive(flt) ? " with the current filter" : ""}</p>`;
+  if (calWeek) {
+    // The whole week (ui.md 4.13b): its days with entries, each under its own heading.
+    const w1 = addDays(calWeek, 6), m0 = new Date(calWeek + "T12:00:00"), m1 = new Date(w1 + "T12:00:00");
+    const fmt = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "long" });
+    const span = fmt.formatRange ? fmt.formatRange(m0, m1) : fmt.format(m0) + " – " + fmt.format(m1);
+    html += `<div class="wkhead">Week ${isoWeek(calWeek)} · ${esc(span)}</div>`;
+    let any = false;
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(calWeek, i), items = dayItems(d);
+      if (!items.length) continue;
+      any = true;
+      html += `<section class="calday wk"><h2>${esc(dayTitle(d))}</h2>${itemsOf(items)}</section>`;
+    }
+    if (!any) html += `<section class="calday wk">${none}</section>`;
+  } else {
+    const items = dayItems(calDay);
+    html += `<section class="calday"><h2>${esc(dayTitle(calDay))}</h2>${itemsOf(items)}${items.length ? "" : none}</section>`;
+  }
   $("agenda").innerHTML = html;
   $("addLine").placeholder = calDay === t0 ? "New item — talk or type" : "New item on " + fmtDate(calDay);
 }
@@ -3873,10 +3939,61 @@ function renderDetail() {
   const [it, g] = got, had = openItems.has(selKey);
   openItems.add(selKey);
   let html; try { html = itemHtml(it, g); } finally { if (!had) openItems.delete(selKey); }
-  const j = it.j || "", idx = el.dataset.line;
-  box.innerHTML = `<div class="dhead"><span class="dj">${esc(journalName(j))}</span><button type="button" class="dx" data-dclose="1" aria-label="Close" title="Close">×</button></div>${html}`
-    + (idx && !el.dataset.ro ? `<div class="dact"><button type="button" data-dsheet="${esc(idx)}">Done or reschedule …</button><button type="button" data-note="${esc(idx)}">${it.e.note ? "Edit note" : "Add note"}</button></div>` : "");
+  const j = it.j || "", idx = el.dataset.line, e = it.e;
+  // A note being written survives a redraw (a sync, a change elsewhere).
+  const was = document.activeElement && document.activeElement.id === "dNote" && box.dataset.key === selKey
+    ? { v: $("dNote").value, a: $("dNote").selectionStart, b: $("dNote").selectionEnd } : null;
+  box.dataset.key = selKey;
+  let act = "";
+  if (idx && !el.dataset.ro) {
+    // The note and the actions of the sheet, in the column itself (ui.md 1a, step 3).
+    const rec = has(e, "recurring");
+    const steps = [["tomorrow", "Next day"], ["weeks1", "1 week"], ["months1", "1 month"], ["days2", "2 days"], ["weeks2", "2 weeks"], ["months3", "3 months"]];
+    act = `<div class="dnote"><div class="dlbl"><label for="dNote">Note</label><button type="button" class="dexp" data-dnotebig="1" title="Larger field" aria-label="Larger field"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg></button></div>`
+      + `<textarea id="dNote" maxlength="${NOTE_MAX}" rows="3" placeholder="Add a note" data-ref="${esc(idx)}">${esc(e.note || "")}</textarea><div class="dcount" id="dNoteCount">${(e.note || "").length} / ${NOTE_MAX}</div></div>`
+      + `<div class="dre" data-dline="${esc(idx)}">`
+      + (rec ? `<div class="dtop"><button type="button" class="primary" data-dact="occdone">Done</button><button type="button" class="sec" data-dact="skip">Skip</button></div>` : `<button type="button" class="primary ddone" data-dact="done">Done</button>`)
+      + `<div class="dlbl">Reschedule</div><div class="dgrid">${steps.map(([a, l]) => `<button type="button" class="sec" data-dact="${a}">${l}</button>`).join("")}</div>`
+      + `<label class="sec dpick"><input type="date" id="dDate"><span>Other date</span></label>`
+      + (rec ? `<button type="button" class="danger dseries" data-dact="done">Delete series</button>` : "") + `</div>`;
+  }
+  box.innerHTML = `<div class="dhead"><span class="dj">${esc(journalName(j))}</span><button type="button" class="dx" data-dclose="1" aria-label="Close" title="Close">×</button></div>${html}${act}`;
+  const ta = $("dNote");
+  if (ta) {
+    if (was) { ta.value = was.v; ta.focus(); ta.setSelectionRange(was.a, was.b); }
+    fitNote(ta); $("dNoteCount").textContent = ta.value.length + " / " + NOTE_MAX;
+  }
 }
+// The note field of the detail column grows with its text and never scrolls sideways.
+function fitNote(ta) { ta.style.height = "auto"; ta.style.height = Math.max(ta.scrollHeight + 2, 72) + "px"; }
+function noteValue(t) { t = t.replace(/\r/g, "").trim(); return /[^\s\u200b-\u200d\u2060\ufeff]/.test(t) ? t.slice(0, NOTE_MAX) : ""; }
+function saveDetailNote() {
+  const ta = $("dNote"); if (!ta) return;
+  const ref = ta.dataset.ref, e = entryAt(ref), v = noteValue(ta.value);
+  if (!e || v === (e.note || "")) return;
+  updateLine(ref, x => { x.note = v; });
+  render(); scheduleSync();
+}
+$("detail").addEventListener("input", ev => { if (ev.target.id === "dNote") { fitNote(ev.target); $("dNoteCount").textContent = ev.target.value.length + " / " + NOTE_MAX; } });
+$("detail").addEventListener("focusout", ev => { if (ev.target.id === "dNote") saveDetailNote(); });
+// Double click on the field or the symbol beside it: the note dialog, which can be made larger.
+$("detail").addEventListener("dblclick", ev => { if (ev.target.id === "dNote") bigNote(); });
+function bigNote() {
+  const ta = $("dNote"); if (!ta) return;
+  const ref = ta.dataset.ref, v = ta.value;
+  saveDetailNote();
+  openNote(ref);
+  $("noteText").value = v; noteCount();
+}
+// The actions of the column work as those of the sheet.
+function detailAct(act, target) {
+  const box = document.querySelector("#detail .dre"); if (!box) return;
+  const idx = box.dataset.dline, e = entryAt(idx); if (!e) return;
+  $("sheet").dataset.line = idx;
+  $("sheet").dataset.base = has(e, "recurring") ? shownOccurrence(e, lineRef(idx).j) : "";
+  sheetApply(act, target || sheetTarget(act, $("sheet").dataset.base || today()));
+}
+$("detail").addEventListener("change", ev => { if (ev.target.id === "dDate" && ev.target.value) detailAct("date", ev.target.value); });
 function itemHtml({ e, idx, j, d, local, overdue, closed, carried, snapId }, g) {
   drawnItems.set((j ? j + ":" : "") + (e.id || "line:" + idx), [arguments[0], g]);
   const ro = !!(j && readOnly(j));
@@ -3909,8 +4026,21 @@ function itemHtml({ e, idx, j, d, local, overdue, closed, carried, snapId }, g) 
     const sw = c ? `<span class="sw" style="background:${c}"></span>` : "";
     // The journal a facet belongs to is shown on hover only (ui.md 4.4).
     const own = t.dim === "facet" && journals().length > 1 ? ` title="${esc(journalName(j))}"` : "";
-    return `<button class="chip ${cls}" data-line="${idx}" data-ti="${ti}"${own}>${sw}${esc(t.dim)}:<b>${esc(t.val || "")}</b></button>`;
+    // Inside the row "date:" of the detail column a word replaces the dimension.
+    const word = t.dim === "skip" ? "not" : t.dim === "done" ? "done" : t.dim === "date" && t.val === ds[1] && ds.length > 1 ? (mode === "series" ? "until" : "to") : "";
+    return `<button class="chip ${cls}" data-line="${idx}" data-ti="${ti}"${own}>${sw}<span class="dl">${esc(t.dim)}:</span>${word ? `<span class="dl2">${word}</span>` : ""}<b>${esc(t.val || "")}</b></button>`;
   });
+  {
+    // The tags about time stay together, at the place of the first of them.
+    const CHRON = ["date", "time", "recurring", "skip", "done"];
+    const at = e.tags.map((t, ti) => CHRON.includes(t.dim) && !t.ov ? ti : -1).filter(i => i >= 0);
+    if (at.length) {
+      const order = at.slice().sort((a, b) => CHRON.indexOf(e.tags[a].dim) - CHRON.indexOf(e.tags[b].dim) || e.tags[a].val.localeCompare(e.tags[b].val));
+      const group = `<span class="chron"><span class="clbl">date:</span><span class="cvals">${order.map(i => chips[i]).join("")}</span></span>`;
+      for (const i of at) chips[i] = "";
+      chips[at[0]] = group;
+    }
+  }
   // + and the note button stay together when the chips wrap; the note button opens the note editor (ui.md 4.9a).
   chips.push(`<span class="cbtns">` + (ADDABLE.some(d => !has(e, d)) ? `<button class="chip plus" data-line="${idx}" data-plus="1" title="Add tag">+</button>` : "")
     + (removableTags(e).length ? `<button class="chip plus" data-line="${idx}" data-minus="1" title="Remove a tag" aria-label="Remove a tag">−</button>` : ""));
@@ -4474,15 +4604,20 @@ function agendaClick(ev) {
     const it = ev.target.closest(".item");
     if (it && !ev.target.closest(".chip, .fold, button, input, [data-note]")) { selKey = it.dataset.key; renderDetail(); return; }
   }
-  const dsh = ev.target.closest("[data-dsheet]");
-  if (dsh) { openSheet(dsh.dataset.dsheet); return; }
+  const da = ev.target.closest("[data-dact]");
+  if (da) { detailAct(da.dataset.dact); return; }
+  if (ev.target.closest("[data-dnotebig]")) { bigNote(); return; }
+  if (ev.target.closest(".dpick")) { const i = $("dDate"); try { if (i && i.showPicker) i.showPicker(); } catch {} return; }
   if (ev.target.closest("[data-dclose]")) { selKey = null; renderDetail(); return; }
   const cd = ev.target.closest("[data-cday]");
-  if (cd) { calDay = cd.dataset.cday; if (calDay.slice(0, 7) !== calMonth.slice(0, 7)) calMonth = calDay.slice(0, 8) + "01"; render(); return; }
+  if (cd) { calWeek = ""; calDay = cd.dataset.cday; if (calDay.slice(0, 7) !== calMonth.slice(0, 7)) calMonth = calDay.slice(0, 8) + "01"; render(); return; }
+  // A week: its entries below the grid; new entries get its Monday.
+  const cw = ev.target.closest("[data-cweek]");
+  if (cw) { calWeek = calDay = cw.dataset.cweek; render(); return; }
   const cn = ev.target.closest("[data-cnav]");
   if (cn) {
     const n = Number(cn.dataset.cnav), t0 = today();
-    calMonth = n ? addMonths(calMonth, n) : t0.slice(0, 8) + "01";
+    calMonth = n ? addMonths(calMonth, n) : t0.slice(0, 8) + "01"; calWeek = "";
     calDay = calMonth.slice(0, 7) === t0.slice(0, 7) ? t0 : calMonth;
     render(); return;
   }
@@ -4516,6 +4651,13 @@ function agendaClick(ev) {
     return;
   }
   const noteBtn = ev.target.closest("[data-note]");
+  if (noteBtn && wide3()) {
+    // Wide screens: the note is written in the detail column.
+    const it = noteBtn.closest(".item");
+    if (it && !it.closest("#detail")) { selKey = it.dataset.key; renderDetail(); }
+    const ta = $("dNote"); if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+    ev.stopPropagation(); return;
+  }
   if (noteBtn) { ev.stopPropagation(); openNote(noteBtn.dataset.note); return; }
   // An entry of a journal read as guest: say why nothing happens (ui.md 4.11a).
   const roItem = ev.target.closest(".item[data-ro]");
@@ -5696,7 +5838,7 @@ function renderJournalList() {
     // A journal just added has not been read yet: say so instead of describing it as empty.
     const unread = !!j && withJ(j, () => !S.etag && !S.snap.trim());
     // Two lines: the facets, then the account and the role.
-    const facetsLine = unread ? "loading …" : fs.join("") || "no facets declared";
+    const facetsLine = unread ? "loading" : fs.join("") || "no facets declared";
     const meta = (acct ? acct.slice(0, 4).toUpperCase() + "…" + acct.slice(-4).toUpperCase() : "") + role;
     const own = j && journalAlias(j) && !unread ? (nameLineIndex(j) >= 0 ? ` · name in the journal: ${esc(journalOwnName(j))}` : " · the journal has no name of its own") : "";
     // A journal without name (and without alias) shows the start of its account ID; say so.
@@ -5725,7 +5867,7 @@ $("journalList").addEventListener("click", async ev => {
   if (ub) {
     const u = undoList().find(x => x.acct === ub.dataset.undo);
     if (!u) { renderJournalList(); return; }
-    ub.disabled = true; ub.textContent = "Restoring …";
+    ub.disabled = true; ub.textContent = "Restoring";
     try { await undoDelete(u); addNotice("The journal " + u.name + " is back."); sync(); }
     catch (err) { addNotice("Undoing the deletion failed: " + err.message); }
     renderJournalList(); render();
@@ -5878,7 +6020,7 @@ $("migCancel").onclick = () => $("dlgMigrate").close();
 $("migGo").onclick = async () => {
   const chosen = migChosen();
   if (!chosen.length) { $("migMsg").textContent = "Choose one or more facets."; return; }
-  $("migGo").disabled = true; $("migMsg").textContent = "Moving …";
+  $("migGo").disabled = true; $("migMsg").textContent = "Moving";
   try { await migrateFacets(migTo, chosen); $("dlgMigrate").close(); }
   catch (err) { $("migMsg").textContent = err.message; }
   finally { $("migGo").disabled = false; }
@@ -5962,7 +6104,7 @@ twoTap($("jRmGo"), "Remove", () => "Tap again: remove " + jRmNames() + (JRM.to ?
 });
 twoTap($("jMakeDefault"), "Make this my default journal", () => "Tap again: make " + journalName(jEditing) + " your default journal", async () => {
   const j = jEditing;
-  $("jMsg").textContent = "Moving your account …";
+  $("jMsg").textContent = "Moving your account";
   try {
     await makeDefault(j);
     $("dlgJournal").close();
@@ -6117,7 +6259,7 @@ $("jNewPhrase").onclick = () => { $("jPhrase").value = newPhrase(wordLangPref())
 $("jV2").onchange = () => { $("jNewHint1").classList.toggle("hidden", !$("jV2").checked); $("jNewHint2").classList.toggle("hidden", $("jV2").checked); };
 twoTap($("jUpgrade"), "Upgrade to version 2", () => "Tap again: copy it into a new journal of version 2", async () => {
   const j = jEditing;
-  $("jMsg").textContent = "Copying the journal …";
+  $("jMsg").textContent = "Copying the journal";
   try {
     const r = await upgradeJournal(j);
     jEditing = r.id;
@@ -6147,7 +6289,7 @@ $("jHandWithdraw").onclick = () => {
 $("jCodeScan").onclick = () => scanQr(p => { $("jCode").value = p; $("jCodeOk").click(); });
 $("jCodeOk").onclick = async () => {
   const j = jEditing;
-  $("jMsg").textContent = "Checking the code …";
+  $("jMsg").textContent = "Checking the code";
   try {
     const level = await applyCode(j, $("jCode").value.trim());
     $("jMsg").textContent = level === "owner" ? "You are the owner of this journal here now." : "You may read and write this journal now.";
@@ -6193,7 +6335,7 @@ $("jMissingRestore").onclick = async () => {
 $("jMissingDrop").onclick = () => { withJ(jEditing, () => { S.missing = []; }); dropNotice("missing:" + jEditing); $("jMissing").classList.add("hidden"); };
 $("jRestore").onclick = async () => {
   const j = jEditing;
-  $("jMsg").textContent = "Restoring …";
+  $("jMsg").textContent = "Restoring";
   try { await restoreJournal(j); $("dlgJournal").close(); }
   catch (err) { $("jMsg").textContent = "Restoring failed: " + err.message; }
 };
@@ -6645,7 +6787,7 @@ async function clipLoad() {
 async function clipPut(blob, name) {
   const type = blob.type || "application/octet-stream";
   if (blob.size > CLIP_MAX) { clipMsg("Too large for the clipboard (" + (blob.size / 1048576).toFixed(1) + " MB, at most 4 MB). Nothing was sent."); return; }
-  clipMsg("Sending …");
+  clipMsg("Sending");
   const meta = { name: name || (type.startsWith("image/") ? "picture." + (type.split("/")[1] || "png") : type === "text/plain" ? "text.txt" : "file"), type, size: blob.size, t: new Date().toISOString() };
   const head = new TextEncoder().encode(JSON.stringify(meta)), body = new Uint8Array(await blob.arrayBuffer());
   const plain = new Uint8Array(4 + head.length + body.length);
@@ -6667,7 +6809,7 @@ function clipMsg(t) { $("clipMsg").textContent = t; }
 function clipRender() {
   const m = CLIP.meta, b = CLIP.blob, box = $("clipPreview");
   if (!CLIP.filled) box.innerHTML = '<span class="hint">Empty</span>';
-  else if (!b) box.innerHTML = '<span class="hint">Loading …</span>';
+  else if (!b) box.innerHTML = '<span class="hint">Loading</span>';
   else if (m.type.startsWith("image/")) box.innerHTML = `<img alt="${esc(m.name)}" src="${CLIP.url}">`;
   else if (m.type.startsWith("text/")) { box.innerHTML = "<pre></pre>"; b.text().then(t => { box.querySelector("pre").textContent = t.length > 4000 ? t.slice(0, 4000) + " …" : t; }); }
   else box.innerHTML = `<span>${esc(m.name)} · ${clipSize(m.size)}</span>`;
@@ -6812,7 +6954,7 @@ async function stopSharing(j) {
 }
 twoTap($("jStop"), "Stop sharing for anybody", () => "Tap again: new words for this journal; everyone else loses access", async () => {
   const j = jEditing, v2 = withJ(j, () => !!S.keys && S.keys.v === KEY_V2);
-  $("jMsg").textContent = "Moving the journal to new words …";
+  $("jMsg").textContent = "Moving the journal to new words";
   try {
     await stopSharing(j);
     addNotice("Sharing stopped: the journal has new words, and the old journal was deleted on the server. To share it again, " + (v2 ? "give its ally code or its guest code, in its dialog." : "pass on its new words, in its dialog."));
@@ -6845,7 +6987,7 @@ $("jOk").onclick = async () => {
   }
   const phrase = $("jPhrase").value.trim();
   if (codeKind(phrase) === "handover") {
-    $("jMsg").textContent = "Taking the journal over …";
+    $("jMsg").textContent = "Taking the journal over";
     try {
       const words = await takeOver(phrase, false, name);
       showJournalResult("Journal taken over", "The journal is yours now, under these new words. Write them down; your other devices get the journal through your journal list.", words);
@@ -6854,7 +6996,7 @@ $("jOk").onclick = async () => {
     return;
   }
   if (!codeKind(phrase)) { $("jMsg").textContent = phraseProblem(phrase) || "Not a phrase (8 words), ally code (16 words) or guest code."; return; }
-  $("jMsg").textContent = "Deriving the keys …";
+  $("jMsg").textContent = "Deriving the keys";
   const created = $("jNewHint").style.display !== "none";
   const r = await joinJournal(phrase, created, name, !$("jV2").checked);
   if (r) { $("jMsg").textContent = r; return; }
@@ -7076,7 +7218,7 @@ function renderExGroups() {
   $("exGroups").innerHTML = [...groups].map(([g, ns]) => {
     const [dim, val] = g.split(":");
     const rows = ns.map(n => `<div class="exr"><span title="${esc(EX.users[n].label)}">${esc(EX.users[n].label)}</span><select data-k="${n}">${exOptions(dim, val, cur.get(String(n)) || "keep")}</select></div>`).join("");
-    return `<div class="exg"><div class="exh"><span>#${esc(dim)}-${esc(val)} (${ns.length})</span><select data-all="${esc(g)}"><option value="">Set all …</option>${exOptions(dim, val, "")}</select></div>${rows}</div>`;
+    return `<div class="exg"><div class="exh"><span>#${esc(dim)}-${esc(val)} (${ns.length})</span><select data-all="${esc(g)}"><option value="">Set all</option>${exOptions(dim, val, "")}</select></div>${rows}</div>`;
   }).join("");
 }
 $("exGroups").addEventListener("change", ev => {
@@ -7206,7 +7348,7 @@ function showSetup(step) {
   if (!$("dlgSetup").open) $("dlgSetup").showModal();
 }
 async function finishSetup(phrase, cfg, examples, keys = null) {
-  $("setupMsg").textContent = "Deriving keys …";
+  $("setupMsg").textContent = "Deriving keys";
   $("setupOk").disabled = true;
   try {
     S.keys = keys || await deriveKeys(phrase);
@@ -7388,7 +7530,7 @@ $("setupOk").onclick = async () => {
   } else if (setupStep === "take") {
     const code = $("phraseInput").value.trim();
     if (codeKind(code) !== "handover") { $("setupMsg").textContent = "Not a handover code. The owner finds it in the journal's dialog, under Hand over."; return; }
-    $("setupMsg").textContent = "Taking the journal over …";
+    $("setupMsg").textContent = "Taking the journal over";
     $("setupOk").disabled = true;
     try {
       S.cfg = { mode: "server", server: serverInput() };
@@ -7411,7 +7553,7 @@ $("setupOk").onclick = async () => {
     if (err) { $("setupMsg").textContent = err; return; }
     // Someone given the phrase of another person's journal would make it their own and
     // write into it (ui.md 4.11a): say whose journal it is before it is set up.
-    $("setupMsg").textContent = "Looking up the journal …";
+    $("setupMsg").textContent = "Looking up the journal";
     $("setupOk").disabled = true;
     let peek = null;
     try { peek = await peekJournal(serverInput(), $("phraseInput").value); } catch { /* unreachable: set up as before */ }
@@ -7426,7 +7568,7 @@ $("setupOk").onclick = async () => {
         return;
       }
       if (peek.deleted.restorable && dh) {
-        $("setupMsg").textContent = "Restoring the account …";
+        $("setupMsg").textContent = "Restoring the account";
         try {
           const r = await fetch(serverInput() + "/undelete", { method: "POST", headers: { ...dh, "X-Agenda-Member": "0".repeat(64) } });
           if (!r.ok) throw new Error(String(r.status));
@@ -7451,7 +7593,7 @@ $("setupOk").onclick = async () => {
     const code = $("phraseInput").value.trim(), kind = codeKind(code);
     const err = kind === "ally" || kind === "guest" ? "" : phraseProblem(code);
     if (err) { $("setupMsg").textContent = err; return; }
-    $("setupMsg").textContent = "Computing …";
+    $("setupMsg").textContent = "Computing";
     // Eight words name a journal of version 2 and one of version 1; which of them exists
     // is not asked here, since nothing is sent.
     $("setupIdValue").textContent = kind === "phrase"
@@ -8216,13 +8358,13 @@ function pinDialog(mode) {
       if (!/^\d{6,12}$/.test(a)) { $p("pinMsg").textContent = "The PIN has six to twelve digits."; return; }
       if (set) {
         if (a !== b) { $p("pinMsg").textContent = "The two entries differ."; return; }
-        $p("pinOk").disabled = true; $p("pinMsg").textContent = "Encrypting …";
+        $p("pinOk").disabled = true; $p("pinMsg").textContent = "Encrypting";
         try { await Vault.enable(a); done("set"); } catch (e) { $p("pinMsg").textContent = "Failed: " + e.message; } finally { $p("pinOk").disabled = false; }
         return;
       }
       const w = wait();
       if (Date.now() < w.until) { $p("pinMsg").textContent = "Too many attempts. Try again in " + Math.ceil((w.until - Date.now()) / 1000) + " s."; return; }
-      $p("pinOk").disabled = true; $p("pinMsg").textContent = "Checking …";
+      $p("pinOk").disabled = true; $p("pinMsg").textContent = "Checking";
       let ok = false;
       try {
         if (mode === "unlock") ok = await Vault.unlock(a);

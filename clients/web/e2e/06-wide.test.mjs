@@ -18,7 +18,7 @@ export default async function ({ b }) {
   await p.evaluate(() => document.querySelector("#detail .chip:not(.plus):not(.notebtn)").click()); await sleep(300);
   check(await p.evaluate(() => !document.getElementById("pop").classList.contains("hidden")), "a tag in the detail opens its menu");
   await p.evaluate(() => closePop());
-  check(await p.evaluate(() => /Done or reschedule/.test(document.getElementById("detail").textContent)), "actions as rows in the detail");
+  check(await p.evaluate(() => !!document.querySelector('#detail [data-dact="done"]') && !!document.getElementById("dNote")), "note and actions in the detail");
   await p.evaluate(() => document.querySelector("#detail [data-dclose]").click()); await sleep(200);
   check(await p.evaluate(() => !document.querySelector("#agenda .item.sel") && /Choose an entry/.test(document.getElementById("detail").textContent)), "closing returns to the hint");
   // Below 1440 px no detail column.
