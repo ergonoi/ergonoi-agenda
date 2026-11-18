@@ -131,6 +131,11 @@
      tray, sync dot), List / Month / Text at the bottom, everything else behind the menu. */
   #btnMenu, #hdot, #bnav { display:none; }
   @media (max-width: 600px) {
+    /* The icons of the header share one centre line (menu, tray, magnifier, sync dot). */
+    header .hbtns { display:flex; align-items:center; }
+    header #btnClip:not(.hidden), header #btnSearch { display:inline-flex !important; align-items:center; justify-content:center; height:var(--tap); border:0 !important; padding-top:0 !important; padding-bottom:0 !important; }
+    #btnClip svg, #btnSearch svg { display:block; }
+    #btnClip svg { transform:translateY(-1px); } /* the tray is drawn low in its box */
     :root { --bn:64px; }
     header .row { flex-wrap:nowrap; min-height:56px; padding:0 4px; gap:0; }
     header h1 { flex:1; order:0; min-width:0; text-align:center; }
