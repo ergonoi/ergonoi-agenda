@@ -4426,7 +4426,7 @@ function renderPanel() {
       `<button type="button" data-fdim="${d}" data-fval="${esc(v)}" class="${f.off[d].includes(v) ? "off" : ""}">${esc(filterLabel(d, v))}<span class="n">${cd.get(v) || 0}</span></button>`).join("") + `</div>`;
   }
   const moreOpen = LS.getItem("agenda.fmore") === "1" || otherActive(f);
-  if (more) h += `<details id="fpMore"${moreOpen ? " open" : ""}><summary>More: topic, action, rank, size, time, repeats</summary><div class="more">${more}<p class="hint" style="padding:0;margin-top:14px">Tap a value to hide or show it, long press for only this value. Within one kind any shown value matches; across kinds all must match.</p></div></details>`;
+  if (more) h += `<details id="fpMore"${moreOpen ? " open" : ""}><summary>More filters</summary><div class="more">${more}<p class="hint" style="padding:0;margin-top:14px">Tap a value to hide or show it, long press for only this value. Within one kind any shown value matches; across kinds all must match.</p></div></details>`;
   const chev = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6l6 6-6 6"/></svg>';
   const ic = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">${d}</svg>`;
   h += `<div class="mlist">`
