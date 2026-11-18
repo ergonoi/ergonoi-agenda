@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -254,4 +255,19 @@ func TestMembersPersistOnlyWithDir(t *testing.T) {
 	mem := newMembers("")
 	mem.touch(acc, testMember)
 	mem.sweep() // must not write anywhere
+}
+
+func TestHealth(t *testing.T) {
+	_, h := testServer(t)
+	rec := do(t, h, "GET", "/health", "", "", nil)
+	if rec.Code != 200 || rec.Header().Get("Access-Control-Allow-Origin") != "*" || rec.Header().Get("Cache-Control") != "no-store" {
+		t.Fatalf("health: %d %v", rec.Code, rec.Header())
+	}
+	var v map[string]string
+	if err := json.Unmarshal(rec.Body.Bytes(), &v); err != nil || v["service"] != "outheis-agenda" || v["version"] == "" {
+		t.Fatalf("health body: %q", rec.Body.String())
+	}
+	if rec := do(t, h, "POST", "/health", "", "", nil); rec.Code != 405 {
+		t.Fatalf("POST /health: %d", rec.Code)
+	}
 }

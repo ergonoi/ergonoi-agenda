@@ -70,6 +70,7 @@ window.fetch = async function (url, opts = {}) {
   const token = String(h.Authorization || "").replace(/^Bearer /, ""), dk = demoKey(token);
   const body = demoJournal(token), etag = demoEtag(body);
   const valid = t => t.split("\n").filter(Boolean).every(l => /^[A-Za-z0-9+/]+={0,2}$/.test(l));
+  if (u.endsWith("/health")) return new Response(JSON.stringify({ service: "outheis-agenda", version: APP_VERSION }), { status: 200, headers: { "Content-Type": "application/json" } });
   if (u.endsWith("/append") && m === "POST") {
     if (!valid(String(opts.body || ""))) return new Response("invalid line format", { status: 400 });
     localStorage.setItem(dk, body + String(opts.body || ""));

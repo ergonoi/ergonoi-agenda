@@ -22,7 +22,8 @@ This document contains everything needed to build the agenda client, or a client
 The interface changes in steps, each recorded here with its aim. The aim of the steps since November 2026 is ergonomics (short paths for frequent actions, fixed places, no surprises) and an uncluttered interface (one task per area, nothing on screen that is needed only now and then). The model is the clarity of well-made professional apps such as PatMed: one header with one task, a calm list, choices in menus and panels rather than in bars over the content.
 
 1. **0.9.0 (20 November 2026): views, facet panel, title.** The facet bar over the list and the filter tab are replaced by named views, chosen from the title, and a facet panel grouped by journal (4.14). Frequent switches between facet combinations take two taps from anywhere; the list gains the rows the bar took; it is visible at once whom a facet belongs to; a read-only journal is marked with a lock instead of a label. Decisions 6.7.
-2. **Planned, in a branch:** three columns on wide screens (panel, list, detail of the chosen entry), a bottom bar *List* / *Month* / *Text* on phones, search in the header for the open view, settings as pages of rows.
+2. **0.9.1, branch `ui-concept`: phone layout and settings.** On phones a bottom bar *List* / *Month* / *Text*, the menu in the facet panel, settings as pages with a back arrow, rows with switches, PIN levels as a list with a check mark, actions as rows and dangerous ones in Scarlet at the end; journals as rows that open their dialog. *Test connection* under the server address (decisions 6.4b).
+3. **Planned, in a branch:** three columns on wide screens (panel, list, detail of the chosen entry), a bottom bar *List* / *Month* / *Text* on phones, search in the header for the open view, settings as pages of rows.
 
 ---
 

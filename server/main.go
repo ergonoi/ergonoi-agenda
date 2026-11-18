@@ -11,6 +11,7 @@
 //	GET    /clip      the one encrypted clipboard item of the account (ETag; HEAD for presence)
 //	PUT    /clip      replace it (owner only, at most 4 MB of content)
 //	DELETE /clip      remove it
+//	GET    /health    service name and version, for a connection test; stores nothing
 //	GET    /          web application
 //
 // The account is identified by what the request proves (auth.go): a version 1
@@ -344,6 +345,7 @@ func (s *server) mux() *http.ServeMux {
 	mux.HandleFunc("/append", s.handleJournal)
 	mux.HandleFunc("/members", s.handleJournal)
 	mux.HandleFunc("/clip", s.handleJournal)
+	mux.HandleFunc("/health", handleHealth)
 	files := http.FileServer(http.FS(web.FS))
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		securityHeaders(w)
@@ -354,6 +356,27 @@ func (s *server) mux() *http.ServeMux {
 		files.ServeHTTP(w, r)
 	})
 	return mux
+}
+
+// handleHealth answers the connection test of the clients (ui.md 1a): which service
+// answers and in which version. It reads no account and stores nothing.
+func handleHealth(w http.ResponseWriter, r *http.Request) {
+	cors(w)
+	switch r.Method {
+	case http.MethodOptions:
+		w.WriteHeader(http.StatusNoContent)
+		return
+	case http.MethodGet, http.MethodHead:
+	default:
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store")
+	if r.Method == http.MethodHead {
+		return
+	}
+	json.NewEncoder(w).Encode(map[string]string{"service": "outheis-agenda", "version": web.Version()})
 }
 
 // securityHeaders limits what the page may load and where it may be framed (audit S5).

@@ -27,6 +27,8 @@ out = re.sub(r"@@FONT:([a-z0-9-]+)@@", lambda m: base64.b64encode((here / "fonts
 vendor = re.compile(r"^// @@VENDOR:([a-z0-9-]+)@@$", re.M)
 out = vendor.sub(lambda m: (here / "vendor" / (m.group(1) + ".min.js")).read_text(encoding="utf-8").strip(), out)
 (here / "index.html").write_text(out, encoding="utf-8")
+# The service reports the same version at GET /health (server/main.go).
+(here / "version.txt").write_text(version + "\n", encoding="utf-8")
 # The offline cache is named after version and content, so every build replaces it.
 import hashlib
 digest = hashlib.sha256(out.encode("utf-8")).hexdigest()[:8]

@@ -615,9 +615,10 @@ Tokens and hashes are 32 bytes, sent as 64 lowercase hex digits; `F` is 11 bytes
 | `PUT /journal` | replaces the file; requires `If-Match: <ETag>`; answers `412` if the file changed since (compaction, 8.5) |
 | `DELETE /journal` | deletes the account (version 2: the owner's delete token only) |
 | `GET /members` | the member IDs (first 16 hex characters) that used the journal, each with its last use, and since when the service counts (8.4a) |
+| `GET /health` | `{"service":"outheis-agenda","version":"…"}`, no account, no member ID, nothing stored; for the connection test of the clients (decisions 6.4b) |
 | `GET /` | web application |
 
-Every request also carries the member ID `X-Agenda-Member: <64 hex digits>` (8.4a); a request without member ID is refused (`400`). Query parameters are not accepted, so tokens do not end up in logs or browser histories.
+Every request except `GET /health` also carries the member ID `X-Agenda-Member: <64 hex digits>` (8.4a); a request without member ID is refused (`400`). Query parameters are not accepted, so tokens do not end up in logs or browser histories.
 
 **Admission rules.** The service cannot inspect content, but it enforces the form, so that it cannot be used to store or distribute anything but journals:
 

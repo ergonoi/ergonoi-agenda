@@ -163,6 +163,13 @@
   /* Settings on the phone (ui.md 1a, step 2): one page per area with a back arrow and the
      area's name; rows instead of tabs, switches instead of check boxes, actions as rows,
      dangerous ones in Scarlet at the end. */
+  .ctest { list-style:none; margin:8px 0 0; padding:0; font-size:14px; }
+  .ctest li { display:grid; grid-template-columns:20px 1fr; gap:2px 6px; padding:4px 0; }
+  .ctest .mk { font-weight:700; }
+  .ctest .ok .mk { color:var(--teal); }
+  .ctest .bad .mk, .ctest .bad .tx { color:var(--scarlet); }
+  .ctest .run .mk { color:var(--muted); }
+  .ctest .dt { grid-column:2; color:var(--muted); }
   #setHead { display:none; }
   #journalList .chev { display:none; }
   #viewSettings label.check .ld::before { content:": "; }
@@ -750,6 +757,8 @@
       <label for="cfgServer">Server URL</label>
       <input id="cfgServer" placeholder="https://agenda.example.org" autocomplete="off" autocapitalize="none" spellcheck="false">
       <div class="hint hidden" id="cfgServerMsg"></div>
+      <div class="btnrow"><button type="button" class="sec" id="btnTestConn">Test connection</button></div>
+      <ul class="ctest hidden" id="connTest" aria-live="polite"></ul>
       <div id="phraseLocal">
         <div class="btnrow">
           <button type="button" class="sec" id="btnShowPhrase">Show phrase</button>
@@ -1078,6 +1087,8 @@
     <div id="setupStart">
       <label for="setupServer">Server URL</label>
       <input id="setupServer" placeholder="https://agenda.example.org">
+      <div class="btnrow"><button type="button" class="ghost" id="btnSetupTest">Test connection</button></div>
+      <ul class="ctest hidden" id="setupTest" aria-live="polite"></ul>
       <p class="hint">If you are new here, creating your own journal is the best way to start.</p>
       <div class="btnrow col">
         <button type="button" class="primary" id="btnNewAccount">New account</button>
@@ -4472,6 +4483,7 @@ function prepSettings() { withJ("", () => {
   $("cfgServer").value = c.server || "";
   $("cfgServer").disabled = c.mode === "local";
   $("phraseBox").classList.add("hidden"); $("qrBox").classList.add("hidden"); $("qrBox").innerHTML = "";
+  $("connTest").classList.add("hidden");
   renderLogRow();
   $("cfgMinimal").checked = document.documentElement.classList.contains("minimal");
   $("cfgCompact").checked = document.documentElement.classList.contains("compact");
@@ -4941,8 +4953,8 @@ twoTap($("btnDeleteAccount"), "Delete account on server", () => "Tap again: dele
 // A changed server URL applies when the field is left (or with Enter).
 $("cfgServer").addEventListener("change", () => {
   if (S.cfg.mode === "local") return;
-  const server = $("cfgServer").value.trim().replace(/\/$/, "");
-  if (!/^https?:\/\/\S+$/.test(server)) { $("cfgServerMsg").textContent = "Enter the server URL, e.g. https://agenda.example.org"; $("cfgServerMsg").classList.remove("hidden"); return; }
+  const server = normServer($("cfgServer").value), sp = serverProblem(server);
+  if (sp) { $("cfgServerMsg").textContent = sp; $("cfgServerMsg").classList.remove("hidden"); return; }
   $("cfgServerMsg").classList.add("hidden");
   if (server === S.cfg.server) return;
   S.cfg = { ...S.cfg, server };
@@ -6430,9 +6442,77 @@ async function finishSetup(phrase, cfg, examples, keys = null) {
     }
   } finally { $("setupOk").disabled = false; }
 }
+// Connection test (ui.md 1a): address, reachability, service and, with an account, the
+// default journal. It sends no lines and changes nothing; a read counts as a use of the
+// journal like any sync. Clients talk to the service only over https (decisions 6.4b).
+function normServer(v) {
+  v = v.trim().replace(/\/+$/, "");
+  // An IPv6 address without brackets: put them in.
+  const m = /^(https?:\/\/)([0-9a-f:]*:[0-9a-f:]+)$/i.exec(v);
+  return m ? m[1] + "[" + m[2] + "]" : v;
+}
+function serverProblem(v) {
+  let u; try { u = new URL(v); } catch { return "Not a valid address, e.g. https://agenda.example.org or https://192.0.2.10"; }
+  if (u.protocol !== "https:" && !(u.protocol === "http:" && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(u.hostname)))
+    return "The service is only reached over https (http is accepted for localhost only).";
+  if (u.pathname !== "/" || u.search || u.hash) return "Enter the address of the server only, without a path.";
+  return "";
+}
+async function testConnection(base, out, withAccount) {
+  const steps = [];
+  const show = () => { out.classList.remove("hidden"); out.innerHTML = steps.map(st => `<li class="${st.s}"><span class="mk" aria-hidden="true">${st.s === "ok" ? "✓" : st.s === "bad" ? "✗" : "…"}</span><span class="tx">${esc(st.t)}</span>${st.d ? `<span class="dt">${esc(st.d)}</span>` : ""}</li>`).join(""); };
+  const step = t => { const st = { s: "run", t, d: "" }; steps.push(st); show(); return (s, d) => { st.s = s; st.d = d || ""; show(); return s === "ok"; }; };
+  let done = step("Address");
+  const p = serverProblem(base);
+  if (!done(p ? "bad" : "ok", p || base)) return;
+  done = step("Encryption in this browser");
+  if (!done(window.isSecureContext && crypto.subtle ? "ok" : "bad", window.isSecureContext && crypto.subtle ? "" : "The browser offers encryption only to pages loaded over https.")) return;
+  done = step("Server answers");
+  let r;
+  const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 8000);
+  try { r = await fetch(base + "/health", { cache: "no-store", signal: ctl.signal }); }
+  catch (err) {
+    return done("bad", ctl.signal.aborted ? "No answer within 8 seconds: the server is off or the address is wrong."
+      : navigator.onLine === false ? "This device is offline."
+      : "No answer: the name is unknown, the certificate is not trusted, or nothing listens there.");
+  } finally { clearTimeout(timer); }
+  done("ok", "HTTP " + r.status);
+  done = step("Agenda service");
+  let info = null; try { info = await r.json(); } catch {}
+  if (!info || info.service !== "outheis-agenda")
+    return done("bad", r.status === 404 ? "Something answers, but not an agenda service (or one older than 0.9.1)." : "Something answers, but not an agenda service.");
+  const cmp = cmpVersion(info.version || "0.0.0", APP_VERSION);
+  done("ok", "version " + info.version + (cmp < 0 ? "; older than this app (" + APP_VERSION + ")" : cmp > 0 ? "; newer than this app (" + APP_VERSION + "), reload to update" : ""));
+  if (!withAccount) return;
+  done = step("Account");
+  const keys = withJ("", () => S.keys);
+  if (!keys) return done("bad", "No account on this device yet.");
+  try {
+    const g = await fetch(base + "/journal", { headers: { ...authHeaders(keys), "X-Agenda-Member": await myMemberId("") }, cache: "no-store" });
+    if (g.status === 404) return done("bad", "The server does not know this account: wrong server, or the account was deleted.");
+    if (g.status === 401 || g.status === 403) return done("bad", "The server refuses the access token (HTTP " + g.status + ").");
+    if (!g.ok) return done("bad", "HTTP " + g.status);
+    const text = await g.text(), lines = text.split("\n").filter(Boolean);
+    const res = lines.length ? await decryptFileWith(await importEncKey(keys.enc), text) : { plain: [], broken: [] };
+    if (lines.length && !res.plain.length) return done("bad", "The journal cannot be read with this phrase.");
+    done("ok", lines.length + " lines, " + res.plain.length + " readable with the phrase here");
+  } catch (err) { done("bad", err.message); }
+}
+$("btnTestConn").onclick = async () => {
+  const b = $("btnTestConn"); b.disabled = true;
+  const v = normServer($("cfgServer").value || location.origin);
+  try { await testConnection(v, $("connTest"), S.cfg.mode !== "local" && v === normServer(S.cfg.server || location.origin)); }
+  finally { b.disabled = false; }
+};
+$("btnSetupTest").onclick = async () => {
+  const b = $("btnSetupTest"); b.disabled = true;
+  try { await testConnection(normServer($("setupServer").value), $("setupTest"), false); }
+  finally { b.disabled = false; }
+};
 function serverInput() {
-  const v = $("setupServer").value.trim().replace(/\/$/, "");
-  if (!/^https?:\/\/[^\s]+$/.test(v)) { $("setupMsg").textContent = "Enter the server URL, e.g. https://agenda.example.org"; return null; }
+  const v = normServer($("setupServer").value), p = serverProblem(v);
+  if (p) { $("setupMsg").textContent = p; return null; }
+  $("setupServer").value = v;
   return v;
 }
 $("btnNewAccount").onclick = () => {
