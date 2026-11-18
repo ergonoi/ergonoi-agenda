@@ -214,7 +214,6 @@
     #detail .dre button, #detail .dre .dpick { min-height:44px; font-size:14px; }
     #detail .dre .ddone, #detail .dre .dseries { width:100%; }
     #detail .dre .dseries { margin-top:16px; }
-    #detail .dre .dtop { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
     #detail .dre .dlbl { margin-top:12px; }
     #detail .dre .dgrid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:8px; }
     #detail .dre .dpick { position:relative; overflow:hidden; border:1px solid var(--wisteria); background:var(--wisteria); color:#1A1A1A; cursor:pointer; display:flex; align-items:center; justify-content:center; width:100%; box-sizing:border-box; border-radius:6px; }
@@ -1033,7 +1032,7 @@
       <div class="btnrow" id="logRow"><button type="button" class="sec" id="btnLogCopy">Copy log</button><button type="button" class="sec" id="btnLogSave">Save log</button><button type="button" class="sec" id="btnLogFlush">Flush log</button><span class="hint" id="logCount"></span></div>
       <h3>About</h3>
       <div class="about">
-        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.35</p>
+        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.36</p>
         <p>Author: Markus Schatzl</p>
         <p class="am"><span id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project: </span><span class="one">Technology is potential. Accessibility makes it matter.</span></p>
         <p class="al"><a href="https://ergonoi.github.io/ergonoi-agenda/" target="_blank" rel="noopener">Documentation <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://github.com/ergonoi/ergonoi-agenda" target="_blank" rel="noopener">Source code on GitHub <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://ergonoi.com" target="_blank" rel="noopener">ergonoi.com <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
@@ -1065,7 +1064,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.9.35</span>
+    <span class="ver">v0.9.36</span>
   </footer>
 </main>
 <nav id="bnav" aria-label="View">
@@ -1132,7 +1131,7 @@
 <div id="pop" class="hidden"></div>
 <div id="sheet" class="hidden"><div class="panel">
   <div class="title" id="sheetTitle"></div>
-  <div class="sheettop"><button class="done hidden" data-act="occdone" id="sheetOccDone">Done</button><button class="sec hidden" data-act="skip" id="sheetSkip">Skip</button><button class="done" data-act="done" id="sheetDone">Done / remove</button></div>
+  <div class="sheettop"><button class="sec hidden" data-act="skip" id="sheetSkip">Skip</button><button class="done" data-act="done" id="sheetDone">Done / remove</button></div>
   <div class="title" style="margin:12px 0 0" id="sheetRe">Reschedule</div>
   <div class="grid">
     <button class="sec" data-act="tomorrow">Next day</button>
@@ -4961,7 +4960,7 @@ function renderDetail() {
       // nothing stands out, so that a click after writing does not close the entry by mistake.
       // A memo has no date, so it is not rescheduled.
       + `<div class="dre" data-dline="${esc(idx)}"><div class="dlbl">Status</div>`
-      + (rec ? `<div class="dtop"><button type="button" class="sec" data-dact="occdone">Occurrence done</button><button type="button" class="sec" data-dact="skip">Skip occurrence</button></div>` : `<button type="button" class="sec ddone" data-dact="done">Mark as done</button>`)
+      + (rec ? `<button type="button" class="sec ddone" data-dact="skip">Skip</button>` : `<button type="button" class="sec ddone" data-dact="done">Mark as done</button>`)
       + (isMemo(e) ? "" : `<div class="dlbl">Reschedule</div><div class="dgrid">${steps.map(([a, l]) => `<button type="button" class="sec" data-dact="${a}">${l}</button>`).join("")}</div>`
       + `<label class="sec dpick"><input type="date" id="dDate"><span>Other date</span></label>`)
       + (rec ? `<button type="button" class="danger dseries" data-dact="done">Delete series</button>` : "") + `</div>`;
@@ -5498,7 +5497,6 @@ function openSheet(idx, pinned) {
   // Done ends the whole series.
   const rec = has(e, "recurring"), occ = rec ? pinned || shownOccurrence(e, lineRef(idx).j) : "";
   $("sheetSkip").classList.toggle("hidden", !rec);
-  $("sheetOccDone").classList.toggle("hidden", !rec);
   $("sheetDone").textContent = rec ? "Delete series" : "Done / remove";
   $("sheetDone").classList.toggle("series", rec);
   $("sheetRe").textContent = "Reschedule";
@@ -5550,7 +5548,7 @@ function sheetApply(act, target) {
   if (act === "done") updateLine(idx, x => addTag(x, "done", t0));
   // Done and Skip of one occurrence both take it out of the series (#skip, architecture 4.4b);
   // the series itself goes on.
-  else if (act === "skip" || act === "occdone") { const occ = $("sheet").dataset.base || shownOccurrence(e, lineRef(idx).j); updateLine(idx, x => { x.tags.push({ dim: "skip", val: occ }); }); showToast((act === "skip" ? "Skipped " : "Done: ") + fmtDate(occ)); }
+  else if (act === "skip") { const occ = $("sheet").dataset.base || shownOccurrence(e, lineRef(idx).j); updateLine(idx, x => { x.tags.push({ dim: "skip", val: occ }); }); showToast("Skipped " + fmtDate(occ)); }
   else if (target) { if (rec) rescheduleOccurrence(idx, target); else updateLine(idx, x => deferTo(x, target)); }
   else render();
 }
@@ -6437,7 +6435,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.9.35, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.36, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -6645,7 +6643,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.9.35";
+const APP_VERSION = "0.9.36";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
