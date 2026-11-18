@@ -1024,7 +1024,7 @@
       <div class="btnrow" id="logRow"><button type="button" class="sec" id="btnLogCopy">Copy log</button><button type="button" class="sec" id="btnLogSave">Save log</button><button type="button" class="sec" id="btnLogFlush">Flush log</button><span class="hint" id="logCount"></span></div>
       <h3>About</h3>
       <div class="about">
-        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.30</p>
+        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.31</p>
         <p>Author: Markus Schatzl</p>
         <p class="am"><span id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project: </span><span class="one">Technology is potential. Accessibility makes it matter.</span></p>
         <p class="al"><a href="https://ergonoi.github.io/ergonoi-agenda/" target="_blank" rel="noopener">Documentation <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://github.com/ergonoi/ergonoi-agenda" target="_blank" rel="noopener">Source code on GitHub <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://ergonoi.com" target="_blank" rel="noopener">ergonoi.com <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
@@ -1056,7 +1056,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.9.30</span>
+    <span class="ver">v0.9.31</span>
   </footer>
 </main>
 <nav id="bnav" aria-label="View">
@@ -6367,7 +6367,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.9.30, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.31, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -6575,7 +6575,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.9.30";
+const APP_VERSION = "0.9.31";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
@@ -7717,7 +7717,7 @@ function followDefaultMove() {
 // the content.
 // ---------------------------------------------------------------------------
 const CLIP_MAX = 4 << 20;
-const CLIP = { etag: "", filled: false, blob: null, meta: null, url: "" };
+const CLIP = { etag: "", filled: false, blob: null, meta: null, url: "", loading: null };
 const clipUsable = () => S.cfg.mode !== "local" && withJ("", () => S.keys && canReplace(S.keys) && !S.gone);
 async function clipKey() { return withJAsync("", async () => (await privKey()) || await key()); }
 async function clipHeaders() { return withJAsync("", async () => ({ ...replaceHeaders(S.keys), "X-Agenda-Member": await myMemberId("") })); }
@@ -7743,13 +7743,31 @@ async function clipCheck() {
     if (r.status === 404) { if (CLIP.filled) clipSet(null, null, ""); return; }
     if (r.ok) { const e = r.headers.get("ETag") || ""; if (e !== CLIP.etag) { clipSet(null, null, e); } }
   } catch { /* offline: as before */ }
+  // A new item is fetched at once in the background, so that it is there when the dialog opens.
+  if (CLIP.filled && !CLIP.blob) clipLoad().catch(() => {});
 }
+// Loading reads the answer piece by piece, so that the dialog can show the share already loaded.
+// One load at a time: a second call waits for the first.
 async function clipLoad() {
   if (CLIP.blob || !CLIP.filled) return CLIP.blob;
+  if (!CLIP.loading) CLIP.loading = clipFetch().finally(() => { CLIP.loading = null; });
+  return CLIP.loading;
+}
+async function clipFetch() {
+  const t0 = Date.now();
   const r = await fetch(serverBackend.base() + "/clip", { headers: await clipHeaders(), cache: "no-store" });
   if (r.status === 404) { clipSet(null, null, ""); return null; }
   if (!r.ok) throw new Error("server " + r.status);
-  const raw = new Uint8Array(await r.arrayBuffer());
+  const total = +r.headers.get("Content-Length") || 0, parts = [];
+  let got = 0;
+  const show = () => { if ($("dlgClip").open && total) { clipProgress(got / total); clipMsg("Loading " + Math.round(100 * got / total) + " %"); } };
+  if (r.body && r.body.getReader) {
+    const rd = r.body.getReader();
+    for (;;) { const { done, value } = await rd.read(); if (done) break; parts.push(value); got += value.length; show(); }
+  } else { const b = new Uint8Array(await r.arrayBuffer()); parts.push(b); got = b.length; }
+  const raw = new Uint8Array(got); let o = 0; for (const p of parts) { raw.set(p, o); o += p.length; }
+  if ($("dlgClip").open) { clipProgress(null); clipMsg(""); }
+  log("clipboard: loaded " + got + " bytes in " + (Date.now() - t0) + " ms");
   const plain = new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: raw.subarray(0, 12) }, await clipKey(), raw.subarray(12)));
   const n = new DataView(plain.buffer).getUint32(0);
   const meta = JSON.parse(new TextDecoder().decode(plain.subarray(4, 4 + n)));
@@ -7824,7 +7842,7 @@ function clipMsg(t) { $("clipMsg").textContent = t; }
 function clipRender() {
   const m = CLIP.meta, b = CLIP.blob, box = $("clipPreview");
   if (!CLIP.filled) box.innerHTML = '<span class="hint">Empty</span>';
-  else if (!b) box.innerHTML = '<span class="hint">Loading</span>';
+  else if (!b) box.innerHTML = '<span class="hint">Loading …</span>';
   else if (m.type.startsWith("image/")) box.innerHTML = `<img alt="${esc(m.name)}" src="${CLIP.url}">`;
   else if (m.type.startsWith("text/")) { box.innerHTML = "<pre></pre>"; b.text().then(t => { box.querySelector("pre").textContent = t.length > 4000 ? t.slice(0, 4000) + " …" : t; }); }
   else box.innerHTML = `<span>${esc(m.name)} · ${clipSize(m.size)}</span>`;
@@ -7867,7 +7885,10 @@ async function clipFrom(dt) {
 async function openClip() {
   clipMsg(""); clipRender();
   if (!$("dlgClip").open) $("dlgClip").showModal();
-  if (CLIP.filled && !CLIP.blob) { try { await clipLoad(); } catch (err) { clipMsg("Not loaded: " + err.message); } }
+  // A look at the server first: something newer from another device shows without waiting
+  // for the next synchronisation, so no button to refresh is needed.
+  await clipCheck();
+  if (CLIP.filled && !CLIP.blob) { try { await clipLoad(); } catch (err) { clipProgress(null); clipMsg("Not loaded: " + err.message); } }
 }
 $("btnClip").onclick = async () => {
   // A click copies what the clipboard holds and opens it: there it takes something new.

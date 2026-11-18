@@ -34,5 +34,12 @@ export default async function ({ svc, b }) {
     return { size: blob.size, name: CLIP.meta && CLIP.meta.name, type: CLIP.meta && CLIP.meta.type, sent: CLIP.meta && CLIP.meta.size };
   });
   check(big.size > 4 << 20 && big.name === "large.jpg" && big.type === "image/jpeg" && big.sent < 4 << 20, "a picture above 4 MB goes as a smaller JPEG: " + JSON.stringify(big));
+  // Another device: the item is fetched in the background as soon as the app sees it, and the
+  // dialog checks the server when it opens.
+  await A.evaluate(() => document.getElementById("dlgClip").close());
+  const bg = await A.evaluate(async () => { clipSet(null, null, ""); CLIP.filled = false; await clipCheck(); await (CLIP.loading || Promise.resolve()); return { blob: !!CLIP.blob, open: document.getElementById("dlgClip").open }; });
+  check(bg.blob && !bg.open, "a new item is loaded in the background, the dialog closed: " + JSON.stringify(bg));
+  const op = await A.evaluate(async () => { clipSet(null, null, ""); CLIP.filled = false; await openClip(); return { img: !!document.querySelector("#clipPreview img"), log: (document.getElementById("logBox")?.textContent || "") }; });
+  check(op.img, "opening the dialog fetches what is newer on the server");
   check(!A.errors.length, "no page errors " + A.errors.join(" | "));
 }
