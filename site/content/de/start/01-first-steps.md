@@ -33,6 +33,7 @@ Die App fragt nach einer Facette. Wähle eine aus oder lege eine neue an. Die Ka
 - Tippe auf den Text eines Eintrags, um ihn zu ändern.
 - Tippe auf ein Tag, um es zu ändern oder zu entfernen; `+` fügt eines hinzu.
 - Wische einen Eintrag nach links, um ihn zu erledigen oder auf einen anderen Tag zu verschieben. Ein Wisch nach rechts öffnet das Menü.
+- *Next day*, *2 days* und die anderen Schritte zählen vom Datum des Eintrags, wenn es noch bevorsteht, sonst von heute. *Next week* legt ihn auf den Montag der folgenden Woche.
 
 ## Beispieleinträge
 

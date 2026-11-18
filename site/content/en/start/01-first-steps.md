@@ -33,6 +33,7 @@ The app asks for a facet. Choose one, or create a new one. The calendar and cloc
 - Tap the text of an entry to change it.
 - Tap a tag to change or remove it; `+` adds one.
 - Swipe an entry to the left to mark it done or move it to another day. A swipe to the right opens the menu.
+- *Next day*, *2 days* and the other steps count from the entry's date if it lies ahead, otherwise from today. *Next week* moves it to the Monday of the following week.
 
 ## Example entries
 

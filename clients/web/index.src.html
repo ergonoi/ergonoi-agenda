@@ -761,6 +761,7 @@
   #sheet .panel { background:var(--bg); width:100%; max-width:540px; border-top:.5px solid var(--line); padding:8px 16px calc(16px + env(safe-area-inset-bottom)); }
   #sheet .title { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); margin:14px 0 8px; }
   #sheet .grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:12px; }
+  #sheet .grid .sheetpick { margin:0; }
   #sheet .sheetpick { position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; width:100%; min-height:var(--tap); margin:0 0 12px; border:1px solid var(--line); border-radius:6px; background:var(--wisteria); border-color:var(--wisteria); color:#1A1A1A; font-size:16px; cursor:pointer; }
   #sheet .sheetpick, #sheet .sheetpick input, #sheet .sheetpick input::-webkit-calendar-picker-indicator, #sheet .sheetpick input::-webkit-datetime-edit { cursor:pointer; } /* a button like the others */
   #sheet .sheetpick input { position:absolute; inset:0; opacity:0; width:100%; height:100%; min-width:0; max-width:100%; border:0; padding:0; margin:0; font-size:16px; -webkit-appearance:none; appearance:none; }
@@ -1133,17 +1134,18 @@
   <div class="title" id="sheetTitle"></div>
   <div class="sheettop"><button class="sec hidden" data-act="skip" id="sheetSkip">Skip instance</button><button class="done" data-act="done" id="sheetDone">Done / remove</button></div>
   <div class="title" style="margin:12px 0 0" id="sheetRe">Reschedule</div>
+  <!-- One column per unit, read downwards: days, weeks, months; Other date closes the last (ui.md 4.9). -->
   <div class="grid">
     <button class="sec" data-act="tomorrow">Next day</button>
-    <button class="sec" data-act="weeks1">1 week</button>
+    <button class="sec" data-act="nextweek">Next week</button>
     <button class="sec" data-act="months1">1 month</button>
-  </div>
-  <div class="grid">
     <button class="sec" data-act="days2">2 days</button>
-    <button class="sec" data-act="weeks2">2 weeks</button>
+    <button class="sec" data-act="weeks1">1 week</button>
     <button class="sec" data-act="months3">3 months</button>
+    <button class="sec" data-act="days3">3 days</button>
+    <button class="sec" data-act="weeks2">2 weeks</button>
+    <label class="sec sheetpick"><input type="date" id="sheetDate"><span>Other date</span></label>
   </div>
-  <label class="sec sheetpick"><input type="date" id="sheetDate"><span>Other date</span></label>
   <button class="ghost" data-act="cancel" style="width:100%">Cancel</button>
 </div></div>
 
@@ -4063,7 +4065,7 @@ function renderDetail() {
   if (idx && !el.dataset.ro) {
     // The note and the actions of the sheet, in the column itself (ui.md 1a, step 3).
     const rec = has(e, "recurring");
-    const steps = [["tomorrow", "Next day"], ["weeks1", "1 week"], ["months1", "1 month"], ["days2", "2 days"], ["weeks2", "2 weeks"], ["months3", "3 months"]];
+    const steps = [["tomorrow", "Next day"], ["nextweek", "Next week"], ["months1", "1 month"], ["days2", "2 days"], ["weeks1", "1 week"], ["months3", "3 months"], ["days3", "3 days"], ["weeks2", "2 weeks"]];
     act = `<div class="dnote"><div class="dlbl"><label for="dNote">Note</label><button type="button" class="dexp" data-dnotebig="1" title="Larger field" aria-label="Larger field"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg></button></div>`
       + `<textarea id="dNote" maxlength="${NOTE_MAX}" rows="3" placeholder="Add a note" data-ref="${esc(idx)}">${esc(e.note || "")}</textarea><div class="dcount" id="dNoteCount">${(e.note || "").length} / ${NOTE_MAX}</div></div>`
       // Status apart from the note, the same order for every kind of entry (ui.md 1a, step 3):
@@ -4071,8 +4073,8 @@ function renderDetail() {
       // A memo has no date, so it is not rescheduled.
       + `<div class="dre" data-dline="${esc(idx)}"><div class="dlbl">Status</div>`
       + (rec ? `<button type="button" class="sec ddone" data-dact="skip">Skip instance</button>` : `<button type="button" class="sec ddone" data-dact="done">Mark as done</button>`)
-      + (isMemo(e) ? "" : `<div class="dlbl">Reschedule</div><div class="dgrid">${steps.map(([a, l]) => `<button type="button" class="sec" data-dact="${a}">${l}</button>`).join("")}</div>`
-      + `<label class="sec dpick"><input type="date" id="dDate"><span>Other date</span></label>`)
+      + (isMemo(e) ? "" : `<div class="dlbl">Reschedule</div><div class="dgrid">${steps.map(([a, l]) => `<button type="button" class="sec" data-dact="${a}">${l}</button>`).join("")}`
+      + `<label class="sec dpick"><input type="date" id="dDate"><span>Other date</span></label></div>`)
       + (rec ? `<button type="button" class="danger dseries" data-dact="done">Delete series</button>` : "") + `</div>`;
   }
   box.innerHTML = `<div class="dhead"><span class="dj">${esc(journalName(j))}</span><button type="button" class="dx" data-dclose="1" aria-label="Close" title="Close">×</button></div>${html}${act}`;
@@ -4109,7 +4111,7 @@ function detailAct(act, target) {
   const idx = box.dataset.dline, e = entryAt(idx); if (!e) return;
   $("sheet").dataset.line = idx;
   $("sheet").dataset.base = has(e, "recurring") ? shownOccurrence(e, lineRef(idx).j) : "";
-  sheetApply(act, target || sheetTarget(act, $("sheet").dataset.base || today()));
+  sheetApply(act, target || sheetTarget(act, stepBase()));
 }
 $("detail").addEventListener("change", ev => { if (ev.target.id === "dDate" && ev.target.value) detailAct("date", ev.target.value); });
 function itemHtml({ e, idx, j, d, local, overdue, closed, carried, snapId }, g) {
@@ -4647,7 +4649,17 @@ function rescheduleOccurrence(idx, target) {
   scheduleSync(); render();
 }
 const lines0 = idx => { const { j, idx: i } = lineRef(idx); return withJ(j, () => S.wc.split("\n")[i]); };
+// The steps count from the date of the entry when it lies ahead, otherwise from today, so that
+// an overdue entry does not land in the past again; a series counts from the occurrence shown.
+// Next week is the Monday after the week of that day (ui.md 4.9).
+function stepBase() {
+  const b = $("sheet").dataset.base; if (b) return b;
+  const e = entryAt($("sheet").dataset.line), t = today();
+  const d = e && (e.tags.find(x => x.dim === "date") || {}).val;
+  return d && d > t ? d : t;
+}
 function sheetTarget(act, t0) {
+  if (act === "nextweek") return addDays(t0, 7 - (new Date(t0 + "T12:00:00").getDay() + 6) % 7);
   return { tomorrow: addDays(t0, 1), days2: addDays(t0, 2), weeks1: addDays(t0, 7), months1: addMonths(t0, 1), days3: addDays(t0, 3), weeks2: addDays(t0, 14), months3: addMonths(t0, 3) }[act];
 }
 function sheetApply(act, target) {
@@ -4666,7 +4678,7 @@ $("sheet").addEventListener("click", ev => {
   if (ev.target.closest(".sheetpick")) return; // the date field opens its picker
   const act = ev.target.dataset.act;
   if (!act && ev.target !== $("sheet")) return;
-  sheetApply(act, sheetTarget(act, $("sheet").dataset.base || today()));
+  sheetApply(act, sheetTarget(act, stepBase()));
 });
 // The chosen date counts when the picker is closed. On touch devices the system picker sends
 // change while one is still choosing (iOS on the first tap or when the month changes), which

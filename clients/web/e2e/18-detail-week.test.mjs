@@ -33,8 +33,9 @@ export default async function ({ svc, b }) {
   await A.evaluate(() => document.getElementById("dlgNote").close()); await sleep(300);
   // Reschedule and Done in the column.
   await pick(A, "Order oak boards"); await sleep(300);
+  const base = await A.evaluate(() => { const e = parseLines(S.wc).find(e => e.text.startsWith("Order oak boards")); const d = (e.tags.find(t => t.dim === "date") || {}).val; return d && d > today() ? d : today(); });
   await A.evaluate(() => document.querySelector('#detail [data-dact="weeks1"]').click()); await sleep(400);
-  check((await fileLine(A, "Order oak boards")).includes("#date-" + await A.evaluate(() => addDays(today(), 7))), "1 week moves the date, counted from today " + await fileLine(A, "Order oak boards"));
+  check((await fileLine(A, "Order oak boards")).includes("#date-" + await A.evaluate(b => addDays(b, 7), base)), "1 week moves the date, counted from its date ahead or from today " + await fileLine(A, "Order oak boards"));
   await pick(A, "Call the joiner"); await sleep(300);
   await A.evaluate(() => document.querySelector('#detail [data-dact="done"]').click()); await sleep(400);
   check((await fileLine(A, "Call the joiner")).includes("#done-" + t0), "Done closes the entry");
