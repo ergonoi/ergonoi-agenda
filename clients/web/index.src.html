@@ -164,9 +164,15 @@
      area's name; rows instead of tabs, switches instead of check boxes, actions as rows,
      dangerous ones in Scarlet at the end. */
   #setHead { display:none; }
+  #journalList .chev { display:none; }
   #viewSettings label.check .ld::before { content:": "; }
   @media (max-width: 600px) {
     #setTabs { display:none !important; }
+    #viewSettings:not([data-st="account"]) #setMode { display:none; }
+    #journalList .jr { cursor:pointer; align-items:center; min-height:60px; padding:8px 0; border-bottom:.5px solid var(--line); }
+    #journalList .jr > div:first-child { flex:1; min-width:0; }
+    #journalList .jr .hint-tap, #journalList .jr [data-jedit] { display:none; }
+    #journalList .jr .chev { display:block; flex:none; color:var(--muted); }
     #setHead { display:flex; align-items:center; gap:4px; min-height:52px; margin:0 -16px 4px; padding:0 8px; border-bottom:.5px solid var(--line); }
     #setHead button { border:0; background:transparent; min-width:var(--tap); min-height:var(--tap); padding:0; display:inline-flex; align-items:center; justify-content:center; color:var(--fg); }
     #setTitle { font:600 20px "Inter", var(--font, sans-serif); }
@@ -740,7 +746,7 @@
         <div class="acct" id="acctId"></div>
         <div class="btnrow"><button type="button" class="sec" id="btnCopyId">Copy account ID</button></div>
       </div>
-      <p class="hint" id="acctHint">The words, codes and account ID of your default journal are in its dialog, under Data → Journals.</p>
+      <p class="hint" id="acctHint">Words, codes and account ID of each journal are in its dialog under Journals.</p>
       <label for="cfgServer">Server URL</label>
       <input id="cfgServer" placeholder="https://agenda.example.org" autocomplete="off" autocapitalize="none" spellcheck="false">
       <div class="hint hidden" id="cfgServerMsg"></div>
@@ -752,7 +758,7 @@
         <div id="phraseBox" class="phrase hidden"></div>
         <div id="qrBox" class="qr hidden"></div>
       </div>
-      <p class="hint">Deleting the account removes your default journal and its clipboard from the server, for every device. Journals of others you take part in are not touched.</p>
+      <p class="hint">Removes your default journal and its clipboard from the server, for every device. Journals of others stay.</p>
       <div class="btnrow">
         <button type="button" id="btnDeleteAccount" class="danger">Delete account on server</button>
       </div>
@@ -764,7 +770,7 @@
       <div class="btnrow">
         <button type="button" class="sec" id="btnPinChange">Change PIN</button>
       </div>
-      <p class="hint">This browser keeps the words and a copy of your journals, with a PIN encrypted. Clearing removes them, the settings, the PIN and unsent changes; the journals on the server are not touched.</p>
+      <p class="hint">Removes words, journals, settings, PIN and unsent changes from this browser. The server is not touched.</p>
       <div class="btnrow">
         <button type="button" id="cfgReset" class="danger">Clear data in this browser</button>
       </div>
@@ -4448,6 +4454,7 @@ const SET_TITLES = { data: "Journals and data", account: "Account", device: "Dev
 function settingsTab(t) {
   if (!["data", "account", "device", "system"].includes(t)) t = "data";
   $("setTitle").textContent = SET_TITLES[t];
+  $("viewSettings").dataset.st = t;
   try { localStorage.setItem("agenda.stab", t); } catch {}
   for (const b of $("setTabs").querySelectorAll("[data-stab]")) b.setAttribute("aria-pressed", String(b.dataset.stab === t));
   for (const sec of $("viewSettings").querySelectorAll("section[data-st]")) sec.classList.toggle("stoff", sec.dataset.st !== t);
@@ -4882,9 +4889,9 @@ function renderPinRow() {
   const cur = pinLevelNow();
   $("pinLevel").innerHTML = PIN_LEVELS.map(([v, label]) => `<button type="button" data-v="${v}" role="radio" aria-checked="${v === cur}" class="${v === cur ? "" : "off"}"><span class="ck" aria-hidden="true">✓</span>${label}</button>`).join("");
   $("pinState").textContent = {
-    off: "This browser keeps your journals, their words and codes unencrypted; whoever uses this device can read them.",
-    session: "Your journals, their words and codes are kept encrypted. The PIN is asked for after the browser or the device was restarted, not each time the app opens.",
-    strict: "Your journals, their words and codes are kept encrypted. The PIN is asked for each time the app opens, and after five minutes in the background.",
+    off: "Journals and words are stored unencrypted; whoever uses this device can read them.",
+    session: "Stored encrypted. The PIN is asked for after a restart of the browser or the device.",
+    strict: "Stored encrypted. The PIN is asked for each time the app opens and after five minutes in the background.",
     "": "Not chosen yet."
   }[cur];
   $("btnPinChange").classList.toggle("hidden", Vault.mode !== "on");
@@ -4971,8 +4978,8 @@ function renderJournalList() {
     // A journal without name (and without alias) shows the start of its account ID; say so.
     const unnamed = !unread && nameLineIndex(j) < 0 && !(j && journalAlias(j));
     const nm = unnamed ? `<span class="unnamed">No name yet</span> <span class="meta">(${esc(journalName(j))})</span>` : esc(journalName(j));
-    const hint = unnamed ? `<div class="meta">Tap <i>Name</i> to give it one.</div>` : "";
-    return `<div class="jr"><div><div class="nm">${nm}</div><div class="meta fs">${facetsLine}</div><div class="meta">${meta}${own}</div>${hint}</div>${j ? "" : `<span class="def">default</span>`}<button type="button" class="ghost" data-jedit="${esc(j)}">${unnamed ? "Name" : "Edit"}</button></div>`;
+    const hint = unnamed ? `<div class="meta hint-tap">Tap <i>Name</i> to give it one.</div>` : "";
+    return `<div class="jr" data-jopen="${esc(j)}"><div><div class="nm">${nm}</div><div class="meta fs">${facetsLine}</div><div class="meta">${meta}${own}</div>${hint}</div>${j ? "" : `<span class="def">default</span>`}<button type="button" class="ghost" data-jedit="${esc(j)}">${unnamed ? "Name" : "Edit"}</button><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></div>`;
   }).join("") + migrationLine();
 }
 // Where the migration stands (8.11h): journals of version 1 still in use here, and former
@@ -4985,7 +4992,10 @@ function migrationLine() {
     : "All journals here are of version 2." + (kept.length ? " " + kept.length + " former journal" + (kept.length === 1 ? " of version 1 is" : "s of version 1 are") + " still on the server; they can be deleted in the dialog of the journal that replaced them." : "");
   return `<p class="hint" style="margin:8px 0 0">${esc(text)}</p>`;
 }
-$("journalList").addEventListener("click", ev => { const b = ev.target.closest("[data-jedit]"); if (b) openJournal(b.dataset.jedit); });
+$("journalList").addEventListener("click", ev => {
+  const b = ev.target.closest("[data-jedit]") || (matchMedia("(max-width: 600px)").matches && ev.target.closest("[data-jopen]"));
+  if (b) openJournal(b.dataset.jedit ?? b.dataset.jopen);
+});
 $("btnAddJournal").onclick = () => openJournal(null);
 $("btnRenameTag").onclick = () => openRename("", "facet", "");
 
