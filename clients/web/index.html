@@ -1012,6 +1012,9 @@
     <section data-st="device">
       <h3>Display</h3>
       <label class="check"><input type="checkbox" id="cfgCompact"><span><span class="lt">Compact layout</span><span class="ld">smaller type and buttons, entries with the time on the left, a quiet surface for the input area. This device only.</span></span></label>
+      <p style="margin:14px 0 0">Date format:</p>
+      <div class="tog" id="dateFmt" role="radiogroup" aria-label="Date format"></div>
+      <div class="hint" id="dateFmtHint"></div>
       <p style="margin:14px 0 0">Header colour:</p>
       <div class="tog" id="hdrColor" role="radiogroup" aria-label="Header colour"></div>
       <div class="hint">For you in this browser, so that it shows at a glance whose agenda is open.</div>
@@ -1024,7 +1027,7 @@
       <div class="btnrow" id="logRow"><button type="button" class="sec" id="btnLogCopy">Copy log</button><button type="button" class="sec" id="btnLogSave">Save log</button><button type="button" class="sec" id="btnLogFlush">Flush log</button><span class="hint" id="logCount"></span></div>
       <h3>About</h3>
       <div class="about">
-        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.32</p>
+        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.33</p>
         <p>Author: Markus Schatzl</p>
         <p class="am"><span id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project: </span><span class="one">Technology is potential. Accessibility makes it matter.</span></p>
         <p class="al"><a href="https://ergonoi.github.io/ergonoi-agenda/" target="_blank" rel="noopener">Documentation <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://github.com/ergonoi/ergonoi-agenda" target="_blank" rel="noopener">Source code on GitHub <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://ergonoi.com" target="_blank" rel="noopener">ergonoi.com <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
@@ -1056,7 +1059,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.9.32</span>
+    <span class="ver">v0.9.33</span>
   </footer>
 </main>
 <nav id="bnav" aria-label="View">
@@ -2825,7 +2828,7 @@ async function sync() {
     if (S.cfg.mode !== "local" && !errors.length) { restoreWrongTombstones(); healMoves(); }
     serverState = errors.length
       ? (navigator.onLine ? "unreachable (" + errors.join("; ") + ")" : "offline")
-      : (S.cfg.mode === "local" ? (withJ("", () => S.unsaved) ? "local file, not saved to disk" : "local file saved") : "in sync") + " " + new Date().toLocaleTimeString();
+      : (S.cfg.mode === "local" ? (withJ("", () => S.unsaved) ? "local file, not saved to disk" : "local file saved") : "in sync") + " " + fmtDT(new Date(), { timeStyle: "medium" });
   } finally {
     syncing = false;
     syncSpin(false, errors.length > 0);
@@ -3060,9 +3063,53 @@ function isoWeek(d) {
 function esc(s) { return s.replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c])); }
 
 
+// Date format (ui.md 4.11f). Browsers report the system language only, not the region and its
+// formats, so "automatic" takes the region from the time zone: the texts stay in the browser's
+// language, the numeric dates follow the region (25.11. in Germany) and times run to 24 hours
+// where the region does. "Browser" keeps what the browser reports; "ISO" writes 2026-11-25.
+const DATE_FMTS = [["auto", "Automatic"], ["browser", "Browser"], ["iso", "ISO"]];
+const TZ_REGION = { Berlin: "DE", Busingen: "DE", Vienna: "AT", Zurich: "CH", Paris: "FR", Brussels: "BE",
+  Amsterdam: "NL", Luxembourg: "LU", Rome: "IT", Madrid: "ES", Lisbon: "PT", London: "GB", Dublin: "IE",
+  Copenhagen: "DK", Oslo: "NO", Stockholm: "SE", Helsinki: "FI", Warsaw: "PL", Prague: "CZ",
+  Bratislava: "SK", Budapest: "HU", Ljubljana: "SI", Zagreb: "HR", Athens: "GR", Tokyo: "JP" };
+function dateFmt() { try { return LS.getItem("agenda.datefmt") || "auto"; } catch { return "auto"; } }
+let LOCALE = null;
+function locale() {
+  if (LOCALE) return LOCALE;
+  const lang = ((navigator.language || "en").split("-")[0] || "en").toLowerCase(), mode = dateFmt();
+  let region = "";
+  if (mode === "auto") { try { region = TZ_REGION[(Intl.DateTimeFormat().resolvedOptions().timeZone || "").split("/").pop()] || ""; } catch {} }
+  const base = mode === "iso" ? lang + "-SE" : region ? lang + "-" + region : undefined;
+  return LOCALE = { mode, base, native: region ? new Intl.Locale("und", { region }).maximize().language + "-" + region : "", fmts: new Map() };
+}
+// Formats a date with the chosen locale; a run of numeric day, month and year is written the way
+// the region itself writes it (or as ISO), so English texts sit beside 25.11.2026.
+function fmtDT(d, opts = {}) {
+  const L = locale(), key = JSON.stringify(opts);
+  let f = L.fmts.get(key);
+  if (!f) { try { f = new Intl.DateTimeFormat(L.base, opts); } catch { f = new Intl.DateTimeFormat(undefined, opts); } L.fmts.set(key, f); }
+  if (!L.native && L.mode !== "iso") return f.format(d);
+  const parts = f.formatToParts(d), num = t => ["day", "month", "year"].includes(t.type) && /^\d+$/.test(t.value);
+  let out = "", i = 0;
+  while (i < parts.length) {
+    if (!num(parts[i])) { out += parts[i++].value; continue; }
+    let j = i; const run = [];
+    while (j < parts.length && (num(parts[j]) || (parts[j].type === "literal" && j + 1 < parts.length && num(parts[j + 1])))) { if (num(parts[j])) run.push(parts[j]); j++; }
+    const v = Object.fromEntries(run.map(p => [p.type, p.value]));
+    if (L.mode === "iso") out += [v.year && (v.year.length === 2 ? "20" + v.year : v.year), v.month && v.month.padStart(2, "0"), v.day && v.day.padStart(2, "0")].filter(Boolean).join("-");
+    else {
+      const o = {}; for (const p of run) o[p.type] = p.value.length === 2 && p.type !== "year" ? "2-digit" : p.type === "year" && p.value.length === 2 ? "2-digit" : "numeric";
+      out += new Intl.DateTimeFormat(L.native, o).format(d);
+    }
+    i = j;
+  }
+  return out;
+}
+const fmtTimeOfDay = d => fmtDT(d, { hour: "2-digit", minute: "2-digit" });
+
 function fmtDate(iso) {
   const d = new Date(iso + "T12:00:00");
-  return isNaN(d) ? iso : d.toLocaleDateString(undefined, { weekday: "short", day: "2-digit", month: "2-digit" });
+  return isNaN(d) ? iso : fmtDT(d, { weekday: "short", day: "2-digit", month: "2-digit" });
 }
 
 function fmtTime(t) {
@@ -3089,7 +3136,7 @@ function renderStatus() {
     `<span><span class="dot ${dot}${clipLabel ? " filled" : ""}"${clipLabel !== null ? ` data-clip="1" title="${clipLabel ? "Clipboard: " + esc(clipLabel) + " · click to open" : "Clipboard: empty · click to open, or drop a file here"}"` : ""}></span>${esc(serverState)}</span>`,
     `<span>${pending ? pending + " pending" : "nothing pending"}</span>`,
     ...(ME ? [`<span>text edit not saved</span>`] : []),
-    `<span>last change ${nt ? nt.toLocaleString([], { dateStyle: "short", timeStyle: "short" }) : "–"}</span>`,
+    `<span>last change ${nt ? fmtDT(nt, { dateStyle: "short", timeStyle: "short" }) : "–"}</span>`,
   ];
   $("status").innerHTML = parts.join("");
   // the dot in the phone header: the same state, the text as its title
@@ -3471,7 +3518,7 @@ async function journalDeleted(j, info) {
   addNotice("The journal " + name + " was deleted by its owner on " + when + ". It was removed from this device, together with its backups.");
   render();
 }
-const fmtDay = d => { const t = new Date(d); return isNaN(t) ? String(d) : t.toLocaleDateString([], { dateStyle: "medium" }); };
+const fmtDay = d => { const t = new Date(d); return isNaN(t) ? String(d) : fmtDT(t, { dateStyle: "medium" }); };
 
 // What the owner needs to undo a deletion for 7 days: the delete headers and the words,
 // kept in this browser only (with the other keys, under the PIN where one is set).
@@ -3542,7 +3589,7 @@ async function renderBackups(j) {
   rows.sort((a, b) => b.time.localeCompare(a.time));
   bkRows = rows;
   const may = canReplace(keys) || (S.cfg.mode === "local" && !j);
-  const when = t => new Date(t).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+  const when = t => fmtDT(new Date(t), { dateStyle: "medium", timeStyle: "short" });
   list.innerHTML = rows.length ? rows.map((b, i) => `<div class="bk"><span>${esc(when(b.time))} · ${esc(b.where)} · ${Math.max(1, Math.round(b.size / 1024))} kB</span><span class="bkb"><button type="button" class="ghost" data-bkdl="${i}">Download</button>${may ? `<button type="button" class="ghost" data-bkrs="${i}">Restore</button>` : ""}</span></div>`).join("") : `<p class="hint">No backups yet.</p>`;
 }
 async function backupText(j, b) {
@@ -4835,10 +4882,10 @@ function renderMonth() {
     });
   });
   const [cy, cm] = calMonth.split("-").map(Number);
-  const title = new Date(cy, cm - 1, 15).toLocaleDateString(undefined, { month: "long", year: "numeric" });
+  const title = fmtDT(new Date(cy, cm - 1, 15), { month: "long", year: "numeric" });
   let html = `<div class="cal"><div class="nav"><button data-cnav="-1" title="Previous month">‹</button><b>${esc(title)}</b><button data-cnav="1" title="Next month">›</button><button data-cnav="0">Today</button></div><div class="grid">`;
   html += `<span class="wd"></span>`;
-  for (let i = 0; i < 7; i++) html += `<span class="wd">${esc(new Date(2026, 10, 16 + i).toLocaleDateString(undefined, { weekday: "short" }))}</span>`;
+  for (let i = 0; i < 7; i++) html += `<span class="wd">${esc(fmtDT(new Date(2026, 10, 16 + i), { weekday: "short" }))}</span>`;
   const inWeek = d => calWeek && d >= calWeek && d <= addDays(calWeek, 6);
   for (let i = 0; i < 42; i++) {
     const d = addDays(g0, i), its = byDay.get(d) || [];
@@ -4850,13 +4897,13 @@ function renderMonth() {
   }
   html += `</div></div>`;
   const dayItems = d => (byDay.get(d) || []).sort((a, b) => { const ka = orderKey(a), kb = orderKey(b); return ka[0] - kb[0] || ka[1].localeCompare(kb[1]); });
-  const dayTitle = d => new Date(d + "T12:00:00").toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
+  const dayTitle = d => fmtDT(new Date(d + "T12:00:00"), { weekday: "long", day: "numeric", month: "long" });
   const itemsOf = items => items.map(it => it.occ ? itemHtml(it, "month").replace('<div class="item', `<div data-occ="${it.occ}" class="item`) : itemHtml(it, "month")).join("");
   const none = `<p class="hint none">Nothing${flt.facet.length || otherActive(flt) ? " with the current filter" : ""}</p>`;
   if (calWeek) {
     // The whole week (ui.md 4.13b): its days with entries, each under its own heading.
     const w1 = addDays(calWeek, 6), m0 = new Date(calWeek + "T12:00:00"), m1 = new Date(w1 + "T12:00:00");
-    const fmt = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "long" });
+    const fmt = new Intl.DateTimeFormat(locale().base, { day: "numeric", month: "long" });
     const span = fmt.formatRange ? fmt.formatRange(m0, m1) : fmt.format(m0) + " – " + fmt.format(m1);
     html += `<div class="wkhead">Week ${isoWeek(calWeek)} · ${esc(span)}</div>`;
     let any = false;
@@ -6262,6 +6309,7 @@ function prepSettings() { withJ("", () => {
   renderLogRow();
   $("cfgMinimal").checked = document.documentElement.classList.contains("minimal");
   renderHdrColor();
+  renderDateFmt();
   $("cfgCompact").checked = document.documentElement.classList.contains("compact");
   $("exportPlain").checked = false;
   $("exportBox").classList.add("hidden");
@@ -6317,6 +6365,18 @@ $("hdrColor").addEventListener("click", ev => {
   if (b.dataset.hdr) PS.setItem("agenda.hdr", b.dataset.hdr); else PS.removeItem("agenda.hdr");
   applyHdr(); renderHdrColor();
 });
+// Date format for this device (ui.md 4.11f).
+function renderDateFmt() {
+  const cur = dateFmt(), d = new Date();
+  $("dateFmt").innerHTML = DATE_FMTS.map(([v, label]) => `<button type="button" data-v="${v}" role="radio" aria-checked="${v === cur}" class="${v === cur ? "" : "off"}"><span class="ck" aria-hidden="true">✓</span>${label}</button>`).join("");
+  $("dateFmtHint").textContent = "For example " + fmtDT(d, { weekday: "short", day: "2-digit", month: "2-digit" }) + " · " + fmtDT(d, { dateStyle: "short", timeStyle: "short" }) + ". This device only.";
+}
+$("dateFmt").addEventListener("click", ev => {
+  const b = ev.target.closest("[data-v]"); if (!b) return;
+  try { if (b.dataset.v === "auto") LS.removeItem("agenda.datefmt"); else LS.setItem("agenda.datefmt", b.dataset.v); } catch {}
+  LOCALE = null; log("date format " + b.dataset.v);
+  renderDateFmt(); render();
+});
 $("cfgMinimal").onchange = () => {
   const on = $("cfgMinimal").checked;
   document.documentElement.classList.toggle("minimal", on);
@@ -6370,7 +6430,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.9.32, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.33, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -6392,9 +6452,9 @@ async function showMembers(j, box = $("jMembers")) {
     const r = await fetch(serverBackend.base() + "/members", { headers: await withJ(j, () => serverBackend.auth()), cache: "no-store" });
     if (!r.ok) throw new Error(String(r.status));
     const { since, members } = await r.json(), mine = (await myMemberId(j)).slice(0, 16);
-    const when = t => { const d = new Date(t), t0 = new Date(); return (d.toDateString() === t0.toDateString() ? "today" : d.toLocaleDateString()) + " " + d.toTimeString().slice(0, 5); };
+    const when = t => { const d = new Date(t), t0 = new Date(); return (d.toDateString() === t0.toDateString() ? "today" : fmtDT(d, { day: "2-digit", month: "2-digit", year: "numeric" })) + " " + fmtTimeOfDay(d); };
     const others = members.filter(m => m.id !== mine);
-    const head = (others.length ? `You and ${others.length} other ${others.length === 1 ? "person" : "people"}` : "Only you") + `, counted since ${new Date(since).toLocaleDateString()}.`;
+    const head = (others.length ? `You and ${others.length} other ${others.length === 1 ? "person" : "people"}` : "Only you") + `, counted since ${fmtDT(new Date(since), { day: "2-digit", month: "2-digit", year: "numeric" })}.`;
     const rows = members.map(m => (m.id === mine ? "you" : "someone else") + " · last " + when(m.last));
     box.innerHTML = esc(head) + "<br>" + rows.map(esc).join("<br>") + `<br>The server counts people by an ID that differs for every journal and reveals no name. All your devices count as one. The count is information, not a control: a client could send another ID.`;
     log(jl(j) + ": members " + members.length);
@@ -6578,7 +6638,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.9.32";
+const APP_VERSION = "0.9.33";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
@@ -9036,7 +9096,7 @@ function printAgenda(facets, kind = "agenda") {
     }
     return r;
   });
-  const dateLabel = iso => new Date(iso + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
+  const dateLabel = iso => fmtDT(new Date(iso + "T12:00:00"), { weekday: "short", day: "numeric", month: "short" });
   let prev = "";
   const rows = items.map((it, i) => {
     // Memos have no date: the facet heads each group instead.
@@ -9047,7 +9107,7 @@ function printAgenda(facets, kind = "agenda") {
       `<div class="t">${esc(fmtTime(get(it.e, "time")))}</div><div class="x">${esc(it.e.text)}</div>` +
       `<div class="f">${esc(get(it.e, "facet"))}</div><div class="id">${esc(short[i])}</div><div class="n"></div></div>`;
   }).join("");
-  const stamp = new Date().toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+  const stamp = fmtDT(new Date(), { dateStyle: "medium", timeStyle: "short" });
   const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(brandName())}</title><style>
 @font-face{font-family:InterP;font-weight:400;src:url(data:font/woff2;base64,${PRINT_FONTS.l400})}
 @font-face{font-family:InterP;font-weight:600;src:url(data:font/woff2;base64,${PRINT_FONTS.l600})}
@@ -9233,7 +9293,7 @@ function personChooser() {
     d.showModal();
   });
 }
-const PIN_PLAIN = new Set(["agenda.compact", "agenda.minimal", "agenda.month", "agenda.fbar.open", "agenda.stab", "agenda.pin", "agenda.pinWait", "agenda.vkeep", "agenda.hdr"]);
+const PIN_PLAIN = new Set(["agenda.compact", "agenda.minimal", "agenda.month", "agenda.fbar.open", "agenda.stab", "agenda.pin", "agenda.pinWait", "agenda.vkeep", "agenda.hdr", "agenda.datefmt"]);
 // Header colours (ui.md 4.11e): key, name, light tone (50 % on white), the colour itself.
 // Without a choice the theme's own header stays.
 const HDR_COLORS = [["", "Wisteria", "#E2C8E8", "#C490D1"], ["amethyst", "Dark Amethyst", "#A385A3", "#460A46"], ["teal", "Teal", "#90C1C0", "#218380"],
