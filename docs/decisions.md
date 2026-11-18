@@ -282,6 +282,6 @@ Chosen: only clients that hold the key fetch. The web client does so where the p
 12. **Evaluate the experiment** (ui.md 4.14b) after a few weeks of use from saved logs: share of uses in the folded bar, unfolds per day; then adjust weights and half-life, adopt or drop it.
 13. Done: the repository is public, Pages publishes `site/` on every push.
 14. **Calendar, later:** a week view with a time axis (overlapping entries side by side) and moving entries by dragging, once the month view (ui.md 4.17) has proved itself.
-15. **Evaluate the compact layout and the minimal colours** (ui.md 2.9, 2.10) in daily use; adopt them as the default, keep them as options, or drop them.
+15. **Evaluate the compact layout and the ergonoi theme** (ui.md 2.9, 2.10) in daily use; adopt them as the default, keep them as options, or drop them.
 16. **Journal identity and aggregators** (architecture 8.11f, 8.11g): a `Journal id` line that survives conversions; aggregators as a bot that mirrors sources into a read-only journal marked by its `Aggregated journal:` lines (not by `Journal type:`, which stays for fixed or mixed dates), one level only (decided: no aggregator of aggregators), duplicates recognised by journal id. Depends on 5 (guest codes) and on the Node client (1).
 17. **Several servers** (6.4): first the home server's address in codes and key lines and a client that talks to several servers; owner signatures before any mirroring; search across servers only with blinded, short-lived entries and lookups through the own server.

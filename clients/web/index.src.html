@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#97EAD2">
-<script>try { if (localStorage.getItem("agenda.compact") === "1") document.documentElement.classList.add("compact"); if (localStorage.getItem("agenda.minimal") === "1") { document.documentElement.classList.add("minimal"); document.querySelector('meta[name="theme-color"]').content = "#FFFFFF"; } } catch {}</script>
+<script>try { if (localStorage.getItem("agenda.compact") === "1") document.documentElement.classList.add("compact"); if (localStorage.getItem("agenda.minimal") === "1") { document.documentElement.classList.add("minimal"); document.querySelector('meta[name="theme-color"]').content = "#E2C8E8"; document.title = "ergonoi Agenda"; } } catch {}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="οὐθείς Agenda">
 <link rel="manifest" href="manifest.webmanifest">
@@ -32,6 +32,8 @@
   @font-face { font-family:"Inter"; font-weight:100 900; font-display:swap; src:url(data:font/woff2;base64,@@FONT:inter-greek-wght@@) format("woff2"); unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF; }
   @font-face { font-family:"Inter"; font-weight:100 900; font-display:swap; src:url(data:font/woff2;base64,@@FONT:inter-greek-ext-wght@@) format("woff2"); unicode-range:U+1F00-1FFF; }
   @font-face { font-family:"IBM Plex Mono"; font-weight:400; font-display:swap; src:url(data:font/woff2;base64,@@FONT:ibm-plex-mono-latin-400@@) format("woff2"); }
+  /* Mona Sans Mono Bold (SIL OFL, github/mona-sans), Latin only: the ergonoi wordmark. */
+  @font-face { font-family:"Mona Sans Mono"; font-weight:700; font-display:swap; src:url(data:font/woff2;base64,@@FONT:mona-sans-mono-bold-latin@@) format("woff2"); }
   :root {
     --bg:#FFFFFF; --hover:#F4F3F3;
     --fg:#1A1A1A; --fg2:#4A4646; --muted:#7A7676;
@@ -698,6 +700,9 @@
   html.minimal header { background:#E2C8E8; border-bottom:.5px solid var(--line); --fg:#1A1A1A; --fg2:#4A4646; --muted:#7A7676; }
   @media (prefers-color-scheme: dark) { html.minimal header { background:var(--bg); --fg:#f0f0f0; --fg2:#a0a0a0; --muted:#707070; } }
   html.minimal header h1 { font-family:inherit; font-weight:500; }
+  /* The ergonoi wordmark as on ergonoi.com: Mona Sans Mono, 700, tracking 0.025 em. */
+  html.minimal header h1 .brand { font-family:"Mona Sans Mono", ui-monospace, monospace; font-weight:700; letter-spacing:.025em; }
+  @media (max-width: 600px) { html.minimal header h1 .brand { font-size:18px; } }
   :where(html.minimal) button { background:var(--btn); border-color:var(--btn); }
   html.minimal header button:not(.tab), html.minimal #tabFilter, html.minimal #btnMic, html.minimal .fold, html.minimal .more, html.minimal .noteic, html.minimal #pop .opt, html.minimal #pop .x, html.minimal #pop .ok, html.minimal #facetSheet .when .x { background:transparent; border-color:transparent; }
   html.minimal button.sec, html.minimal .chip.plus, html.minimal .chip.notebtn, html.minimal #sheet .sheetpick { background:var(--btn); border:.5px solid var(--btn); color:var(--fg); }
@@ -831,7 +836,7 @@
     <section data-st="device">
       <h3>Display</h3>
       <label class="check"><input type="checkbox" id="cfgCompact"><span><span class="lt">Compact layout</span><span class="ld">smaller type and buttons, entries with the time on the left, a quiet surface for the input area. This device only.</span></span></label>
-      <label class="check"><input type="checkbox" id="cfgMinimal"><span><span class="lt">Minimal colours</span><span class="ld">colour only where it points to something (facets, overdue, now, danger); a white header and grey buttons. This device only.</span></span></label>
+      <label class="check"><input type="checkbox" id="cfgMinimal"><span><span class="lt">ergonoi theme</span><span class="ld">the name ergonoi Agenda with its wordmark; colour only where it points to something (facets, overdue, now, danger), a light Wisteria header and grey buttons. This device only.</span></span></label>
     </section>
     <section data-st="system">
       <h3 id="logLabel">Log</h3>
@@ -923,8 +928,8 @@
 </dialog>
 <dialog id="dlgAbout">
   <form method="dialog">
-    <strong>οὐθείς Agenda</strong>
-    <p>οὐθείς Agenda is an <b>ergonoi</b> project:</p>
+    <strong id="aboutName">οὐθείς Agenda</strong>
+    <p id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project:</p>
     <p style="margin-top:14px">Technology is potential. Accessibility makes it matter.</p>
     <p class="hint">Version @@VERSION@@ · outheis-labs</p>
     <div class="btnrow" style="justify-content:flex-end"><button class="primary">Close</button></div>
@@ -4609,9 +4614,21 @@ $("cfgCompact").onchange = () => {
 $("cfgMinimal").onchange = () => {
   const on = $("cfgMinimal").checked;
   document.documentElement.classList.toggle("minimal", on);
-  document.querySelector('meta[name="theme-color"]').content = on ? "#FFFFFF" : "#97EAD2";
+  document.querySelector('meta[name="theme-color"]').content = on ? "#E2C8E8" : "#97EAD2";
   try { LS.setItem("agenda.minimal", on ? "1" : "0"); } catch {}
+  applyBrand();
 };
+// The ergonoi theme (ui.md 2.10) carries the name ergonoi Agenda; the protocol, the keys and
+// the journals are the same, so both names open the same accounts.
+const brandName = () => document.documentElement.classList.contains("minimal") ? "ergonoi Agenda" : "οὐθείς Agenda";
+function applyBrand() {
+  const n = brandName(), ergo = n.startsWith("ergonoi");
+  document.title = n;
+  document.querySelector('meta[name="apple-mobile-web-app-title"]').content = n;
+  for (const el of document.querySelectorAll(".brand, #aboutName")) el.textContent = n;
+  $("aboutProject").classList.toggle("hidden", ergo);
+}
+applyBrand();
 // The log cannot be switched off while the experiment is on: it records the experiment.
 // Nothing is ever written while the log is off.
 $("cfgLog").onchange = () => {
@@ -4628,7 +4645,7 @@ function diagnosticLog() {
     return jl(j) + ": " + (k.v === KEY_V2 ? "v2 " + k.level : "v1") + (j ? " " + journalRole(j) : " default") + (S.etag ? ", read" : ", never read") + ", " + S.snap.split("\n").filter(Boolean).length + " lines, " + S.outbox.length + " pending" + (S.gone ? ", gone" : "") + (S.missing.length ? ", " + S.missing.length + " missing" : "");
   });
   const hidden = upgradedJournals().map(m => jl(m.id) + " → " + (m.upgraded ? jl(m.upgraded) : "default") + (m.handover ? " (takeover)" : ""));
-  return ["οὐθείς Agenda diagnostic log", appInfo(), "journals:", ...journals().map(j => "  " + state(j)), "list entries: " + JSON.parse(LS.getItem("agenda.journals") || "[]").length + " stored, " + extraJournals().length + " distinct", "hidden: " + (hidden.join(", ") || "none"), "key lines: " + [...keyLines().entries()].map(([id, k]) => id.slice(0, 4) + " " + k.role + " " + codeKind(k.phrase)).join(", "), ""].concat(logLines()).join("\n") + "\n";
+  return [brandName() + " diagnostic log", appInfo(), "journals:", ...journals().map(j => "  " + state(j)), "list entries: " + JSON.parse(LS.getItem("agenda.journals") || "[]").length + " stored, " + extraJournals().length + " distinct", "hidden: " + (hidden.join(", ") || "none"), "key lines: " + [...keyLines().entries()].map(([id, k]) => id.slice(0, 4) + " " + k.role + " " + codeKind(k.phrase)).join(", "), ""].concat(logLines()).join("\n") + "\n";
 }
 $("btnLogCopy").onclick = async () => {
   const b = $("btnLogCopy");
@@ -4916,7 +4933,7 @@ async function scanQr(done) {
         const t = r.data.trim();
         const phrase = t.startsWith(QR_PREFIX) ? normCode(t.slice(QR_PREFIX.length)) : "";
         if (phrase && codeKind(phrase)) { const f = scanDone; stopScan(); f(phrase); return; }
-        $("scanMsg").textContent = "This QR code does not hold an account phrase of οὐθείς Agenda.";
+        $("scanMsg").textContent = "This QR code does not hold an account phrase of " + brandName() + ".";
       }
     }
     requestAnimationFrame(tick);
@@ -6967,7 +6984,7 @@ $("icsGo").onclick = () => {
       out.push(e);
     }
   });
-  const blob = new Blob([entriesToICS(out, "οὐθείς Agenda")], { type: "text/calendar;charset=utf-8" });
+  const blob = new Blob([entriesToICS(out, brandName())], { type: "text/calendar;charset=utf-8" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "agenda-" + t0 + ".ics";
@@ -7088,7 +7105,7 @@ function printAgenda(facets, kind = "agenda") {
       `<div class="f">${esc(get(it.e, "facet"))}</div><div class="id">${esc(short[i])}</div><div class="n"></div></div>`;
   }).join("");
   const stamp = new Date().toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
-  const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>οὐθείς Agenda</title><style>
+  const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(brandName())}</title><style>
 @font-face{font-family:InterP;font-weight:400;src:url(data:font/woff2;base64,${PRINT_FONTS.l400})}
 @font-face{font-family:InterP;font-weight:600;src:url(data:font/woff2;base64,${PRINT_FONTS.l600})}
 @font-face{font-family:InterP;font-weight:600;src:url(data:font/woff2;base64,${PRINT_FONTS.g600});unicode-range:U+0370-03FF,U+1F00-1FFF}
@@ -7108,7 +7125,7 @@ h1 { margin:0; font-size:12pt; font-weight:600; }
 .n { align-self:stretch; border-left:.3pt solid #B8B4B4; }
 footer { border-top:.8pt solid #1A1A1A; padding-top:1.5mm; display:flex; justify-content:space-between; }
 </style></head><body><div class="page">
-<header><h1>οὐθείς Agenda${memos ? " · Memos" : ""}</h1><div>${esc(facets ? facets.join(" · ") : "")}</div></header>
+<header><h1>${esc(brandName())}${memos ? " · Memos" : ""}</h1><div>${esc(facets ? facets.join(" · ") : "")}</div></header>
 <div class="list" id="list">${rows || (memos ? "<p>No open memos.</p>" : "<p>No items in the next 30 days.</p>")}</div>
 <footer><span id="rest"></span><span>${esc(stamp)}</span></footer>
 </div></body></html>`;

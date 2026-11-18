@@ -184,14 +184,14 @@ From 1100 px window width the content column is at most 1200 px wide; the areas 
 - **Sizes:** buttons 28 px (`--bs`) and 36 px (`--bm`), text 14 px; on touch screens small buttons keep a 44 px touch target through an invisible margin.
 - **Sheets:** top corners 12 px, tighter gaps, section titles in sentence case.
 
-### 2.10 Experimental: minimal colours
+### 2.10 ergonoi theme (formerly minimal colours)
 
-*Settings → Experimental → Minimal colours* (per device, `localStorage agenda.minimal`, class `minimal`). Colour is used only where it directs attention to something, not as decoration: facet colours (stripes, dots, bar), overdue dates, *now*, *review*, danger, the sync state. Everything else is black, grey and white.
+*Settings → Device → Display → ergonoi theme* (per device, `localStorage agenda.minimal`, class `minimal`; named *Minimal colours* until 0.9.4). The theme also carries the name: *ergonoi Agenda* in the header, the window title, the About dialog, the diagnostic log, the calendar export and the printout. The wordmark is set as on ergonoi.com: Mona Sans Mono Bold (SIL OFL, from github/mona-sans, embedded as a Latin subset), tracking 0.025 em, 18 px on phones. Only name and wordmark change; protocol, keys and journals are the same, so both names open the same accounts. The home-screen name of an installed app stays as installed (manifest). Colour is used only where it directs attention to something, not as decoration: facet colours (stripes, dots, bar), overdue dates, *now*, *review*, danger, the sync state. Everything else is black, grey and white.
 
 - **Header:** a light Wisteria (`#E2C8E8`, 50 % on white; dark mode: the plain surface) with a 0.5 px `--line` bottom border instead of Pearl Aqua (decided 21 November 2026, white was too empty); title in the body font. *List* / *Month* / *Text* as small grey buttons, the active one with a 1 px `--fg` border, instead of underlined tabs.
 - **Buttons:** a light grey fill (`--btn`, `#EFEEEE`, dark `#2C2C2C`) sets them off from the ground; no Wisteria, no Dark Amethyst, no Teal. The primary action has a 1 px `--fg` border and 500 weight. Danger keeps its Scarlet outline. Icon buttons, the fold chevron and menu rows stay without fill.
 - **Tags stay unfilled** (outlined chips, facet choice buttons), so that values are not mistaken for actions.
-- The recurring icon sits in a small outlined box; the facet stripe is 6 px as without minimal colours (2 px until 0.9.3, too narrow to be seen), the text keeps its place.
+- The recurring icon sits in a small outlined box; the facet stripe is 6 px as in the outheis theme (2 px until 0.9.3, too narrow to be seen), the text keeps its place.
 - **Bottom bar** on phones: the active view in Charcoal and 600 weight instead of Teal, which stays for the sync state.
 
 ## 3. Layout
@@ -397,7 +397,7 @@ A view like the filter tab, opened with the gear in the header (which then carri
 
 - **Data:** *Journals* (server mode only: the journal list 4.11d, *+ Add journal*, *Rename tag*, a hint that facets belong to journals); *Import and export*: *Import entries* (4.11b), *Export journal file* (a small panel: the journal is downloaded encrypted as `agenda-journal.enc`, a checkbox *Export unencrypted as plain text* for `agenda-journal.txt`, *Cancel* / *Download*; built from the local copy, so it works without the server), *Export calendar* (4.11g); *Local journal and print*: *Open local journal*, *Print agenda* (4.13).
 - **Account:** *Account ID* (monospace, 64 hex digits) with *Copy account ID*; *Server URL*, underline-only input, applied when the field is left (disabled in local mode); *Show account phrase* and *Show QR code* (4.11h); a sentence on what deleting removes, and *Delete account on server* (Scarlet Fire, two-tap: the first tap arms and states the consequence, the second removes the account file on the server and then clears the browser).
-- **Device:** *PIN* with its three levels (4.12a) and *Change PIN*; *Clear data in this browser* (Scarlet Fire, two-tap; removes phrase, keys, local copy, settings and outbox and reloads; the journal on the server is not touched); *Display*: *Compact layout* and *Minimal colours*.
+- **Device:** *PIN* with its three levels (4.12a) and *Change PIN*; *Clear data in this browser* (Scarlet Fire, two-tap; removes phrase, keys, local copy, settings and outbox and reloads; the journal on the server is not touched); *Display*: *Compact layout* and *ergonoi theme*.
 - **System:** *Log* (4.18). The section *Experimental* is empty since 0.9.0 and not shown. Version and links stand in the footer as on every view.
 
 ### 4.11a Setup dialog
