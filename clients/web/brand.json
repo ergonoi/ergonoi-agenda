@@ -1,5 +1,7 @@
 {
   "default": "ergonoi",
+  "docs": "https://ergonoi.github.io/ergonoi-agenda/",
+  "repo": "https://github.com/ergonoi/ergonoi-agenda",
   "themes": {
     "outheis": { "name": "οὐθείς Agenda", "color": "#97EAD2" },
     "ergonoi": { "name": "ergonoi Agenda", "color": "#E2C8E8" }

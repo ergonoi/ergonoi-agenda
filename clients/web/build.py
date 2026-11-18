@@ -20,7 +20,6 @@ brand = json.loads((here / "brand.json").read_text(encoding="utf-8"))
 theme = brand["default"]
 look = brand["themes"][theme]
 version = (here.parents[1] / "VERSION").read_text(encoding="utf-8").strip()
-DOCS_URL = "https://outheis-labs.github.io/outheis-agenda/"
 core = (here.parent / "core" / "agenda-core.js").read_text(encoding="utf-8")
 # The module's export statement has no meaning inside a classic script.
 core = re.sub(r"\nexport \{[^}]*\};\s*$", "\n", core)
@@ -29,7 +28,7 @@ marker = re.compile(r"^// @@core@@.*$", re.M)
 if len(marker.findall(src)) != 1:
     raise SystemExit("index.src.html must contain the core marker exactly once")
 out = marker.sub(lambda _: "// ---- core: clients/core/agenda-core.js (inlined by build.py) ----\n" + core.strip() + "\n// ---- end of core ----", src)
-out = out.replace("@@VERSION@@", version).replace("@@DOCS_URL@@", DOCS_URL)
+out = out.replace("@@VERSION@@", version).replace("@@DOCS_URL@@", brand["docs"]).replace("@@REPO_URL@@", brand["repo"])
 out = out.replace("@@BRAND_NAME@@", look["name"]).replace("@@THEME_COLOR@@", look["color"]).replace("@@DEFAULT_THEME@@", theme)
 # Fonts are embedded from clients/web/fonts, so the page stays one self-contained file.
 import base64
