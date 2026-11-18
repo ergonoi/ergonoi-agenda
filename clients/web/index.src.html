@@ -804,7 +804,7 @@
         <div id="jCodeRow" class="hidden">
         <label for="jCode" id="jCodeLabel">Ally code or phrase of this journal</label>
         <textarea id="jCode" rows="2" autocapitalize="none" autocomplete="off" spellcheck="false"></textarea>
-        <div class="btnrow"><button type="button" class="sec" id="jCodeOk">Use this code</button></div>
+        <div class="btnrow"><button type="button" class="sec" id="jCodeScan">Scan QR code</button><button type="button" class="sec" id="jCodeOk">Use this code</button></div>
       </div>
         <label>Account ID</label>
         <div class="acct" id="jAcct"></div>
@@ -4982,6 +4982,7 @@ $("jHandWithdraw").onclick = () => {
   $("jMsg").textContent = "Handover withdrawn. Whoever has the code can still read and write this journal as ally; to end that, use Stop sharing.";
   scheduleSync();
 };
+$("jCodeScan").onclick = () => scanQr(p => { $("jCode").value = p; $("jCodeOk").click(); });
 $("jCodeOk").onclick = async () => {
   const j = jEditing;
   $("jMsg").textContent = "Checking the code …";
