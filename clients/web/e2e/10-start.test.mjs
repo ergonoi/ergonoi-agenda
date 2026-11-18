@@ -22,7 +22,7 @@ export default async function ({ svc, b }) {
   const words = await A.evaluate(() => { const p = pendingPhrase.split(" "); return p[checkIdx[0]] + " " + p[checkIdx[1]]; });
   await A.type("#checkWords", words); await A.type("#newName", "Mine");
   await A.evaluate(() => document.getElementById("setupOk").click());
-  await A.waitForFunction(() => !document.getElementById("setupJoin").classList.contains("hidden") || document.getElementById("pinWithout")?.offsetParent, { timeout: 20000 }).catch(() => {});
+  await A.waitForFunction(() => !document.getElementById("setupJoin").classList.contains("hidden") || document.getElementById("dlgPin")?.open, { timeout: 20000 }).catch(() => {});
   await sleep(500);
   check(await A.evaluate(() => !document.getElementById("setupJoin").classList.contains("hidden") || typeof setupOther === "string"), "afterwards the shared journal is offered");
   check(!A.errors.length && !O.errors.length, "no page errors " + A.errors.concat(O.errors).join(" | "));

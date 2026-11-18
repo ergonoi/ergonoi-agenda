@@ -58,14 +58,14 @@ export async function device(b, { phone = false, width = 1280, height = 900 } = 
   return p;
 }
 
-// Sets up a new account on the service (new words in the given language), without a PIN,
-// and waits for the first sync.
+// Sets up a new account on the service (new words in the given language) with the PIN
+// 111111, and waits for the first sync.
 export async function newAccount(p, url, lang = "en") {
   let phrase = null;
   await p.goto(url); await sleep(800);
   phrase = phrase || await p.evaluate(l => newPhrase(l), lang);
   p.evaluate(async ph => { await finishSetup(ph, { mode: "server", server: location.origin }, "Journal", await deriveKeysV2(ph)); }, phrase).catch(() => {});
-  await withoutPin(p);
+  await choosePin(p);
   return phrase;
 }
 
@@ -80,19 +80,21 @@ export async function joinAccount(p, url, phrase) {
   await p.click("#setupOk");
   await p.waitForFunction(() => { const b = document.getElementById("btnExistsGo"); return b && b.offsetParent; }, { timeout: 15000 });
   await p.click("#btnExistsGo");
-  await withoutPin(p);
+  await choosePin(p);
 }
 
-async function withoutPin(p) {
-  await p.waitForFunction(() => document.getElementById("pinWithout") && !document.getElementById("pinWithout").classList.contains("hidden"), { timeout: 15000 });
-  await p.click("#pinWithout"); await sleep(100); await p.click("#pinWithout");
+// The PIN is required once on every device (architecture 8.13); the tests use 111111.
+export async function choosePin(p, pin = "111111") {
+  await p.waitForFunction(() => document.getElementById("dlgPin")?.open, { timeout: 15000 });
+  await p.evaluate(v => { for (const id of ["pin1", "pin2"]) document.getElementById(id).value = v; document.getElementById("pinOk").click(); }, pin);
+  await p.waitForFunction(() => !document.getElementById("dlgPin").open, { timeout: 15000 });
   await p.waitForFunction(() => typeof S !== "undefined" && S.keys && S.etag, { timeout: 15000 });
   await settled(p);
 }
 
 // Waits until no sync is running and nothing is pending.
 export async function settled(p) {
-  await p.waitForFunction(() => !syncing && !(S.outbox && S.outbox.length), { timeout: 20000 }).catch(() => {});
+  await p.waitForFunction(() => typeof syncing !== "undefined" && !syncing && !(S.outbox && S.outbox.length), { timeout: 20000 }).catch(() => {});
   await sleep(300);
 }
 

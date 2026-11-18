@@ -334,7 +334,7 @@
   #pinPad.hidden { display:none; }
   #pinPad button { min-height:56px; font-size:22px; }
   #dlgPin input.padactive { border-bottom-color:var(--teal); }
-  /* Below the PIN: the way out on the left (forgot, without PIN), cancel and confirm on the
+  /* Below the PIN: the way out on the left (forgot PIN), cancel and confirm on the
      right; the side actions as quiet text, so that only the confirmation stands out. */
   #dlgPin .pinfoot { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:16px; }
   #dlgPin .pinfoot > div { display:flex; align-items:center; gap:16px; }
@@ -947,7 +947,7 @@
     <section data-st="system">
       <h3>About</h3>
       <div class="about">
-        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.20</p>
+        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.21</p>
         <p>Author: Markus Schatzl</p>
         <p class="am"><span id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project: </span><span class="one">Technology is potential. Accessibility makes it matter.</span></p>
         <p class="al"><a href="https://ergonoi.github.io/ergonoi-agenda/" target="_blank" rel="noopener">Documentation <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://github.com/ergonoi/ergonoi-agenda" target="_blank" rel="noopener">Source code on GitHub <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://ergonoi.com" target="_blank" rel="noopener">ergonoi.com <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
@@ -983,7 +983,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.9.20</span>
+    <span class="ver">v0.9.21</span>
   </footer>
 </main>
 <nav id="bnav" aria-label="View">
@@ -1023,10 +1023,9 @@
       <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
       <button type="button" data-k="del" aria-label="Delete">⌫</button><button type="button" data-k="0">0</button><button type="button" data-k="ok" class="primary" aria-label="OK">✓</button>
     </div>
-    <p class="hint hidden" id="pinWithoutWarn">Without a PIN, this browser keeps all your journals, their words and codes unencrypted: whoever uses this device can read them and pass them on. Sensible on a shared device that holds only guest or ally codes. Tap again to continue without a PIN.</p>
     <p class="hint hidden" id="pinForgotWarn">This clears all data in this browser. The journals on the server are not touched; changes not yet sent are lost. Then set up again with your words. Tap again to clear.</p>
     <div class="pinfoot">
-      <div><button type="button" class="pinlink hidden" id="pinForgot">Forgot PIN</button><button type="button" class="pinlink hidden" id="pinWithout">Use without PIN</button></div>
+      <div><button type="button" class="pinlink hidden" id="pinForgot">Forgot PIN</button></div>
       <div><button type="button" class="pinlink hidden" id="pinCancel">Cancel</button><button type="button" class="primary" id="pinOk">Unlock</button></div>
     </div>
   </form>
@@ -5130,7 +5129,7 @@ function onChipClick(btn) {
       // a second date makes a span, up to three facets and three topics.
       const dims = ADDABLE.filter(d => !has(e, d) || (d === "date" && nDates === 1) || (TAG_MAX[d] && d !== "date" && count(d) < TAG_MAX[d]));
       if (!dims.length) { const n = document.createElement("div"); n.className = "hint"; n.style.padding = "8px 12px"; n.textContent = "All tag types are set."; pop.appendChild(n); }
-      const dimLabel = d => d === "date" && nDates === 1 ? (has(e, "recurring") ? "second date (end of series or of each occurrence)" : "end date") : (d === "facet" || d === "topic") && count(d) ? "another " + d : d === "ref" ? "reference to an entry" : d;
+      const dimLabel = d => d === "date" && nDates === 1 ? (has(e, "recurring") ? "date (end of series or of each occurrence)" : "date (end of span)") : (d === "facet" || d === "topic") && count(d) ? "another " + d : d === "ref" ? "reference to an entry" : d;
       for (const d of dims) opt(pop, dimLabel(d), () => {
         while (pop.children.length > 1) pop.removeChild(pop.lastChild);
         pop.firstChild.firstChild.textContent = dimLabel(d);
@@ -5796,7 +5795,7 @@ function goToAdded() {
   openSearch(true); $("searchQ").value = w.text; $("searchQ").dispatchEvent(new Event("input"));
 }
 // Date and time chosen in the facet choice (ui.md 4.2); without a date, today applies.
-let sheetWhen = { date: "", from: "", to: "" };
+let sheetWhen = { date: "", until: "", from: "", to: "" };
 // Date binding chosen in the facet choice (architecture 5.5): preset from the entry (a clock
 // time or a repetition makes it fixed), written as #type-fix or #type-flex.
 // Memo (architecture 5.6): the bookmark beside date and time; nothing else is chosen when
@@ -5810,28 +5809,50 @@ function renderSheetType() {
 function renderSheetWhen() {
   renderSheetType();
   const w = sheetWhen, parts = [];
-  if (w.date) parts.push(fmtDate(w.date));
+  if (w.date) parts.push(fmtDate(w.date) + (w.until ? "–" + fmtDate(w.until) : ""));
   if (w.from) parts.push(sheetTime(w).replace("-", "–"));
   if (sheetMemo) parts.push("memo");
   $("facetTo").classList.toggle("hidden", !w.from);
+  $("facetUntil").classList.toggle("hidden", !w.date);
   $("facetWhen").classList.toggle("hidden", !parts.length);
   $("facetWhen").innerHTML = parts.length ? `${esc(parts.join(" · "))} <button type="button" class="x" data-nowhen="1" title="Remove date and time">×</button>` : "";
 }
 // Adds the chosen date and time to a new line, unless it carries them already.
 // Start and end are kept apart until the entry is saved: either can be chosen first.
 function sheetTime(w) { return w.from && w.to && w.to > w.from ? w.from + "-" + w.to : w.from || ""; }
+// Dates of the line and of the sheet together make at most a span (architecture 3.3): two
+// dates, the earlier first; were it more, the line keeps its own.
 function withSheetWhen(v) {
-  const w = sheetWhen; sheetWhen = { date: "", from: "", to: "" };
+  const w = sheetWhen; sheetWhen = { date: "", until: "", from: "", to: "" };
   const e = parse(v);
   if (!e) return v;
-  if (w.date && !has(e, "date")) addTag(e, "date", w.date);
+  const own = e.tags.filter(t => t.dim === "date").map(t => t.val);
+  const all = [...new Set([...own, w.date, w.until].filter(Boolean))].sort();
+  if (all.length <= 2 && all.length > own.length) {
+    addTag(e, "date", all[0]);
+    if (all[1]) e.tags.splice(e.tags.findIndex(t => t.dim === "date") + 1, 0, { dim: "date", val: all[1] });
+  }
   const t = sheetTime(w);
   if (t && !has(e, "time")) addTag(e, "time", t);
   return toLine(e);
 }
 (() => {
   const box = $("facetPick");
-  box.appendChild(nativePicker("date", ICON_CAL, "", () => sheetWhen.date || today(), v => { sheetWhen.date = v; sheetMemo = false; renderSheetWhen(); }));
+  box.appendChild(nativePicker("date", ICON_CAL, "", () => sheetWhen.date || today(), v => {
+    const w = sheetWhen; w.date = v; sheetMemo = false;
+    if (w.until && w.until <= v) w.until = "";
+    renderSheetWhen();
+  }));
+  // A second date, the end of a span or of a series, appears once a date is chosen (3.3).
+  const until = nativePicker("date", ICON_CAL, "until", () => sheetWhen.until || sheetWhen.date || today(), v => {
+    const w = sheetWhen; if (!w.date) return;
+    if (v === w.date) w.until = "";
+    else if (v < w.date) { w.until = w.date; w.date = v; }
+    else w.until = v;
+    renderSheetWhen();
+  });
+  until.id = "facetUntil"; until.classList.add("hidden");
+  box.appendChild(until);
   box.appendChild(nativePicker("time", ICON_CLOCK, "from", () => sheetWhen.from || "09:00", v => { sheetWhen.from = v; renderSheetWhen(); }));
   // There is no end without a start: "to" appears once a start is chosen.
   const to = nativePicker("time", ICON_CLOCK, "to", () => sheetWhen.to || sheetWhen.from || "10:00", v => { sheetWhen.to = v; renderSheetWhen(); });
@@ -5842,7 +5863,7 @@ function withSheetWhen(v) {
   bm.type = "button"; bm.id = "facetMemo"; bm.className = "pick memo"; bm.setAttribute("aria-pressed", "false");
   bm.setAttribute("aria-label", "Memo");
   bm.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6.5 3.5h11v17l-5.5-4-5.5 4z"/></svg>`;
-  bm.addEventListener("click", ev => { ev.stopPropagation(); sheetMemo = !sheetMemo; if (sheetMemo) sheetWhen = { date: "", from: "", to: "" }; renderSheetWhen(); });
+  bm.addEventListener("click", ev => { ev.stopPropagation(); sheetMemo = !sheetMemo; if (sheetMemo) sheetWhen = { date: "", until: "", from: "", to: "" }; renderSheetWhen(); });
   box.appendChild(bm);
 })();
 $("add").addEventListener("submit", ev => {
@@ -5859,7 +5880,7 @@ function openFacetSheet(v, only) {
   uiBusy = true;
   hideToast();
   $("facetTitle").textContent = v;
-  sheetWhen = { date: "", from: "", to: "" }; sheetMemo = false;
+  sheetWhen = { date: "", until: "", from: "", to: "" }; sheetMemo = false;
   // In the month view a new entry takes the chosen day, unless the line has a date of its own.
   if (monthMode && view === "agenda" && calDay && calDay !== today() && !/#date-/.test(v)) sheetWhen.date = calDay;
   renderSheetWhen();
@@ -5895,7 +5916,7 @@ function newFacetField(row) {
 }
 $("facetSheet").addEventListener("click", ev => {
   if (ev.target.closest(".newf") || ev.target.closest("#facetPick")) return;
-  if (ev.target.closest("[data-nowhen]")) { sheetWhen = { date: "", from: "", to: "" }; renderSheetWhen(); return; }
+  if (ev.target.closest("[data-nowhen]")) { sheetWhen = { date: "", until: "", from: "", to: "" }; renderSheetWhen(); return; }
   if (ev.target.closest("#facetWhen")) return;
   const btn = ev.target.closest("button");
   if (!btn && ev.target !== $("facetSheet")) return;
@@ -5904,7 +5925,7 @@ $("facetSheet").addEventListener("click", ev => {
 function chooseFacet(f, j) {
   $("facetSheet").classList.add("hidden");
   uiBusy = false;
-  if (f === "cancel") { sheetWhen = { date: "", from: "", to: "" }; render(); $("addLine").focus(); return; }
+  if (f === "cancel") { sheetWhen = { date: "", until: "", from: "", to: "" }; render(); $("addLine").focus(); return; }
   const memo = sheetMemo; sheetMemo = false;
   let v = withSheetWhen(normalizeSpace($("addLine").value));
   if (!v) { render(); return; }
@@ -6093,7 +6114,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.9.20, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.21, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -6301,7 +6322,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.9.20";
+const APP_VERSION = "0.9.21";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)
@@ -6411,18 +6432,20 @@ async function exportJournal(asPlain) {
   } catch (err) { addNotice("Export failed: " + err.message); render(); }
 }
 $("btnOpenFile").onclick = () => { openLocalFile(withJ("", () => S.phrase)); };
-// The PIN (architecture 8.13): chosen once an account exists; it can be changed, and
-// switched off on purpose, with a plain statement of what that means.
-async function ensurePin() { if (Vault.mode === "") { await pinDialog("choose"); log("PIN " + (Vault.mode === "on" ? "set" : "not used")); renderPinRow(); } }
-// Three levels (ui.md 4.12a): no PIN; once per session (the default: asked after the browser
-// or the device was restarted); every time (on each opening and after five minutes away).
-const PIN_LEVELS = [["off", "No PIN"], ["session", "Once per session"], ["strict", "Every time"]];
-function pinLevelNow() { return Vault.mode === "on" ? Vault.level() : Vault.mode === "off" ? "off" : ""; }
+// The PIN (architecture 8.13): chosen once an account exists, required on every device; it
+// can be changed, and made silent, with a plain statement of what that means.
+async function ensurePin() { if (Vault.mode !== "on" && !Vault.cfg()?.demo) { await pinDialog("choose"); log("PIN set"); renderPinRow(); } }
+// Three levels (ui.md 4.12a): silent (the key stays in this browser, the app opens without
+// asking, words and codes still need the PIN); once per session (the default: asked after the
+// browser or the device was restarted); every time (on each opening and after five minutes away).
+const PIN_LEVELS = [["silent", "Silent PIN"], ["session", "Once per session"], ["strict", "Every time"]];
+const PIN_RANK = { silent: 0, session: 1, strict: 2 };
+function pinLevelNow() { return Vault.mode === "on" ? Vault.level() : ""; }
 function renderPinRow() {
   const cur = pinLevelNow();
   $("pinLevel").innerHTML = PIN_LEVELS.map(([v, label]) => `<button type="button" data-v="${v}" role="radio" aria-checked="${v === cur}" class="${v === cur ? "" : "off"}"><span class="ck" aria-hidden="true">✓</span>${label}</button>`).join("");
   $("pinState").textContent = {
-    off: "Journals and words are stored unencrypted; whoever uses this device can read them.",
+    silent: "The app opens without the PIN. The key lies in this browser beside the journals, so whoever uses this device can read them. Words and codes are shown only after the PIN.",
     session: "Stored encrypted. The PIN is asked for after a restart of the browser or the device.",
     strict: "Stored encrypted. The PIN is asked for each time the app opens and after five minutes in the background.",
     "": "Not chosen yet."
@@ -6433,17 +6456,13 @@ $("pinLevel").addEventListener("click", async ev => {
   const b = ev.target.closest("[data-v]"); if (!b) return;
   const to = b.dataset.v, from = pinLevelNow();
   if (to === from) return;
-  if (to === "off") {
-    Vault.shownAt = 0;
-    if (!(await pinGate())) { renderPinRow(); return; }
-    await Vault.disable(); log("PIN turned off");
-  } else if (from === "off" || from === "") {
+  if (from === "") {
     if ((await pinDialog("set")) !== "set") { renderPinRow(); return; }
-    Vault.setLevel(to); log("PIN set, " + to);
+    await Vault.setLevel(to); log("PIN set, " + to);
   } else {
     // A weaker level needs the PIN; a stronger one does not.
-    if (to === "session") { Vault.shownAt = 0; if (!(await pinGate())) { renderPinRow(); return; } }
-    Vault.setLevel(to); log("PIN level " + to);
+    if (PIN_RANK[to] < PIN_RANK[from]) { Vault.shownAt = 0; if (!(await pinGate())) { renderPinRow(); return; } }
+    await Vault.setLevel(to); log("PIN level " + to);
   }
   renderPinRow();
 });
@@ -8808,7 +8827,8 @@ if (!S.keys) {
 // Local storage and the PIN (architecture 8.13). The app reads and writes its data through
 // LS. With a PIN, everything it keeps in this browser lies encrypted with a key derived from
 // the PIN; it is decrypted into memory once the PIN is entered, before the app starts.
-// Without a PIN (switched off on purpose), LS passes through to localStorage in plain text.
+// Before the PIN is chosen, LS passes through to localStorage in plain text. With the silent
+// PIN the key is kept in localStorage too: the store is encrypted, the device is not guarded.
 // Display preferences stay plain so that the page looks right before the PIN is entered.
 // The storage layer is the one place a native app would replace (with a hardware keystore).
 // ---------------------------------------------------------------------------
@@ -8872,7 +8892,7 @@ function personChooser() {
     d.showModal();
   });
 }
-const PIN_PLAIN = new Set(["agenda.compact", "agenda.minimal", "agenda.month", "agenda.fbar.open", "agenda.stab", "agenda.pin", "agenda.pinWait"]);
+const PIN_PLAIN = new Set(["agenda.compact", "agenda.minimal", "agenda.month", "agenda.fbar.open", "agenda.stab", "agenda.pin", "agenda.pinWait", "agenda.vkeep"]);
 const VAULT = "agv:";          // prefix of the encrypted entries in localStorage
 const PIN_ITER = 600000;       // PBKDF2 rounds: about half a second on a phone
 const PIN_IDLE = 5 * 60e3;     // "every time": locked again after this long in the background
@@ -8881,23 +8901,27 @@ const pinSkey = () => PIN_SKEY0 + (PFX ? ":" + PFX : ""); // "once per session":
 const pinB64 = u => { let s = ""; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
 const pinUnb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 const Vault = {
-  mode: "",        // "on" (PIN), "off" (switched off), "" (not decided yet: plain until the user chooses)
+  mode: "",        // "on" (PIN), "" (not chosen yet: plain until the user chooses); "off" only in the click dummy and in browsers of before 0.9.21
   key: null, mem: null, dirty: new Set(), timer: null, shownAt: 0,
   cfg() { try { return JSON.parse(PS.getItem("agenda.pin") || "null"); } catch { return null; } },
   async derive(pin, salt) {
     const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pin), "PBKDF2", false, ["deriveKey"]);
     return crypto.subtle.deriveKey({ name: "PBKDF2", hash: "SHA-256", salt, iterations: PIN_ITER }, base, { name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
   },
-  level() { const c = this.cfg(); return c && c.level === "strict" ? "strict" : "session"; },
+  level() { const c = this.cfg(); return c && (c.level === "strict" || c.level === "silent") ? c.level : "session"; },
   async setLevel(l) {
     const c = this.cfg(); if (!c || c.mode !== "on") return;
     c.level = l; PS.setItem("agenda.pin", JSON.stringify(c));
     await this.keepSession();
   },
   // Once per session: the key stays in sessionStorage until the browser ends the session.
+  // Silent: it stays in localStorage.
   async keepSession() {
+    const raw = this.mode === "on" && this.key ? pinB64(new Uint8Array(await crypto.subtle.exportKey("raw", this.key))) : "";
+    const l = this.level();
+    if (raw && l === "silent") PS.setItem("agenda.vkeep", raw); else PS.removeItem("agenda.vkeep");
     try {
-      if (this.mode === "on" && this.key && this.level() === "session") sessionStorage.setItem(pinSkey(), pinB64(new Uint8Array(await crypto.subtle.exportKey("raw", this.key))));
+      if (raw && l === "session") sessionStorage.setItem(pinSkey(), raw);
       else sessionStorage.removeItem(pinSkey());
     } catch { /* no sessionStorage: asked each time */ }
   },
@@ -8911,8 +8935,11 @@ const Vault = {
   },
   // Opens without asking when this session already holds the key.
   async resume() {
-    if (this.level() !== "session") { try { sessionStorage.removeItem(pinSkey()); } catch {} return false; }
-    let raw = null; try { raw = sessionStorage.getItem(pinSkey()); } catch {}
+    const l = this.level();
+    if (l === "strict") { try { sessionStorage.removeItem(pinSkey()); } catch {} PS.removeItem("agenda.vkeep"); return false; }
+    let raw = null;
+    if (l === "silent") raw = PS.getItem("agenda.vkeep");
+    else try { raw = sessionStorage.getItem(pinSkey()); } catch {}
     if (!raw) return false;
     try { const key = await crypto.subtle.importKey("raw", pinUnb64(raw), { name: "AES-GCM" }, true, ["encrypt", "decrypt"]); return await this.load(key); }
     catch { return false; }
@@ -8955,20 +8982,11 @@ const Vault = {
     for (const [k, v] of mem) sealed.push([k, await this.seal(key, v)]);
     for (const k of PS.keys()) if (k.startsWith(VAULT)) PS.removeItem(k);
     for (const [k, v] of sealed) PS.setItem(VAULT + k, v);
-    const level = this.cfg() && this.cfg().level === "strict" ? "strict" : "session";
+    const level = this.cfg() && this.cfg().mode === "on" ? this.level() : "session";
     PS.setItem("agenda.pin", JSON.stringify({ v: 1, mode: "on", level, salt: pinB64(salt), check: await this.seal(key, "agenda-vault") }));
     for (const k of PS.keys()) if (k.startsWith("agenda.") && !PIN_PLAIN.has(k)) PS.removeItem(k);
     this.key = key; this.mem = mem; this.mode = "on"; this.shownAt = Date.now();
     await this.keepSession();
-  },
-  // Switched off on purpose: the data goes back to plain localStorage.
-  async disable() {
-    await this.flush();
-    if (this.mem) for (const [k, v] of this.mem) PS.setItem(k, v);
-    for (const k of PS.keys()) if (k.startsWith(VAULT)) PS.removeItem(k);
-    PS.setItem("agenda.pin", JSON.stringify({ v: 1, mode: "off" }));
-    this.key = null; this.mem = null; this.mode = "off";
-    try { sessionStorage.removeItem(pinSkey()); } catch {}
   },
   flushSoon() { clearTimeout(this.timer); this.timer = setTimeout(() => this.flush(), 150); },
   async flush() {
@@ -9011,17 +9029,14 @@ function pinDialog(mode) {
     unlock: "This browser keeps your journals encrypted with your PIN.",
     confirm: "Words and codes are shown only after the PIN.",
     set: "Six to twelve digits. This browser then keeps your journals, their words and codes only encrypted, and asks for the PIN after the browser or the device was restarted.",
-    choose: "Six to twelve digits. This browser then keeps your journals, their words and codes only encrypted, and asks for the PIN after the browser or the device was restarted. Settings can make it stricter.",
+    choose: "Six to twelve digits, required once on every device. This browser then keeps your journals, their words and codes only encrypted, and asks for the PIN after the browser or the device was restarted. Settings can make it stricter, or silent.",
     change: "Six to twelve digits.",
   }[mode];
   $p("pin1").value = ""; $p("pin2").value = ""; $p("pinMsg").textContent = "";
   $p("pin2Row").classList.toggle("hidden", !set);
-  // With several persons on this browser a PIN is required (ui.md 4.11e); any PIN will do.
-  $p("pinWithout").classList.toggle("hidden", mode !== "choose" || multiPerson());
   $p("pinForgot").classList.toggle("hidden", mode !== "unlock");
   $p("pinCancel").classList.toggle("hidden", mode === "unlock" || mode === "choose");
   $p("pinOk").textContent = set ? "Set PIN" : mode === "unlock" ? "Unlock" : "OK";
-  $p("pinWithoutWarn").classList.add("hidden");
   return new Promise(resolve => {
     const wait = () => { try { return JSON.parse(PS.getItem("agenda.pinWait") || "null") || { n: 0, until: 0 }; } catch { return { n: 0, until: 0 }; } };
     const done = v => { d.close(); resolve(v); };
@@ -9049,11 +9064,6 @@ function pinDialog(mode) {
       $p("pin1").value = "";
     };
     $p("pinCancel").onclick = () => done(null);
-    $p("pinWithout").onclick = async () => {
-      const warn = $p("pinWithoutWarn");
-      if (warn.classList.contains("hidden")) { warn.classList.remove("hidden"); return; }
-      await Vault.disable(); done("off");
-    };
     $p("pinForgot").onclick = () => {
       const f = $p("pinForgotWarn");
       if (f.classList.contains("hidden")) { f.classList.remove("hidden"); return; }
@@ -9115,8 +9125,9 @@ addEventListener("pagehide", () => Vault.flush());
   const c = Vault.cfg();
   Vault.mode = c ? c.mode : "";
   if (Vault.mode === "on" && !(await Vault.resume())) await pinDialog("unlock");
-  // Several persons: whoever has journals here and no PIN yet chooses one now.
-  if (multiPerson() && Vault.mode !== "on" && PS.keys().some(k => /^agenda\.(keys|phrase|cfg)/.test(k))) await pinDialog("choose");
+  // Whoever has journals here and no PIN yet chooses one now (the PIN is required, 8.13);
+  // only the click dummy runs without.
+  if (Vault.mode !== "on" && !(c && c.demo) && PS.keys().some(k => /^agenda\.(keys|phrase|cfg)/.test(k))) await pinDialog("choose");
   const s = document.createElement("script");
   s.textContent = document.getElementById("appMain").textContent;
   document.body.appendChild(s);

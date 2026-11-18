@@ -190,6 +190,8 @@ A version number and a link to the documentation sit at the bottom left, as in o
 
 Import and export of calendar files, single and in batches, were set as a core feature: there is no good way to aggregate several calendars (work under an administrator's rules, private, a provider such as Proton), and the agenda can be the common source because files can always be moved, whatever an administrator blocks. Import and export run entirely in the client. Re-imports are recognised by a hash of the event's `UID` (`#cal`), so that an updated invitation changes the entry instead of adding a second one. Recurrence is taken over only where the grammar expresses it exactly; anything else is imported once and marked for review rather than approximated silently.
 
+At most two dates per entry (23 November 2026): the second is the end of a span or of a series, as before. Irregular series (the `RDATE` of iCalendar) and further dates were considered and rejected: they would need a dimension of their own beside `#date` and make adding and parsing much more involved. Separate entries do the job. The known loss stays: an imported series whose occurrences span several days keeps those days and loses its end.
+
 Two further steps were noted and deferred: fetching subscribed calendar addresses in the nightly run of the Node client (browsers usually cannot fetch them), and letting other calendar programs subscribe to the agenda, which needs plain text outside the client and therefore touches the trust model of section 2.1.
 
 ## 6.4 Several servers (draft, open; 18 November 2026)
@@ -236,6 +238,8 @@ Everything the web client keeps lies encrypted under a PIN of six to twelve digi
 Rejected: passkeys and device unlock (WebAuthn) as an alternative to the PIN: they depend on an operating system, a browser and a key store that someone else controls, bind to the person who set up the device, and do not work for a local journal file. Forward secrecy was considered and dropped: a journal's current state has to stay readable for everyone entitled to it, so it would protect only superseded lines, at the price of member lists and device management. Binding the owner's rights to devices (an owner key per device, the words alone giving ally rights, a delayed recovery) was considered against stolen words and deferred: a device does not stand for a person, several people use the same device and even the same browser. The thought is kept for later.
 
 Three levels (18 November 2026): asking at every opening proved a nuisance on the phone, while the encryption of the store is what matters. Hence *Once per session* as the default (asked after a restart of the browser or the device, the key kept in `sessionStorage` in between), *Every time* for those who want it (each opening and after five minutes in the background), and *No PIN* as before. A weaker level needs the PIN.
+
+*Silent PIN* instead of *No PIN* (23 November 2026): *No PIN* suggested that a device could do without one, while the PIN has to be chosen at least once on every device. Now it is required at setup, any PIN is accepted, and the weakest level keeps the key in the browser, so that the app opens without asking. The store on the device is then no better protected than before, but words and codes stay behind the PIN, and a stronger level needs no new PIN. Browsers that ran without a PIN choose one at their next start.
 
 ## 6.6 Clipboard beside the journal (18 November 2026)
 

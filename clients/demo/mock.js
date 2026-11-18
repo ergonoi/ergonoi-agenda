@@ -14,8 +14,8 @@
   }
   const ls = window.localStorage;
   // Demo account: fixed phrase, keys precomputed with the derivation of spec 8.2.
-  // The click dummy runs without a PIN (architecture 8.13).
-  if (!ls.getItem("agenda.pin")) ls.setItem("agenda.pin", JSON.stringify({ v: 1, mode: "off" }));
+  // The click dummy alone runs without a PIN (architecture 8.13).
+  if (!ls.getItem("agenda.pin")) ls.setItem("agenda.pin", JSON.stringify({ v: 1, mode: "off", demo: true }));
   if (!ls.getItem("agenda.keys")) {
     ls.setItem("agenda.cfg", JSON.stringify({ mode: "server", server: "https://agenda.example.org" }));
     ls.setItem("agenda.phrase", "garden window river cable orbit maple quote harbor");

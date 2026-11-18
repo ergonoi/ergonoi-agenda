@@ -1,11 +1,11 @@
 // Several persons on one browser (ui.md 4.11e): each keeps its journals apart under a PIN of
-// its own; the chooser comes after Switch person; with several persons a PIN is required,
-// any PIN will do; clearing removes only the current person.
+// its own; the chooser comes after Switch person; every person chooses a PIN, any PIN will do;
+// clearing removes only the current person.
 import { device, newAccount, check, sleep, settled } from "./lib.mjs";
 
 async function setPin(p, pin) {
   await p.waitForFunction(() => document.getElementById("dlgPin")?.open, { timeout: 20000 });
-  const without = await p.evaluate(() => !document.getElementById("pinWithout").classList.contains("hidden"));
+  const without = await p.evaluate(() => !!document.getElementById("pinWithout"));
   await p.evaluate(v => { document.getElementById("pin1").value = v; document.getElementById("pin2").value = v; document.getElementById("pinOk").click(); }, pin);
   await p.waitForFunction(() => !document.getElementById("dlgPin").open, { timeout: 20000 });
   return without;
@@ -29,15 +29,18 @@ export default async function ({ svc, b }) {
   await A.waitForFunction(() => document.getElementById("dlgSetup")?.open, { timeout: 20000 });
   const lena = await A.evaluate(() => newPhrase("en"));
   A.evaluate(async ph => { await finishSetup(ph, { mode: "server", server: location.origin }, "Journal", await deriveKeysV2(ph)); }, lena).catch(() => {});
-  check(!(await setPin(A, "111111")), "with several persons there is no way without a PIN, and 111111 is accepted");
+  check(!(await setPin(A, "333333")), "a new person must choose a PIN too");
   await A.waitForFunction(() => typeof S !== "undefined" && S.keys && S.etag, { timeout: 20000 }); await settled(A);
   check(await A.evaluate(p => S.phrase === p, lena), "Lena has her own account");
 
-  // Back to the first person: no PIN yet, so one is required now.
+  // Back to the first person: her own PIN opens her journals.
   A.evaluate(() => switchPerson()).catch(() => {});
   const names = await choose(A, "Markus").catch(() => []);
   check(names.length === 2, "the chooser lists both persons: " + names.join(" | "));
-  check(!(await setPin(A, "222222")), "the first person must choose a PIN now");
+  await A.waitForFunction(() => document.getElementById("dlgPin")?.open && /Enter your PIN/.test(document.getElementById("pinTitle").textContent), { timeout: 20000 });
+  await A.evaluate(() => { document.getElementById("pin1").value = "333333"; document.getElementById("pinOk").click(); }); await sleep(2500);
+  check(await A.evaluate(() => document.getElementById("dlgPin").open), "Lena's PIN does not open the first person's journals");
+  await A.evaluate(() => { document.getElementById("pin1").value = "111111"; document.getElementById("pinOk").click(); });
   await A.waitForFunction(() => typeof S !== "undefined" && S.keys, { timeout: 20000 });
   check(await A.evaluate(p => S.phrase === p, first), "the first person sees her own account");
   const store = await A.evaluate(() => { const ks = Object.keys(localStorage); return { plainKeys: ks.filter(k => /^agenda\.keys/.test(k) || /^p[0-9a-z]{6}\/agenda\.keys/.test(k)).length, vault: ks.filter(k => k.startsWith("agv:")).length, lena: ks.filter(k => /^p[0-9a-z]{6}\/agv:/.test(k)).length }; });
@@ -47,7 +50,7 @@ export default async function ({ svc, b }) {
   A.evaluate(() => switchPerson()).catch(() => {});
   await choose(A, "Lena");
   await A.waitForFunction(() => document.getElementById("dlgPin")?.open && /Enter your PIN/.test(document.getElementById("pinTitle").textContent), { timeout: 20000 });
-  await A.evaluate(() => { document.getElementById("pin1").value = "111111"; document.getElementById("pinOk").click(); });
+  await A.evaluate(() => { document.getElementById("pin1").value = "333333"; document.getElementById("pinOk").click(); });
   await A.waitForFunction(() => typeof S !== "undefined" && S.keys, { timeout: 20000 });
   check(await A.evaluate(p => S.phrase === p, lena), "Lena unlocks hers with her PIN");
   check(await A.evaluate(() => { openViewMenu(); return /Lena/.test($("viewMenu").textContent) && /Switch person/.test($("viewMenu").textContent); }), "the menu names the person and offers to switch");

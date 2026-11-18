@@ -2,7 +2,7 @@
 // at the next sync, with its backups; the owner can undo it for 7 days. Backups in this
 // browser (8.4c) and the backup list of the journal dialog. Deleting the account: the
 // words restore it within 7 days.
-import { device, newAccount, check, sleep, settled, startService } from "./lib.mjs";
+import { device, newAccount, check, sleep, settled, startService, choosePin } from "./lib.mjs";
 
 // A service of its own: the suite's service has used up the new accounts per address and day.
 export default async function ({ b }) {
@@ -60,8 +60,7 @@ async function run(svc, b) {
   const msg = await A.evaluate(() => $("setupMsg").textContent);
   check(/was deleted on/.test(msg), "the words find the deleted account: " + msg);
   await A.click("#setupOk");
-  await A.waitForFunction(() => document.getElementById("pinWithout") && !document.getElementById("pinWithout").classList.contains("hidden"), { timeout: 15000 });
-  await A.click("#pinWithout"); await sleep(100); await A.click("#pinWithout");
+  await choosePin(A);
   await A.waitForFunction(() => typeof S !== "undefined" && S.keys && S.etag, { timeout: 15000 }); await settled(A);
   const back = await A.evaluate(() => ({ entries: parseLines(S.snap).length, shared: extraJournals().length }));
   check(back.entries > 3 && back.shared === 1, "after Continue the account is back as it was " + JSON.stringify(back));

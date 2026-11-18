@@ -26,7 +26,7 @@ Das Ablagefach links neben der Lupe bringt ein Stück von einem deiner Geräte a
 
 ## Ein gemeinsam genutztes Gerät
 
-Auf einem Gerät, das mehrere Menschen benutzen, etwa einem Tablet in der Küche, lässt sich die PIN abschalten: *Settings → Device → PIN → No PIN*. Das Gerät hält dann alles unverschlüsselt, und wer es benutzt, kann lesen und weitergeben, was darauf liegt. Gib einem solchen Gerät nur Guest-Codes, oder Ally-Codes, wo Menschen eintragen sollen, nie die Wörter eines Journals. Sein eigenes Journal ist dann das einzige, dessen Owner es ist.
+Auf einem Gerät, das mehrere Menschen benutzen, etwa einem Tablet in der Küche, lässt sich die PIN stumm schalten: *Settings → Device → PIN → Silent PIN*. Eine PIN wird beim Einrichten trotzdem einmal vergeben; danach öffnet sich die App ohne sie, nur Wörter und Codes verlangen sie noch. Der Schlüssel liegt dann im Browser neben den Journalen, und wer das Gerät benutzt, kann lesen und weitergeben, was darauf liegt. Gib einem solchen Gerät nur Guest-Codes, oder Ally-Codes, wo Menschen eintragen sollen, nie die Wörter eines Journals. Sein eigenes Journal ist dann das einzige, dessen Owner es ist.
 
 ## Ein Gerät leeren
 

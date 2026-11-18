@@ -26,7 +26,7 @@ The tray left of the magnifier moves one thing between your own devices: a pictu
 
 ## A shared device
 
-On a device that several people use, a tablet in the kitchen for example, the PIN can be switched off: *Settings → Device → PIN → No PIN*. The device then keeps everything unencrypted, and whoever uses it can read and pass on what it holds. Give such a device only guest codes, or ally codes where people should write, never the words of a journal. Its own journal is then the only one it owns.
+On a device that several people use, a tablet in the kitchen for example, the PIN can be made silent: *Settings → Device → PIN → Silent PIN*. A PIN is still chosen once when the app is set up; afterwards the app opens without asking for it, and only words and codes need it. The key then lies in the browser beside the journals, so whoever uses the device can read and pass on what it holds. Give such a device only guest codes, or ally codes where people should write, never the words of a journal. Its own journal is then the only one it owns.
 
 ## Clearing a device
 
