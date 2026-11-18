@@ -112,10 +112,13 @@
   #fpanel .fac.off { opacity:var(--off); }
   #fpanel .fac:focus-visible, #fpanel .jh:focus-visible { outline:0; text-decoration:underline; text-underline-offset:4px; }
   #fpanel details { margin-top:14px; border-top:.5px solid var(--line); }
-  #fpanel summary { cursor:pointer; padding:12px 18px 4px; font:600 14px "Inter", var(--font, sans-serif); color:var(--fg2); }
+  #fpanel summary { list-style:none; display:flex; align-items:center; gap:10px; cursor:pointer; padding:12px 18px 4px; font:600 14px "Inter", var(--font, sans-serif); color:var(--fg2); }
   #fpanel .more { padding:0 18px; }
   #fpanel .more.jmore { padding:0 0 6px; }
-  #fpanel summary .fhid { font-weight:400; color:var(--muted); }
+  #fpanel summary::-webkit-details-marker { display:none; }
+  #fpanel summary .fchev { flex:none; color:var(--fg2); transition:transform .15s; }
+  #fpanel details[open] > summary .fchev { transform:rotate(90deg); }
+  #fpanel summary .fhid { margin-left:-6px; font-weight:400; color:var(--muted); }
   #fpanel .more h4 { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); font-weight:500; margin:14px 0 2px; }
   #fpanel .vals { display:flex; flex-wrap:wrap; gap:0 18px; }
   #fpanel .vals button { min-height:var(--bm); padding:0; border:0; border-radius:0; background:transparent; font-size:15px; display:inline-flex; align-items:center; gap:7px; color:var(--fg); -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
@@ -4414,8 +4417,9 @@ function renderPanel() {
   const others = journals().filter(j => j && keys.some(k => keyJ(k) === j))
     .sort((a, b) => readOnly(a) - readOnly(b) || journalName(a).localeCompare(journalName(b)));
   if (others.length) {
-    const nHidden = keys.filter(k => keyJ(k) && others.includes(keyJ(k)) && f.facet.includes(k)).length;
-    h += `<details id="fpJour"${foldOpen("agenda.fjour", nHidden > 0) ? " open" : ""}><summary>More journals (${others.length})${nHidden ? `<span class="fhid"> · ${nHidden} hidden</span>` : ""}</summary><div class="more jmore">${others.map(jblock).join("")}</div></details>`;
+    const theirs = keys.filter(k => keyJ(k) && others.includes(keyJ(k)));
+    const nHidden = theirs.filter(k => f.facet.includes(k)).length;
+    h += `<details id="fpJour"${foldOpen("agenda.fjour", nHidden > 0) ? " open" : ""}><summary>${FOLD_CHEV}More journals (${others.length})<span class="fhid"> · ${theirs.length} facet${theirs.length === 1 ? "" : "s"}</span></summary><div class="more jmore">${others.map(jblock).join("")}</div></details>`;
   }
   // The other tags, folded.
   const base = all.filter(e => passesFacet(e, f));
@@ -4427,7 +4431,7 @@ function renderPanel() {
     more += `<h4>${d}</h4><div class="vals">` + vals.map(v =>
       `<button type="button" data-fdim="${d}" data-fval="${esc(v)}" class="${f.off[d].includes(v) ? "off" : ""}">${esc(filterLabel(d, v))}<span class="n">${cd.get(v) || 0}</span></button>`).join("") + `</div>`;
   }
-  if (more) h += `<details id="fpMore"${foldOpen("agenda.fmore", otherActive(f)) ? " open" : ""}><summary>More filters${otherActive(f) ? `<span class="fhid"> · filtering</span>` : ""}</summary><div class="more">${more}<p class="hint" style="padding:0;margin-top:14px">Tap a value to hide or show it, long press for only this value. Within one kind any shown value matches; across kinds all must match.</p></div></details>`;
+  if (more) h += `<details id="fpMore"${foldOpen("agenda.fmore", otherActive(f)) ? " open" : ""}><summary>${FOLD_CHEV}More filters${otherActive(f) ? `<span class="fhid"> · filtering</span>` : ""}</summary><div class="more">${more}<p class="hint" style="padding:0;margin-top:14px">Tap a value to hide or show it, long press for only this value. Within one kind any shown value matches; across kinds all must match.</p></div></details>`;
   const chev = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6l6 6-6 6"/></svg>';
   const ic = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">${d}</svg>`;
   h += `<div class="mlist">`
@@ -4443,6 +4447,8 @@ function renderPanel() {
   const det = $("fpMore"); if (det) det.ontoggle = () => LS.setItem("agenda.fmore", det.open ? "1" : "0");
   const dj = $("fpJour"); if (dj) dj.ontoggle = () => LS.setItem("agenda.fjour", dj.open ? "1" : "0");
 }
+// The fold marker of the panel: the chevron of the menu rows, turned down when open.
+const FOLD_CHEV = '<svg class="fchev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
 // A fold of the panel keeps the state it was left in; before any choice it is open when it filters.
 function foldOpen(key, filtering) { const v = LS.getItem(key); return v === "1" || (v !== "0" && filtering); }
 const LOCK_SVG = '<svg class="lock" width="13" height="13" viewBox="0 0 16 16" role="img" aria-label="read only"><title>read only</title><rect x="3.5" y="7" width="9" height="6.5" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>';

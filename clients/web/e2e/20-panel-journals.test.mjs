@@ -34,7 +34,7 @@ export default async function ({ svc, b }) {
   await settled(A);
   await A.evaluate(() => openPanel(true)); await sleep(300);
   const st = await A.evaluate(() => { const d = document.getElementById("fpJour"); return d && { sum: d.querySelector("summary").textContent, open: d.open, order: [...d.querySelectorAll(".jh")].map(x => x.textContent.trim()), firstOwn: document.querySelector("#fpanel .jh")?.closest("#fpJour") === null }; });
-  check(st && /^More journals \(\d\)$/.test(st.sum) && !st.open && st.firstOwn, "the further journals folded under the own one: " + JSON.stringify(st));
+  check(st && /^More journals \(3\) · 3 facets$/.test(st.sum) && !st.open && st.firstOwn, "the further journals folded under the own one: " + JSON.stringify(st));
   check(st && JSON.stringify(st.order.map(x => x.replace("read only", ""))) === JSON.stringify(["Alpha", "Zeta", "Aardvark"]), "guests after allies, whatever their names: " + JSON.stringify(st && st.order));
   // A hidden facet in there keeps it open.
   await A.evaluate(() => { document.getElementById("fpJour").open = true; }); await sleep(100);
@@ -42,7 +42,7 @@ export default async function ({ svc, b }) {
   // Closed by hand: it stays closed, and its line says what is hidden.
   await A.evaluate(() => { document.getElementById("fpJour").open = false; }); await sleep(200);
   await A.evaluate(() => { openPanel(false); openPanel(true); }); await sleep(200);
-  check(await A.evaluate(() => !document.getElementById("fpJour").open && /· 1 hidden/.test(document.querySelector("#fpJour summary").textContent)), "closed stays closed after closing and opening the panel, with the hidden count");
+  check(await A.evaluate(() => !document.getElementById("fpJour").open && /· 3 facets$/.test(document.querySelector("#fpJour summary").textContent)), "closed stays closed after closing and opening the panel, with the number of their facets");
   await A.evaluate(() => { document.getElementById("fpJour").open = true; }); await sleep(200);
   await A.evaluate(() => { openPanel(false); openPanel(true); }); await sleep(200);
   check(await A.evaluate(() => document.getElementById("fpJour").open), "open stays open");
