@@ -250,6 +250,14 @@ First increment toward more ergonomics and a less cluttered interface (ui.md 1a)
 - Views are lines of the default journal, like aliases and overlays, so they apply on all devices and stay private.
 - The experimental facet order by use (4.14b) was retired with the bar; within a journal the order is by name.
 
+## 6.8 Codes in words of several languages (21 November 2026)
+
+Owner phrase, ally code and guest code differ in length because of what they carry: the phrase 88 random bits (8 words); the ally code the ally secret `M` and the fingerprint `F` (16 words), since the service finds the account by `F` and stores nothing; the guest code `K`, `R` and `F` (75 bytes, a link or QR code). Shorter codes for allies and guests would need the service to keep `F` and a check value for writing beside the file; rejected, the service stores nothing but the journal.
+
+Phrases chosen by the user were rejected: their randomness cannot be judged (people choose related and frequent words), a fixed derivation suited to random phrases (PBKDF2) would no longer be enough, and changing the phrase without voiding the codes given out would need wrapped keys and a further file on the service.
+
+Instead every device chooses the language of its words: English (BIP39), German (dys2p `de-2048`: nouns, verbs and adjectives, 4 to 8 letters, no umlauts), French, Spanish, Italian, Portuguese, Czech (BIP39, accents removed). Default is the browser's language where a list exists. New phrases are drawn from that list and keep their language; ally codes are shown in it and read in any list. Accents typed or not make no difference. Existing English phrases are unchanged.
+
 ## 7. Open items and next steps
 
 1. **Node client with MCP tools and a nightly run** on top of the core module (next step).

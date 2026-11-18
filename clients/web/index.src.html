@@ -171,6 +171,7 @@
   .ctest .run .mk { color:var(--muted); }
   .ctest .dt { grid-column:2; color:var(--muted); }
   #setHead { display:none; }
+  select.wsel { font:inherit; font-size:16px; min-height:var(--tap); padding:0 8px; border:0; border-bottom:.5px solid var(--line); background:transparent; color:var(--fg); max-width:280px; }
   #detail { display:none; }
   @media (min-width: 1440px) {
     html main, html header .row { margin-left:280px; margin-right:400px; max-width:none; }
@@ -793,6 +794,9 @@
       <div class="hint hidden" id="cfgServerMsg"></div>
       <div class="btnrow"><button type="button" class="sec" id="btnTestConn">Test connection</button></div>
       <ul class="ctest hidden" id="connTest" aria-live="polite"></ul>
+      <label for="cfgWords">Words in</label>
+      <select id="cfgWords" class="wsel"></select>
+      <p class="hint">Language of new phrases and of the ally codes shown here. A phrase keeps the language it was made in; ally codes in any language are understood.</p>
       <div id="phraseLocal">
         <div class="btnrow">
           <button type="button" class="sec" id="btnShowPhrase">Show phrase</button>
@@ -1124,6 +1128,8 @@
       <input id="setupServer" placeholder="https://agenda.example.org">
       <div class="btnrow"><button type="button" class="ghost" id="btnSetupTest">Test connection</button></div>
       <ul class="ctest hidden" id="setupTest" aria-live="polite"></ul>
+      <label for="setupWords">Words in</label>
+      <select id="setupWords" class="wsel"></select>
       <p class="hint">If you are new here, creating your own journal is the best way to start.</p>
       <div class="btnrow col">
         <button type="button" class="primary" id="btnNewAccount">New account</button>
@@ -4554,6 +4560,7 @@ function prepSettings() { withJ("", () => {
   $("cfgServer").disabled = c.mode === "local";
   $("phraseBox").classList.add("hidden"); $("qrBox").classList.add("hidden"); $("qrBox").innerHTML = "";
   $("connTest").classList.add("hidden");
+  fillWordSelects();
   renderLogRow();
   $("cfgMinimal").checked = document.documentElement.classList.contains("minimal");
   $("cfgCompact").checked = document.documentElement.classList.contains("compact");
@@ -5438,7 +5445,7 @@ function openJournal(j) {
 }
 $("dlgJournal").addEventListener("close", () => { uiBusy = false; disarm(); renderJournalList(); render(); });
 $("jCancel").onclick = () => $("dlgJournal").close();
-$("jNewPhrase").onclick = () => { $("jPhrase").value = newPhrase(); $("jNewHint").style.display = ""; };
+$("jNewPhrase").onclick = () => { $("jPhrase").value = newPhrase(wordLangPref()); $("jNewHint").style.display = ""; };
 // Switch between the derivations while version 2 is tested (architecture 8.11e):
 // new journals are version 1 unless asked for.
 // Since 0.6.0 new journals are of version 2; the box asks for version 1 instead.
@@ -5499,7 +5506,7 @@ $("jShowPhrase").onclick = async () => { if ($("jPhraseBox").classList.contains(
 async function journalCode(j, kind) {
   const keys = withJ(j, () => S.keys), held = withJ(j, () => S.phrase);
   if (kind === "guest") return guestCodeOf(keys);
-  return keys.level === "owner" ? allyCodeOf(held) : held;
+  return keys.level === "owner" ? allyCodeOf(held, wordLangPref()) : held;
 }
 for (const [btn, kind, label] of [["jShowAlly", "ally", "Ally code: may read and write. Pass it only to people who may change this journal."], ["jShowGuest", "guest", "Guest code: may only read."]])
   $(btn).onclick = async () => {
@@ -5738,7 +5745,7 @@ async function takeOver(code, asDefault, name = "") {
   const ok = await keysFromAllyCode(ally), oldId = ok.acct.slice(0, 12);
   if (!asDefault && (extraJournals().some(x => x.id === oldId) || withJ("", () => LS.getItem(K("acct"))) === ok.acct)) throw new Error("this journal is already in this browser; remove it first");
   let phrase, keys, nid;
-  if (asDefault) { phrase = newPhrase(); keys = await deriveKeysV2(phrase); nid = keys.acct.slice(0, 12); freshJournal("", keys, phrase); }
+  if (asDefault) { phrase = newPhrase(wordLangPref()); keys = await deriveKeysV2(phrase); nid = keys.acct.slice(0, 12); freshJournal("", keys, phrase); }
   else ({ id: nid, keys, phrase } = await newOwnJournal(true));
   const target = asDefault ? "" : nid;
   saveExtraJournals(extraJournals().concat([{ id: oldId, role: "joined", upgraded: target, handover: true }]));
@@ -5817,7 +5824,7 @@ async function copyInto(j, lines) {
 }
 // A new further journal, own, under new words of the given version; returns its id.
 async function newOwnJournal(v2) {
-  const phrase = newPhrase(), keys = v2 ? await deriveKeysV2(phrase) : await deriveKeys(phrase);
+  const phrase = newPhrase(wordLangPref()), keys = v2 ? await deriveKeysV2(phrase) : await deriveKeys(phrase);
   if (!keys.acct) keys.acct = await acctOf(keys);
   const id = keys.acct.slice(0, 12);
   saveExtraJournals(extraJournals().concat([{ id, role: "own" }]));
@@ -6478,6 +6485,7 @@ function showSetup(step) {
   $("setupNav").classList.toggle("hidden", step === "start" || step === "join" || step === "taken");
   $("setupOk").classList.toggle("hidden", step === "exists");
   $("setupMsg").textContent = "";
+  fillWordSelects();
   if (!$("dlgSetup").open) $("dlgSetup").showModal();
 }
 async function finishSetup(phrase, cfg, examples, keys = null) {
@@ -6579,6 +6587,19 @@ $("btnSetupTest").onclick = async () => {
   try { await testConnection(normServer($("setupServer").value), $("setupTest"), false); }
   finally { b.disabled = false; }
 };
+// Language of new phrases and of the ally codes shown (architecture 8.2): chosen per device,
+// by default the browser's language where a list exists for it.
+function wordLangPref() {
+  const v = LS.getItem("agenda.words");
+  if (v && WORDLISTS[v]) return v;
+  const nav = (navigator.language || "en").slice(0, 2).toLowerCase();
+  return WORDLISTS[nav] ? nav : "en";
+}
+function fillWordSelects() {
+  const cur = wordLangPref(), opts = Object.entries(WORDLISTS).map(([k, l]) => `<option value="${k}"${k === cur ? " selected" : ""}>${esc(l.name)}</option>`).join("");
+  for (const id of ["cfgWords", "setupWords"]) $(id).innerHTML = opts;
+}
+for (const id of ["cfgWords", "setupWords"]) $(id).addEventListener("change", ev => { LS.setItem("agenda.words", ev.target.value); fillWordSelects(); });
 function serverInput() {
   const v = normServer($("setupServer").value), p = serverProblem(v);
   if (p) { $("setupMsg").textContent = p; return null; }
@@ -6587,7 +6608,7 @@ function serverInput() {
 }
 $("btnNewAccount").onclick = () => {
   if (!serverInput()) return;
-  pendingPhrase = newPhrase();
+  pendingPhrase = newPhrase(wordLangPref());
   const n = PHRASE_WORDS;
   const a = Math.floor(Math.random() * n); let b = Math.floor(Math.random() * (n - 1)); if (b >= a) b++;
   checkIdx = [a, b].sort((x, y) => x - y);

@@ -34,9 +34,29 @@ type Keys struct {
 	Auth    map[string]string // headers for reading and appending
 }
 
-// NormPhrase lower-cases the words and joins them with single spaces. The clients also
-// apply NFKD, which changes nothing for the ASCII words of the list.
-func NormPhrase(p string) string { return strings.Join(strings.Fields(strings.ToLower(p)), " ") }
+// NormPhrase lower-cases the words, removes accents and joins them with single spaces, as
+// the web client does; nothing changes for words of the ASCII lists.
+func NormPhrase(p string) string {
+	return strings.Join(strings.Fields(foldAccents(strings.ToLower(p))), " ")
+}
+
+// foldAccents removes the accents of Latin letters, as the web client does with NFKD, so that
+// words typed with accents match the ASCII word lists (clients/core/wordlists).
+func foldAccents(s string) string {
+	return accentFolder.Replace(s)
+}
+
+var accentFolder = strings.NewReplacer(
+	"à", "a", "á", "a", "â", "a", "ã", "a", "ä", "a", "å", "a",
+	"ç", "c", "č", "c", "ď", "d",
+	"è", "e", "é", "e", "ê", "e", "ë", "e", "ě", "e",
+	"ì", "i", "í", "i", "î", "i", "ï", "i",
+	"ñ", "n", "ň", "n",
+	"ò", "o", "ó", "o", "ô", "o", "õ", "o", "ö", "o",
+	"ř", "r", "š", "s", "ť", "t",
+	"ù", "u", "ú", "u", "û", "u", "ü", "u", "ů", "u",
+	"ý", "y", "ÿ", "y", "ž", "z",
+)
 
 func hmacSHA256(key, msg []byte) []byte {
 	m := hmac.New(sha256.New, key)

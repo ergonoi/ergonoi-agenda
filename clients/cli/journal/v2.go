@@ -64,16 +64,13 @@ func AllyV2(code string) (KeysV2, error) {
 	if len(words) != 16 {
 		return KeysV2{}, fmt.Errorf("an ally code has 16 words, not %d", len(words))
 	}
-	idx := map[string]int{}
-	for i, w := range bip39 {
-		idx[w] = i
+	idx := wordIndex(words)
+	if idx == nil {
+		return KeysV2{}, errors.New("the words are not all of one word list")
 	}
 	var bits []byte
 	for _, w := range words {
-		i, ok := idx[w]
-		if !ok {
-			return KeysV2{}, fmt.Errorf("%q is not a word of the list", w)
-		}
+		i := idx[w]
 		for b := 10; b >= 0; b-- {
 			bits = append(bits, byte(i>>b&1))
 		}
@@ -186,4 +183,26 @@ func AccessAny(code string) ([]Access, error) {
 		out = append(out, AccessV1(code))
 	}
 	return out, nil
+}
+
+// wordIndex returns the positions of the first word list (English first) that holds all the
+// words, or nil (architecture 8.2).
+func wordIndex(words []string) map[string]int {
+	for _, lang := range wordlistOrder {
+		idx := make(map[string]int, 2048)
+		for i, w := range wordlists[lang] {
+			idx[w] = i
+		}
+		all := true
+		for _, w := range words {
+			if _, ok := idx[w]; !ok {
+				all = false
+				break
+			}
+		}
+		if all {
+			return idx
+		}
+	}
+	return nil
 }

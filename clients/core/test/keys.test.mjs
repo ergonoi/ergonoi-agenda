@@ -45,3 +45,31 @@ test("version 1 keys keep their account", async () => {
   assert.equal(C.authHeaders(k).Authorization, "Bearer " + k.token);
   assert.equal(C.canWrite(k), true);
 });
+
+test("word lists: a German phrase and an ally code in any list reach the same account", async () => {
+  for (const [k, l] of Object.entries(C.WORDLISTS)) {
+    assert.equal(l.words.length, 2048, k);
+    assert.equal(new Set(l.words).size, 2048, k);
+    assert.ok(l.words.every(w => /^[a-z]+$/.test(w)), k);
+  }
+  const phrase = C.newPhrase("de");
+  assert.equal(C.wordlistOf(phrase.split(" ")), "de");
+  assert.equal(C.codeKind(phrase), "phrase");
+  assert.equal(C.phraseProblem(phrase), "");
+  const o = await C.deriveKeysV2(phrase);
+  const en = await C.allyCodeOf(phrase), fr = await C.allyCodeOf(phrase, "fr");
+  assert.notEqual(en, fr);
+  assert.equal(C.codeKind(fr), "ally");
+  assert.equal((await C.keysFromAllyCode(en)).acct, o.acct);
+  assert.equal((await C.keysFromAllyCode(fr)).acct, o.acct);
+  // Accents typed or not: the same words.
+  const accented = fr.replace(/e/, "é");
+  assert.equal((await C.keysFromAllyCode(accented)).acct, o.acct);
+});
+
+test("English phrases derive as before", async () => {
+  const p = "abandon ability able about above absent absorb abstract";
+  assert.equal(C.phraseProblem(p), "");
+  assert.equal(C.wordlistOf(p.split(" ")), "en");
+  assert.equal(C.phraseProblem("abandon ability able about above absent absorb xyzzy"), "Unknown word(s): xyzzy");
+});

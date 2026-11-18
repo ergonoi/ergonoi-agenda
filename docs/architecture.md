@@ -565,14 +565,14 @@ What the service can see: the number of lines per account, their size class (8.4
 
 ### 8.2 Account phrase and derived keys
 
-An account is defined by a phrase of **eight words**, drawn at random by the first client from the BIP39 English word list (2048 words; 88 bits). The phrase is shown once, written down by the user, and typed into every further client. It is stored nowhere else; there is no registration and no recovery. Whoever loses the phrase loses the journal; whoever has it has the journal.
+An account is defined by a phrase of **eight words**, drawn at random by the first client from a list of 2048 words (88 bits) in the language chosen on the device: English (BIP39, the default), German, French, Spanish, Italian, Portuguese or Czech (`clients/core/wordlists`; all plain ASCII, accents of the BIP39 lists removed). The phrase is derived from its text, so it keeps the language it was made in. The phrase is shown once, written down by the user, and typed into every further client. It is stored nowhere else; there is no registration and no recovery. Whoever loses the phrase loses the journal; whoever has it has the journal.
 
 Eight words are chosen because they can be copied by hand onto any device, including computers without a camera; no QR code is required.
 
 Derivation (every client computes the same values):
 
 ```
-phrase  = the eight words, lowercase, separated by single spaces
+phrase  = the eight words, lowercase, accents removed (NFKD without combining marks), separated by single spaces
 master  = PBKDF2-HMAC-SHA256(phrase, salt = "outheis-agenda/v1", iterations = 600000, length = 32)
 K_enc   = HKDF-SHA256(master, salt = empty, info = "enc",  length = 32)   # never leaves the client
 token   = HKDF-SHA256(master, salt = empty, info = "auth", length = 32)   # sent to the service as 64 lowercase hex digits
@@ -796,7 +796,7 @@ account = SHA-256( F ‖ SHA-256(R) )
 
 - `master = PBKDF2-HMAC-SHA256(phrase, salt = "outheis-agenda/v2", 600000)`, as 8.2 with a new salt; `P`, `D` (32 bytes) and `M` (11 bytes) = HKDF-SHA256(master, info `outheis-agenda/v2/private`, `…/delete`, `…/ally`); `K`, `W` = HKDF-SHA256(M, info `outheis-agenda/v2/enc`, `…/write`); `R = HMAC-SHA256(W, "outheis-agenda/read")`. Each step is one-way: `M` gives neither `P` nor `D`, `R` does not give `W`, `F` does not give `D`.
 - **Reading** sends `R` and `F`; the service computes the account ID from both. **Appending** sends `W` (from which the service computes `R`) and `F`. **Replacing** the whole file sends in addition `X-Agenda-Owner: <D>`; the service accepts it only if the fingerprint of `D` is `F`. So an ally can only append: it cannot shorten the journal or drop the owner's private lines (audit S2). **Deleting** sends `D` itself and `SHA-256(R)`. The headers are in 8.4. `F` has 88 bits: finding another `D` with the same fingerprint takes about 2^88 hash computations.
-- **Ally code:** `M ‖ F`, 176 bits, written as 16 words of the BIP39 list (11 bits each, no checksum). **Guest code:** `g1.` followed by base64url of `K ‖ R ‖ F` (75 bytes), for a link or a QR code. Eight words are the phrase of a version 1 or 2 journal: with a known journal id the id decides; when a journal is added, a version 2 journal is recognised by its file on the service (it is never empty). While version 2 is tested, new journals are version 1 unless *Version 2* is ticked when creating one (a switch in the *Add journal* dialog); *Stop sharing* keeps the version of the journal it replaces.
+- **Ally code:** `M ‖ F`, 176 bits, written as 16 words (11 bits each, no checksum) of the list chosen on the device; the same code can be written in every list, and a client reads it in the first list (English first) that holds all its words. **Guest code:** `g1.` followed by base64url of `K ‖ R ‖ F` (75 bytes), for a link or a QR code. Eight words are the phrase of a version 1 or 2 journal: with a known journal id the id decides; when a journal is added, a version 2 journal is recognised by its file on the service (it is never empty). While version 2 is tested, new journals are version 1 unless *Version 2* is ticked when creating one (a switch in the *Add journal* dialog); *Stop sharing* keeps the version of the journal it replaces.
 
 | Level | Holds | Can | Code |
 |---|---|---|---|
@@ -1026,7 +1026,7 @@ The reasons behind the decisions in this document, and further open items of the
 3. **`#topic-*`.** Keep, or drop in favour of full-text search. The vocabulary is derived from the journal (3.4).
 4. **Mandatory facet when unclear.** Fallback value or `#review-needed`.
 5. **Limits of the service.** Concrete rate limits (8.4) to be set from experience.
-6. **Word list.** BIP39 English, or a German list without umlauts and easily confused words.
+6. **Word list.** Decided (21 November 2026): seven lists of 2048 words, chosen per device (8.2); decisions 6.8.
 7. **Weighting of relevance.** How relevance and priority shift across facets, times of day and persons is to be judged by a language model following rules in `human/rules/`. Open: where the model runs, and how its ordering reaches static clients (through the journal or through a separate endpoint).
 8. **Clients outside the browser.** `agenda-cli-v1` (`clients/cli/`, Go, no dependencies) prints a journal of version 1 decrypted, from the relay or from a stored `.enc` file, and appends single lines; it implements 8.2–8.4 a second time and is checked against the web client's encryption. The MCP module (8.6) and a command-line client with the human directory (8.9) are specified but not implemented. The logic shared by all clients is in `clients/core/agenda-core.js` (grammar, validation, recurrence, keys and encryption, journal names and declared facets, the bot rules of 8.12); the web client inlines it when `index.html` is built (`clients/web/build.py`). The Node client on top of it is not written yet.
 9. **Calendar subscriptions** (8.13): fetching subscribed `.ics` addresses in the nightly run of the Node client; and whether, and how, other calendar programs may subscribe to the agenda, which would need plain text outside the client.
