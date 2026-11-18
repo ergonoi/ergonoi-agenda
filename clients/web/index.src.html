@@ -88,7 +88,7 @@
   #viewMenu .vsep { border-top:.5px solid var(--line); margin:6px 0; }
   .vact { display:block; width:100%; min-height:var(--bs); padding:0 18px; border:0; border-radius:0; background:transparent; text-align:left; font-size:15px; color:var(--teal); cursor:pointer; }
   .vact.plain { color:var(--fg2); }
-  .vsw { display:inline-flex; gap:2px; flex:none; }
+  .vsw { display:inline-flex; gap:2px; flex:none; min-width:calc(var(--vswn, 0) * 7px - 2px); } /* as wide as the widest in its list, so the names line up */
   .vsw i { width:5px; height:13px; border-radius:1px; }
   .vname { display:flex; gap:8px; align-items:center; padding:4px 18px 8px; }
   .vname input { flex:1; min-width:0; }
@@ -144,6 +144,7 @@
     header h1 { flex:1; order:0; min-width:0; text-align:center; }
     header h1 button#homeLink { max-width:100%; }
     header h1 .vwrap { align-items:center; min-width:0; }
+    header h1.hasview .vwrap { align-items:flex-start; text-align:left; } /* the view's name under the wordmark, both from the left */
     #viewName, header h1 .brand { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:52vw; }
     header .row::after, #status, header .vtabs, #tabFilter, #btnSync, #btnSettings { display:none !important; }
     header .hbtns { order:2; }
@@ -351,7 +352,14 @@
   #btnMic { border:0; min-width:var(--tap); padding:0 8px; }
   #btnMic.rec, #noteMic.rec { color:var(--scarlet); }
   /* Dictation into the note: the microphone sits below the clear button, inside the field. */
-  #noteMic { position:absolute; right:2px; top:40px; border:0; background:none; min-height:0; padding:6px; line-height:0; color:var(--fg2); }
+  /* The note (ui.md): clear inside the field, top right, clear of the frame; dictation below
+     it on the left, the count on the right. */
+  #noteText { padding-right:36px; }
+  #noteClear { top:18px; right:6px; transform:none; }
+  #dlgNote .nrow { display:flex; align-items:center; gap:8px; margin:4px 0 0; min-height:36px; }
+  #dlgNote .nrow #noteCount { margin:0 0 0 auto; }
+  #noteMic { border:0; background:none; min-height:var(--tap); min-width:var(--tap); padding:0; margin-left:-10px; display:inline-flex; align-items:center; justify-content:center; color:var(--fg2); }
+  #noteMic.hidden { display:none; }
   section h2 { margin:0; padding:22px 16px 8px; font-size:11px; font-weight:600; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); }
   .more { display:block; width:100%; text-align:left; border:0; border-bottom:.5px solid var(--line); border-radius:0; padding:0 16px; color:var(--fg2); font-size:15px; }
   .item { -webkit-user-select:none; -webkit-touch-callout:none; }
@@ -1208,8 +1216,8 @@
   <form method="dialog">
     <strong>Note</strong>
     <div class="hint" id="noteFor" style="margin:4px 0 0"></div>
-    <div style="position:relative"><textarea id="noteText" rows="8" maxlength="500" autocomplete="off" style="padding-right:30px"></textarea><button type="button" id="noteMic" class="hidden" title="Dictate" aria-label="Dictate"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg></button><button type="button" id="noteClear" class="qclear hidden" style="top:8px; transform:none" aria-label="Clear the note"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>
-    <div class="hint" id="noteCount" style="text-align:right; margin:4px 0 0"></div>
+    <div style="position:relative"><textarea id="noteText" rows="8" maxlength="500" autocomplete="off"></textarea><button type="button" id="noteClear" class="qclear hidden" aria-label="Clear the note"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>
+    <div class="nrow"><button type="button" id="noteMic" class="hidden" title="Dictate" aria-label="Dictate"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg></button><div class="hint" id="noteCount"></div></div>
     <p class="hint" style="margin:4px 0 0">Closing keeps what is written; an empty note is removed. <i>Undo</i> takes it back.</p>
   </form>
 </dialog>
@@ -2880,11 +2888,15 @@ function renameView(oldName, name) {
 function deleteView(name) {
   const v = viewByName(name); if (!v) return;
   checkpoint("View deleted: " + name);
-  withJ("", () => { const ls = S.wc.split("\n"); ls.splice(v.idx, 1); S.wc = ls.join("\n"); });
+  // Closed with #done like every entry (architecture 6.3): a removed line would come back
+  // from the journal at the next sync.
+  withJ("", () => { const ls = S.wc.split("\n"), e = parse(ls[v.idx]); addTag(e, "done", today()); ls[v.idx] = toLine(e); S.wc = ls.join("\n"); });
   if (LS.getItem("agenda.view") === name) LS.removeItem("agenda.view");
   showToast("View deleted: " + name);
   render(); scheduleSync();
 }
+const viewSwKeys = v => v.on.includes("*") ? valuesOf("facet").filter(Boolean) : valuesOf("facet").filter(k => k && v.on.includes(facetName(k) + "@" + keyJ(k)));
+const vswn = vs => Math.min(10, Math.max(0, ...vs.map(v => viewSwKeys(v).length)));
 const viewSw = v => {
   const keys = v.on.includes("*") ? valuesOf("facet").filter(Boolean) : valuesOf("facet").filter(k => k && v.on.includes(facetName(k) + "@" + keyJ(k)));
   return `<span class="vsw">${keys.slice(0, 10).map(k => `<i style="background:${facetColor(k) || "var(--line)"}"></i>`).join("")}</span>`;
@@ -2907,7 +2919,7 @@ function renderViewMenu() {
     ? `<form class="vname" data-vnew="1"><input id="viewNewName" placeholder="Name of the view" autocomplete="off" maxlength="40"><button type="submit">Save</button></form>`
     : `<button type="button" class="vact" data-vsave="1">+ Save current as view …</button>`;
   if (vs.length) h += `<button type="button" class="vact plain" data-vedit="1">Edit views …</button>`;
-  $("viewMenu").innerHTML = h;
+  $("viewMenu").innerHTML = h; $("viewMenu").style.setProperty("--vswn", vswn(vs));
   if (viewNaming) $("viewNewName").focus();
 }
 function openViewMenu() { viewNaming = false; renderViewMenu(); $("viewMenu").classList.remove("hidden"); $("homeLink").setAttribute("aria-expanded", "true"); }
@@ -2999,7 +3011,7 @@ function renderPanel() {
     + `<a class="mrow" href="@@DOCS_URL@@" target="_blank" rel="noopener">${ic('<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>')}Documentation</a>`
     + `</div>`;
   h += `<p class="hint" style="margin-top:18px">Tap a facet to switch it on or off; long press shows only this facet. Tap a journal to switch all its facets.</p>`;
-  $("fpanel").innerHTML = h;
+  $("fpanel").innerHTML = h; $("fpanel").style.setProperty("--vswn", vswn(vs));
   if (panelNaming) $("panelNewName").focus();
   const det = $("fpMore"); if (det) det.ontoggle = () => LS.setItem("agenda.fmore", det.open ? "1" : "0");
 }
