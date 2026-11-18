@@ -69,7 +69,7 @@ An entry may carry additional text, its *note* (in iCalendar terms: `SUMMARY` is
 Meet the client {{Address: Garden Square 3\nContact: Ms Huber}} #facet-work #date-2026-11-18
 ```
 
-- At most 5000 characters (after decoding; 500 until 0.9.38). Inside, `\n` stands for a line break, `\}` for a brace and `\\` for a backslash; nothing else is special, and a `#` inside starts no tag.
+- At most 3500 characters (after decoding; 500 until 0.9.38), and the whole line at most 3839 bytes in UTF-8, the most one encrypted line holds (8.4: 4096 bytes with nonce, tag and padding to 256). A note that would make the line longer is cut to fit, with a notice; a line that is still too long is moved to the quarantine instead of being sent. Inside, `\n` stands for a line break, `\}` for a brace and `\\` for a backslash; nothing else is special, and a `#` inside starts no tag.
 - `{{…}}` counts as the note only if nothing but tags follows it; otherwise it is ordinary text. Of several, the last one that meets this rule is the note.
 - The delimiters are plain ASCII, available on every keyboard, and very unlikely in a title (`[[…]]` was not chosen: wikis and Obsidian use it for links).
 - The note is part of the line: it is encrypted, synchronised and versioned with it. Views show only an icon; the text view shows the line as it is. A note without visible characters is removed from the line.

@@ -40,7 +40,9 @@ function normSnowflake(v) {
 
 // The note of an entry (architecture 2.4): "{{…}}" after the text, before the tags.
 // Inside, "\n" is a line break, "\}" a brace and "\\" a backslash; "#" starts no tag.
-const NOTE_MAX = 5000;
+// A note fits into one encrypted line with the entry (MAX_LINE, 4 KB with padding and tag);
+// lineFits() checks the bytes, as letters such as ä take two.
+const NOTE_MAX = 3500;
 function encodeNote(n) { return String(n).replace(/\r/g, "").replace(/\\/g, "\\\\").replace(/\}/g, "\\}").replace(/\n/g, "\\n"); }
 function decodeNote(s) { return s.replace(/\\(.)/g, (_, c) => c === "n" ? "\n" : c); }
 // Finds "{{…}}" followed only by tags (or nothing); returns [before, note, after] or null.
@@ -208,6 +210,9 @@ const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, 
 const PHRASE_WORDS = 8;
 
 const PAD = 256, MAX_LINE = 4096, NONCE = 12, GCM_TAG = 16;
+// Longest plaintext line that encryptWith() accepts: padding to 256 bytes leaves 3839 bytes.
+const LINE_TEXT_MAX = Math.floor((MAX_LINE - NONCE - GCM_TAG) / PAD) * PAD - 1;
+const lineFits = text => TE.encode(text).length <= LINE_TEXT_MAX;
 
 // Words are compared in lower case without accents, so that "équipe" and "equipe" are the
 // same word; the lists hold plain ASCII (clients/core/wordlists). English phrases are unchanged.
@@ -889,7 +894,7 @@ export {
   BIP39, BIP39_SET, WORDLISTS, wordlistOf, DIM_ORDER, DIM_RANK, LIST_MARKERS, normalizeSpace, normSnowflake, NOTE_MAX, encodeNote, decodeNote, parse, get, has, contentKey, toLine, addTag,
   EPOCH, makeSnow, snowTime, today, parseLines, currentOf, sortKey,
   validDate, checkTag, validate, TAG_MAX, facetsOf, DEF_RE, PRIVATE_RE, COMMENT_RE, NAME_RE, VOCAB, RE_FACET, RE_TOPIC, RE_TIME,
-  TE, TD, b64, unb64, hex, PHRASE_WORDS, PAD, MAX_LINE, NONCE, GCM_TAG,
+  TE, TD, b64, unb64, hex, PHRASE_WORDS, PAD, MAX_LINE, NONCE, GCM_TAG, LINE_TEXT_MAX, lineFits,
   normPhrase, phraseProblem, newPhrase, accountId, deriveKeys, memberId,
   deriveKeysV2, allyCodeOf, keysFromAllyCode, guestCodeOf, keysFromGuestCode, handoverCodeOf, parseHandoverCode, codeKind, acctOf, authHeaders, deleteHeaders, canWrite, canReplace, replaceHeaders, KEY_V2, importEncKey, encryptWith, decryptWith, decryptFileWith,
   addDays, addMonths, nextMonday, firstOfNextMonth, dayDiff, WD, nextOccurrence, shownDate, occurrences, recurrenceMode, recurrenceDoubt,
