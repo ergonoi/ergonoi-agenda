@@ -1053,7 +1053,7 @@
       <div class="btnrow" id="logRow"><button type="button" class="sec" id="btnLogCopy">Copy log</button><button type="button" class="sec" id="btnLogSave">Save log</button><button type="button" class="sec" id="btnLogFlush">Flush log</button><span class="hint" id="logCount"></span></div>
       <h3>About</h3>
       <div class="about">
-        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.41</p>
+        <p><strong id="aboutName">ergonoi Agenda</strong> · version 0.9.42</p>
         <p>Author: Markus Schatzl</p>
         <p class="am"><span id="aboutProject">οὐθείς Agenda is an <b>ergonoi</b> project: </span><span class="one">Technology is potential. Accessibility makes it matter.</span></p>
         <p class="al"><a href="https://ergonoi.github.io/ergonoi-agenda/" target="_blank" rel="noopener">Documentation <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://github.com/ergonoi/ergonoi-agenda" target="_blank" rel="noopener">Source code on GitHub <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a href="https://ergonoi.com" target="_blank" rel="noopener">ergonoi.com <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
@@ -1085,7 +1085,7 @@
     </div>
   </div>
   <footer id="appfoot">
-    <span class="ver">v0.9.41</span>
+    <span class="ver">v0.9.42</span>
   </footer>
 </main>
 <nav id="bnav" aria-label="View">
@@ -2006,14 +2006,25 @@ function firstOn(anchor, pat, from) {
 // carried forward until done. An explicit #anchor decides (or #type-fix/-flex, its older
 // spelling); then the kind (#type-event fixed, #type-task flexible); otherwise the
 // journal's type, then a calendar origin, a repetition or a clock time make it fixed.
-function bindingOf(e, journalFixed) {
+// fixedFacets: the facets whose Tag definition carries #anchor-fix (fixedFacetsOf); an entry
+// of such a facet has fixed dates unless it says otherwise itself (architecture 5.5).
+function bindingOf(e, journalFixed, fixedFacets) {
   const a = get(e, "anchor"), t = get(e, "type");
   if (a === "fix" || a === "flex") return a;
   if (t === "fix" || t === "flex") return t;
   if (t === "event") return "fix";
   if (t === "task") return "flex";
   if (journalFixed || has(e, "cal") || has(e, "recurring") || has(e, "time")) return "fix";
+  if (fixedFacets && fixedFacets.size && e.tags.some(x => x.dim === "facet" && fixedFacets.has(x.val))) return "fix";
   return "flex";
+}
+// Facets of fixed dates (architecture 5.5): an open Tag definition of a facet with #anchor-fix
+// makes the dates of all its entries fixed, without a tag in the entries themselves.
+function fixedFacetsOf(entries) {
+  const out = new Set();
+  for (const e of entries) if (/^Tag definition:/.test(e.text) && !has(e, "done") && get(e, "anchor") === "fix")
+    for (const x of e.tags) if (x.dim === "facet") out.add(x.val);
+  return out;
 }
 // Kinds without a date (architecture 3.2, 5.6): a memo is kept to be found again, a meta
 // line says something about the journal (its name, keys, definitions, overlays …). Both
@@ -4781,7 +4792,7 @@ function renderAgenda() {
   groups.done = []; groups.memo = [];
   for (const j of journals()) withJ(j, () => {
     const known = new Set(parseLines(S.snap).map(e => e.id + "/" + e.rev + "/" + contentKey(e)));
-    const jFixed = journalFixed(j);
+    const jFixed = journalFixed(j), fFixed = fixedFacetsOf(parseLines(S.wc));
     S.wc.split("\n").forEach((l, idx) => {
       const e = parse(l);
       if (!e) return;
@@ -4814,7 +4825,7 @@ function renderAgenda() {
       // day (or its time span) is over. Nothing is written; the search still finds it.
       let carried = false;
       if (d < t0 || overToday) {
-        if (bindingOf(e, jFixed) === "flex") carried = d < t0;
+        if (bindingOf(e, jFixed, fFixed) === "flex") carried = d < t0;
         else { if (!searching) return; g = "past"; }
       }
       if (g === "beyond") beyondCount++;
@@ -4902,7 +4913,7 @@ function renderMonth() {
   const put = (d, it) => { if (!byDay.has(d)) byDay.set(d, []); byDay.get(d).push(it); };
   for (const j of journals()) withJ(j, () => {
     const known = new Set(parseLines(S.snap).map(e => e.id + "/" + e.rev + "/" + contentKey(e)));
-    const jFixed = journalFixed(j);
+    const jFixed = journalFixed(j), fFixed = fixedFacetsOf(parseLines(S.wc));
     S.wc.split("\n").forEach((l, idx) => {
       const e = parse(l);
       if (!e || has(e, "done") || isMeta(e) || isMemo(e) || COMMENT_RE.test(e.text)) return;
@@ -4912,7 +4923,7 @@ function renderMonth() {
       if (!passesFacet(e, flt) || !passesOther(e, flt)) return;
       const local = !e.id || !known.has(e.id + "/" + e.rev + "/" + e._ck);
       const rec = has(e, "recurring"), base = { e, idx: j + "|" + idx, j, local };
-      if (!rec && (!has(e, "date") || (shownDate(e, t0) < t0 && bindingOf(e, jFixed) === "flex"))) {
+      if (!rec && (!has(e, "date") || (shownDate(e, t0) < t0 && bindingOf(e, jFixed, fFixed) === "flex"))) {
         put(t0, { ...base, d: t0, overdue: has(e, "date"), carried: has(e, "date") });
         return;
       }
@@ -6481,7 +6492,7 @@ $("btnLogSave").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 $("btnLogFlush").onclick = () => { LS.removeItem("agenda.log"); log("log flushed"); renderLogRow(); };
-function appInfo() { return "version 0.9.41, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
+function appInfo() { return "version 0.9.42, " + location.origin + ", PIN " + (Vault.mode || "not chosen") + ", " + navigator.userAgent; }
 function renderLogRow() {
   $("cfgLog").checked = logOn();
   // The experiment may have been switched on on another device: then this browser does
@@ -6698,7 +6709,7 @@ $("dlgNote").addEventListener("close", () => {
 // older than that only reads the journal.
 // ---------------------------------------------------------------------------
 
-const APP_VERSION = "0.9.41";
+const APP_VERSION = "0.9.42";
 const NOTE_FORMAT = "0.2.0"; // entries with {{…}}
 const FACETS_FORMAT = "0.3.0"; // entries with more than one facet or topic
 const BINDING_FORMAT = "0.4.0"; // #type, #skip, "Journal type:" (older clients would carry fixed entries or show skipped ones)

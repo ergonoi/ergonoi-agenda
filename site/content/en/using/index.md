@@ -30,6 +30,7 @@ The complete list, with the tags the app writes itself, is in *Reference*.
 
 - An entry with a time or a repetition is **fixed**: it belongs to its day and is gone from the list once the day is over. Nothing is deleted; the search still finds it. What must be done afterwards anyway belongs in a flexible entry.
 - An entry without time is **flexible**: it moves along to *Today* each day until it is done. The tag `#anchor-fix` or `#anchor-flex` changes this where needed.
+- A **facet of fixed dates** makes all its entries fixed: write `#anchor-fix` on its Tag definition in the *Text* tab, for example `Tag definition: school dates #type-meta #facet-school #anchor-fix`. The other facets of the journal stay flexible.
 - A **memo** is kept to be looked up: tap the bookmark when adding. It is never due and does not appear in the list; the search finds it under *Memos*.
 
 ## Notes

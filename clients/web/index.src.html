@@ -3886,7 +3886,7 @@ function renderAgenda() {
   groups.done = []; groups.memo = [];
   for (const j of journals()) withJ(j, () => {
     const known = new Set(parseLines(S.snap).map(e => e.id + "/" + e.rev + "/" + contentKey(e)));
-    const jFixed = journalFixed(j);
+    const jFixed = journalFixed(j), fFixed = fixedFacetsOf(parseLines(S.wc));
     S.wc.split("\n").forEach((l, idx) => {
       const e = parse(l);
       if (!e) return;
@@ -3919,7 +3919,7 @@ function renderAgenda() {
       // day (or its time span) is over. Nothing is written; the search still finds it.
       let carried = false;
       if (d < t0 || overToday) {
-        if (bindingOf(e, jFixed) === "flex") carried = d < t0;
+        if (bindingOf(e, jFixed, fFixed) === "flex") carried = d < t0;
         else { if (!searching) return; g = "past"; }
       }
       if (g === "beyond") beyondCount++;
@@ -4007,7 +4007,7 @@ function renderMonth() {
   const put = (d, it) => { if (!byDay.has(d)) byDay.set(d, []); byDay.get(d).push(it); };
   for (const j of journals()) withJ(j, () => {
     const known = new Set(parseLines(S.snap).map(e => e.id + "/" + e.rev + "/" + contentKey(e)));
-    const jFixed = journalFixed(j);
+    const jFixed = journalFixed(j), fFixed = fixedFacetsOf(parseLines(S.wc));
     S.wc.split("\n").forEach((l, idx) => {
       const e = parse(l);
       if (!e || has(e, "done") || isMeta(e) || isMemo(e) || COMMENT_RE.test(e.text)) return;
@@ -4017,7 +4017,7 @@ function renderMonth() {
       if (!passesFacet(e, flt) || !passesOther(e, flt)) return;
       const local = !e.id || !known.has(e.id + "/" + e.rev + "/" + e._ck);
       const rec = has(e, "recurring"), base = { e, idx: j + "|" + idx, j, local };
-      if (!rec && (!has(e, "date") || (shownDate(e, t0) < t0 && bindingOf(e, jFixed) === "flex"))) {
+      if (!rec && (!has(e, "date") || (shownDate(e, t0) < t0 && bindingOf(e, jFixed, fFixed) === "flex"))) {
         put(t0, { ...base, d: t0, overdue: has(e, "date"), carried: has(e, "date") });
         return;
       }

@@ -462,14 +462,25 @@ function firstOn(anchor, pat, from) {
 // carried forward until done. An explicit #anchor decides (or #type-fix/-flex, its older
 // spelling); then the kind (#type-event fixed, #type-task flexible); otherwise the
 // journal's type, then a calendar origin, a repetition or a clock time make it fixed.
-function bindingOf(e, journalFixed) {
+// fixedFacets: the facets whose Tag definition carries #anchor-fix (fixedFacetsOf); an entry
+// of such a facet has fixed dates unless it says otherwise itself (architecture 5.5).
+function bindingOf(e, journalFixed, fixedFacets) {
   const a = get(e, "anchor"), t = get(e, "type");
   if (a === "fix" || a === "flex") return a;
   if (t === "fix" || t === "flex") return t;
   if (t === "event") return "fix";
   if (t === "task") return "flex";
   if (journalFixed || has(e, "cal") || has(e, "recurring") || has(e, "time")) return "fix";
+  if (fixedFacets && fixedFacets.size && e.tags.some(x => x.dim === "facet" && fixedFacets.has(x.val))) return "fix";
   return "flex";
+}
+// Facets of fixed dates (architecture 5.5): an open Tag definition of a facet with #anchor-fix
+// makes the dates of all its entries fixed, without a tag in the entries themselves.
+function fixedFacetsOf(entries) {
+  const out = new Set();
+  for (const e of entries) if (/^Tag definition:/.test(e.text) && !has(e, "done") && get(e, "anchor") === "fix")
+    for (const x of e.tags) if (x.dim === "facet") out.add(x.val);
+  return out;
 }
 // Kinds without a date (architecture 3.2, 5.6): a memo is kept to be found again, a meta
 // line says something about the journal (its name, keys, definitions, overlays …). Both
@@ -898,6 +909,6 @@ export {
   normPhrase, phraseProblem, newPhrase, accountId, deriveKeys, memberId,
   deriveKeysV2, allyCodeOf, keysFromAllyCode, guestCodeOf, keysFromGuestCode, handoverCodeOf, parseHandoverCode, codeKind, acctOf, authHeaders, deleteHeaders, canWrite, canReplace, replaceHeaders, KEY_V2, importEncKey, encryptWith, decryptWith, decryptFileWith,
   addDays, addMonths, nextMonday, firstOfNextMonth, dayDiff, WD, nextOccurrence, shownDate, occurrences, recurrenceMode, recurrenceDoubt,
-  journalNameOf, declaredFacetsOf, learnedRulesOf, sourceOf, botViolation, enforceBotRules,
+  journalNameOf, declaredFacetsOf, fixedFacetsOf, learnedRulesOf, sourceOf, botViolation, enforceBotRules,
   bindingOf, isMemo, isMeta, FAR_DATE, migrateLine, passesSilently, tzOffset, icsTime, parseICS, rruleToPattern, calHash, icsEventToLine, entriesToICS, patternToRRule,
 };
