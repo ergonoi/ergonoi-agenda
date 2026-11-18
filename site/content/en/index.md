@@ -1,6 +1,6 @@
 # οὐθείς Agenda
 
-Appointments, tasks and notes in one list, as in a notebook, except that an entry moves to another day with a swipe. On every device, in any browser, readable only by you and by those you share it with.
+Appointments, tasks and notes in one list, as in a paper notebook – but rearranged and moved to another day with a simple swipe. On every device, in any browser, readable only by you and by those you share it with.
 
 **οὐθείς Agenda is a planning journal that is light enough to understand completely: one encrypted text file per journal, a small server that cannot read it, and an app that runs in the browser.**
 
