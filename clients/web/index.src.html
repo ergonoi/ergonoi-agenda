@@ -647,6 +647,8 @@
   #dlgRename .vals small, .valbtns small, #facetSheet .facets small { color:var(--muted); font-size:12px; font-weight:400; }
   .ln { display:inline-block; flex:none; width:22px; height:3px; border-radius:1px; background:var(--line); }
   #dlgRename .vals button:focus-visible, .valbtns button:focus-visible, #facetSheet .facets button.tag:focus-visible, .tog button:focus-visible { outline:0; text-decoration:underline; text-underline-offset:4px; }
+  #jFixFacets button .anc { margin-left:4px; display:inline-flex; color:var(--line); }
+  #jFixFacets button[aria-pressed="true"] .anc { color:var(--fg); }
   #dlgRename .row { display:flex; }
   .jchoice { padding:8px 16px 12px; grid-column:1 / -1; }
   #facetSheet .jchoice { padding:4px 0 0; }
@@ -796,6 +798,8 @@
   #facetSheet .tpick button.pick { border:0; background:transparent; }
   #facetSheet .tpick .pick.memo[aria-pressed="true"] { color:var(--fg); }
   #facetSheet .tpick .pick.memo[aria-pressed="true"] svg { fill:currentColor; }
+  #facetSheet .tpick .pick.anchor[aria-pressed="true"] { color:var(--fg); }
+  #facetSheet .tpick .pick.anchor[aria-pressed="true"] svg { stroke-width:2.2; }
   #facetSheet .tpick .pick.off { opacity:var(--off); }
   #facetSheet .when { font-size:15px; color:var(--fg); margin:-4px 0 12px; display:flex; align-items:center; gap:6px; }
   #facetSheet .when .x { min-height:32px; min-width:32px; padding:0; border:0; color:var(--muted); }
@@ -1267,6 +1271,11 @@
         </div>
         <div class="btnrow"><button type="button" class="sec hidden" id="jRmGo">Remove</button></div>
         <p class="hint" id="jRmMsg">Its entries keep their place: they get another facet of this journal first.</p>
+      </div>
+      <div id="jFixRow">
+        <label>Facets with fixed dates</label>
+        <div class="valbtns" id="jFixFacets"></div>
+        <p class="hint">Entries of a facet with the anchor keep their dates and pass with their day instead of moving on to Today, also for everyone who shares the journal. An entry's own #anchor still decides for that entry.</p>
       </div>
       <label class="check" id="jTypeRow"><input type="checkbox" id="jType"><span>Fixed dates by default — for birthdays, holidays and the like: entries keep their dates and pass without asking, also for everyone who shares the journal. An entry's own #anchor still decides for that entry; more entries can be added as usual.</span></label>
         <div class="btnrow"><button type="button" class="sec" id="jMig">Pass facets</button><button type="button" class="sec" id="jExport">Export journal file</button></div>
@@ -4208,7 +4217,7 @@ function itemHtml({ e, idx, j, d, local, overdue, closed, carried, snapId }, g) 
   return `<div class="item${overdue ? " overdue" : ""}${open ? " open" : ""}${closed ? " isdone" : ""}"${ro ? ' data-ro="1"' : ""}${snapId && !ro ? ` data-reopen="${esc(j)}|${esc(snapId)}"` : ""} data-line="${idx}" data-key="${esc(key)}" style="border-left-color:${bar}">
     <div class="swipehint">← done / reschedule</div>
     <div class="when${implied && !time ? " onlywide" : ""}">${whenHtml}</div>
-    <div class="body"><div class="text" data-line="${idx}">${esc(e.text)}${get(e, "recurring") ? `<span class="recic" title="Recurring: ${esc(get(e, "recurring"))}" aria-label="Recurring"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v4.5h-4.5"/></svg></span>` : ""}${e.note ? `<button class="noteic" data-note="${idx}" title="Note" aria-label="Note"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg></button>` : ""}${j ? `<span class="jtag">${esc(journalName(j))}</span>` : ""}</div>
+    <div class="body"><div class="text" data-line="${idx}">${esc(e.text)}${get(e, "recurring") ? `<span class="recic" title="Recurring: ${esc(get(e, "recurring"))}" aria-label="Recurring"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v4.5h-4.5"/></svg></span>` : ""}${get(e, "anchor") === "fix" ? `<span class="recic" title="Fixed date" aria-label="Fixed date"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="5" r="2"/><path d="M12 7v13M8 11h8M5 13a7 7 0 0 0 14 0"/></svg></span>` : ""}${e.note ? `<button class="noteic" data-note="${idx}" title="Note" aria-label="Note"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg></button>` : ""}${j ? `<span class="jtag">${esc(journalName(j))}</span>` : ""}</div>
       ${open ? "" : `<div class="marks">${marks.join("")}</div>`}
       <div class="chips">${chips.join("")}</div></div>
     <button class="fold" data-fold="${esc(key)}" title="${open ? "Hide tags" : "Show tags"}" aria-expanded="${open}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></div>`;
@@ -5246,10 +5255,14 @@ let sheetWhen = { date: "", until: "", from: "", to: "" };
 // Memo (architecture 5.6): the bookmark beside date and time; nothing else is chosen when
 // adding, whether an entry is fixed or flexible follows from it (5.5).
 let sheetMemo = false;
+// Anchor (architecture 5.5): the new entry keeps its date and passes with it, written as #anchor-fix.
+let sheetAnchor = false;
 function renderSheetType() {
   const b = $("facetMemo");
   if (b) { b.setAttribute("aria-pressed", String(sheetMemo)); b.title = sheetMemo ? "Memo: kept, never due, found by search. Tap again to undo." : "Memo: keep it to be found again, without a date"; }
   for (const p of $("facetPick").querySelectorAll(".pick")) p.classList.toggle("off", sheetMemo);
+  const an = $("facetAnchor");
+  if (an) { an.setAttribute("aria-pressed", String(sheetAnchor)); an.title = sheetAnchor ? "Fixed date: the entry passes with its day. Tap again to undo." : "Fixed date: the entry passes with its day instead of moving on to Today"; }
 }
 function renderSheetWhen() {
   renderSheetType();
@@ -5259,6 +5272,7 @@ function renderSheetWhen() {
   if (w.date) parts.push([w.date, w.until].filter(Boolean).map((d, i) => esc(fmtDate(d)) + x(`data-nodate="${i}"`, "Remove this date")).join(" – "));
   if (w.from) parts.push(esc(sheetTime(w).replace("-", "–")) + x("data-notime=\"1\"", "Remove the time"));
   if (sheetMemo) parts.push("memo");
+  if (sheetAnchor && !sheetMemo) parts.push("fixed date");
   $("facetTo").classList.toggle("hidden", !w.from);
   // One calendar: a first date, then a second one (a span); with two it is gone.
   $("facetCal").classList.toggle("hidden", !!w.until);
@@ -5307,7 +5321,14 @@ function withSheetWhen(v) {
   bm.type = "button"; bm.id = "facetMemo"; bm.className = "pick memo"; bm.setAttribute("aria-pressed", "false");
   bm.setAttribute("aria-label", "Memo");
   bm.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6.5 3.5h11v17l-5.5-4-5.5 4z"/></svg>`;
-  bm.addEventListener("click", ev => { ev.stopPropagation(); sheetMemo = !sheetMemo; if (sheetMemo) sheetWhen = { date: "", until: "", from: "", to: "" }; renderSheetWhen(); });
+  bm.addEventListener("click", ev => { ev.stopPropagation(); sheetMemo = !sheetMemo; if (sheetMemo) { sheetWhen = { date: "", until: "", from: "", to: "" }; sheetAnchor = false; } renderSheetWhen(); });
+  // Anchor: one tap fixes the date of the new entry (architecture 5.5); without a date, today.
+  const an = document.createElement("button");
+  an.type = "button"; an.id = "facetAnchor"; an.className = "pick anchor"; an.setAttribute("aria-pressed", "false");
+  an.setAttribute("aria-label", "Fixed date");
+  an.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="5" r="2"/><path d="M12 7v13M8 11h8M5 13a7 7 0 0 0 14 0"/></svg>`;
+  an.addEventListener("click", ev => { ev.stopPropagation(); sheetAnchor = !sheetAnchor; if (sheetAnchor) sheetMemo = false; renderSheetWhen(); });
+  box.appendChild(an);
   box.appendChild(bm);
 })();
 $("add").addEventListener("submit", ev => {
@@ -5324,7 +5345,7 @@ function openFacetSheet(v, only) {
   uiBusy = true;
   hideToast();
   $("facetTitle").textContent = v;
-  sheetWhen = { date: "", until: "", from: "", to: "" }; sheetMemo = false;
+  sheetWhen = { date: "", until: "", from: "", to: "" }; sheetMemo = false; sheetAnchor = false;
   // In the month view a new entry takes the chosen day, unless the line has a date of its own.
   if (monthMode && view === "agenda" && calDay && calDay !== today() && !/#date-/.test(v)) sheetWhen.date = calDay;
   renderSheetWhen();
@@ -5372,11 +5393,12 @@ function chooseFacet(f, j) {
   $("facetSheet").classList.add("hidden");
   uiBusy = false;
   if (f === "cancel") { sheetWhen = { date: "", until: "", from: "", to: "" }; render(); $("addLine").focus(); return; }
-  const memo = sheetMemo; sheetMemo = false;
+  const memo = sheetMemo, anchor = sheetAnchor && !sheetMemo; sheetMemo = false; sheetAnchor = false;
   let v = withSheetWhen(normalizeSpace($("addLine").value));
   if (!v) { render(); return; }
   // A memo has no date, time or repetition (architecture 5.6).
   if (memo) { const x = parse(v); if (x) { x.tags = x.tags.filter(t => t.dim !== "date" && t.dim !== "time" && t.dim !== "recurring" && t.dim !== "type"); addTag(x, "type", "memo"); v = toLine(x); } }
+  if (anchor) { const x = parse(v); if (x) { if (!has(x, "date")) addTag(x, "date", today()); addTag(x, "anchor", "fix"); v = toLine(x); } }
   if (!f) { addLine(v, ""); return; }
   const e = parse(v);
   if (e) { addTag(e, "facet", f); addLine(toLine(e), j); }
@@ -6314,6 +6336,38 @@ function jFacetsOf(j) {
 function jRmCarried(j, fs) {
   return withJ(j, () => parseLines(S.wc).filter(e => !has(e, "done") && !isMeta(e) && e.tags.some(t => t.dim === "facet" && fs.has(t.val))).length);
 }
+const JFIX = new Set();
+function renderJFix() {
+  const j = jEditing, fs = [...jFacetsOf(j).keys()].sort((a, b) => a.localeCompare(b));
+  $("jFixFacets").innerHTML = fs.map(v => `<button type="button" data-fixf="${esc(v)}" aria-pressed="${JFIX.has(v)}"><span class="ln" style="background:${facetColor(facetKey(v, j)) || "var(--line)"}"></span><span>${esc(v)}</span><span class="anc" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="5" r="2"/><path d="M12 7v13M8 11h8M5 13a7 7 0 0 0 14 0"/></svg></span></button>`).join("") || `<p class="hint">This journal has no facets.</p>`;
+}
+$("jFixFacets").addEventListener("click", ev => { const b = ev.target.closest("[data-fixf]"); if (!b) return; const f = b.dataset.fixf; if (JFIX.has(f)) JFIX.delete(f); else JFIX.add(f); renderJFix(); });
+// Writes #anchor-fix on the Tag definition of each facet chosen, takes it off the others. A
+// definition that also defines other facets is not changed; the facet gets one of its own.
+function setFixedFacets(j, want) {
+  const have = withJ(j, () => fixedFacetsOf(parseLines(S.wc)));
+  const add = [...want].filter(f => !have.has(f)), drop = [...have].filter(f => !want.has(f));
+  if (!add.length && !drop.length) return;
+  checkpoint("Facets with fixed dates");
+  withJ(j, () => {
+    const ls = S.wc.split("\n"), facetsIn = e => e.tags.filter(t => t.dim === "facet" && t.val).map(t => t.val);
+    for (const f of add) {
+      const i = ls.findIndex(l => { const e = parse(l); return e && /^Tag definition:/.test(e.text) && !has(e, "done") && facetsIn(e).length === 1 && facetsIn(e)[0] === f; });
+      if (i >= 0) { const e = parse(ls[i]); addTag(e, "anchor", "fix"); ls[i] = toLine(e); }
+      else ls.push(`Tag definition: ${f} #type-meta #facet-${f} #anchor-fix`);
+    }
+    for (const f of drop) ls.forEach((l, i) => {
+      const e = parse(l);
+      if (e && /^Tag definition:/.test(e.text) && !has(e, "done") && get(e, "anchor") === "fix" && facetsIn(e).includes(f)) {
+        if (facetsIn(e).length === 1) { e.tags = e.tags.filter(t => t.dim !== "anchor"); ls[i] = toLine(e); }
+        else { e.tags = e.tags.filter(t => !(t.dim === "facet" && t.val === f)); ls[i] = toLine(e); ls.push(`Tag definition: ${f} #type-meta #facet-${f}`); }
+      }
+    });
+    S.wc = ls.join("\n");
+  });
+  log(jl(j) + ": fixed facets " + [...want].join(","));
+  render(); sync();
+}
 function renderJRm() {
   const j = jEditing, m = jFacetsOf(j);
   for (const f of [...JRM.fs]) if (!m.has(f)) JRM.fs.delete(f);
@@ -6462,6 +6516,10 @@ function openJournal(j) {
   JRM.fs.clear(); JRM.to = "";
   $("jRmMsg").textContent = "Its entries keep their place: they get another facet of this journal first.";
   if (!adding && !gone && !readOnly(j)) renderJRm();
+  // Facets of fixed dates (architecture 5.5): #anchor-fix on their Tag definition, chosen here
+  // and written with Save.
+  $("jFixRow").classList.toggle("hidden", adding || gone || readOnly(j));
+  JFIX.clear(); if (!adding && !gone && !readOnly(j)) { for (const f of withJ(j, () => fixedFacetsOf(parseLines(S.wc)))) JFIX.add(f); renderJFix(); }
   $("jDefaultRow").classList.toggle("hidden", adding || !j || gone || !v2 || keys.level !== "owner" || S.cfg.mode === "local");
   $("jNewFacet").value = "";
   $("jFacetMsg").textContent = "Everyone who shares the journal sees it; it can be chosen at once, before any entry uses it.";
@@ -7303,6 +7361,7 @@ $("jOk").onclick = async () => {
     if (jEditing) setJournalAlias(jEditing, $("jAlias").value);
     if (name && name !== journalOwnName(jEditing)) setJournalName(jEditing, name);
     if (!$("jTypeRow").classList.contains("hidden") && $("jType").checked !== journalFixed(jEditing)) setJournalType(jEditing, $("jType").checked);
+    if (!$("jFixRow").classList.contains("hidden")) setFixedFacets(jEditing, new Set(JFIX));
     if (jEditing && !$("jOvRow").classList.contains("hidden") && jOvSel !== (journalOverlay(jEditing)[0] || "")) setJournalOverlay(jEditing, jOvSel ? [jOvSel] : []);
     $("dlgJournal").close();
     return;

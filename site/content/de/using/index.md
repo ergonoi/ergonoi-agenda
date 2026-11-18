@@ -30,7 +30,8 @@ Die vollständige Liste, mit den Tags, die die App selbst schreibt, steht unter 
 
 - Ein Eintrag mit Uhrzeit oder Wiederholung ist **fest**: Er gehört zu seinem Tag und ist nach diesem Tag aus der Liste verschwunden. Gelöscht wird nichts; die Suche findet ihn weiter. Was danach trotzdem noch zu tun ist, gehört in einen flexiblen Eintrag.
 - Ein Eintrag ohne Uhrzeit ist **beweglich**: Er wandert jeden Tag mit nach *Today*, bis er erledigt ist. Das Tag `#anchor-fix` oder `#anchor-flex` ändert das, wo nötig.
-- Eine **Facette mit festen Terminen** macht alle ihre Einträge fest: `#anchor-fix` in ihre Tag-Definition im Reiter *Text* schreiben, etwa `Tag definition: Schultermine #type-meta #facet-schule #anchor-fix`. Die anderen Facetten des Journals bleiben beweglich.
+- Der **Anker** neben Kalender und Uhr beim Hinzufügen macht einen Eintrag mit einem Tipp fest.
+- Eine **Facette mit festen Terminen** macht alle ihre Einträge fest: unter *Settings → Journals → Edit* bei *Facets with fixed dates* oder mit `#anchor-fix` in ihrer Tag-Definition im Reiter *Text*. Die anderen Facetten des Journals bleiben beweglich.
 - Ein **Memo** wird zum Nachschlagen aufbewahrt: beim Hinzufügen auf das Lesezeichen tippen. Es ist nie fällig und erscheint nicht in der Liste; die Suche findet es unter *Memos*.
 
 ## Notizen zum Eintrag
