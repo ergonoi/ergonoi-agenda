@@ -533,6 +533,13 @@
         border-top: 1px solid #eee;
       }
     }
+    /* Phones: the header in one line; GitHub is reached through the contents (ui.md 9.3). */
+    @media (max-width: 600px) {
+      header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: nowrap; }
+      header .logo { white-space: nowrap; flex: none; }
+      header nav { display: flex; align-items: baseline; gap: 14px; white-space: nowrap; flex-wrap: nowrap; }
+      header nav a[href*="github.com"] { display: none; }
+    }
     /* Agenda: grid items may shrink, so that code and tables scroll instead of widening the page. */
     .section > * { min-width: 0; }
     @media (max-width: 700px) { .section-text table { display: block; overflow-x: auto; } }
