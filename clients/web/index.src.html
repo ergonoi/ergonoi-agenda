@@ -112,8 +112,13 @@
   #fpanel .fac.off { opacity:var(--off); }
   #fpanel .fac:focus-visible, #fpanel .jh:focus-visible { outline:0; text-decoration:underline; text-underline-offset:4px; }
   #fpanel details { margin-top:14px; border-top:.5px solid var(--line); }
-  #fpanel summary { cursor:pointer; padding:12px 18px 4px; font:600 14px "Inter", var(--font, sans-serif); color:var(--fg2); }
+  #fpanel summary { list-style:none; display:flex; align-items:center; gap:10px; cursor:pointer; padding:12px 18px 4px; font:600 14px "Inter", var(--font, sans-serif); color:var(--fg2); }
   #fpanel .more { padding:0 18px; }
+  #fpanel .more.jmore { padding:0 0 6px; }
+  #fpanel summary::-webkit-details-marker { display:none; }
+  #fpanel summary .fchev { flex:none; color:var(--fg2); transition:transform .15s; }
+  #fpanel details[open] > summary .fchev { transform:rotate(90deg); }
+  #fpanel summary .fhid { margin-left:-6px; font-weight:400; color:var(--muted); }
   #fpanel .more h4 { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); font-weight:500; margin:14px 0 2px; }
   #fpanel .vals { display:flex; flex-wrap:wrap; gap:0 18px; }
   #fpanel .vals button { min-height:var(--bm); padding:0; border:0; border-radius:0; background:transparent; font-size:15px; display:inline-flex; align-items:center; gap:7px; color:var(--fg); -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
@@ -465,7 +470,8 @@
   .item.flash { box-shadow:inset 0 0 0 2px var(--teal); }
   .chip.notebtn { min-width:var(--bs); width:var(--bs); padding:0; display:inline-flex; align-items:center; justify-content:center; background:transparent; border:1px solid var(--teal); color:var(--teal); }
   .chip.local { display:inline-flex; align-items:center; border:0; color:var(--amber); cursor:default; padding:0 4px; }
-  .swipehint { position:absolute; left:-110px; top:0; bottom:0; width:100px; display:flex; align-items:center; justify-content:flex-end; color:var(--scarlet); font-size:14px; opacity:0; }
+  #agenda, #fpanel { touch-action:pan-y; }
+  .swipehint { position:absolute; right:-110px; top:0; bottom:0; width:100px; display:flex; align-items:center; justify-content:flex-start; color:var(--scarlet); font-size:14px; opacity:0; }
   .item.dragging .swipehint { opacity:1; }
   @media (max-width: 600px) {
     .item .when:empty { display:none; }
@@ -3505,14 +3511,26 @@ function renderPanel() {
   // Facets grouped by the journal they belong to, in the order of the journals; within a
   // journal by name, so that each keeps its place.
   const keys = valuesOf("facet").filter(k => k && (total.get(k) || f.facet.includes(k)));
-  for (const j of journals()) {
+  const jblock = j => {
     const ks = keys.filter(k => keyJ(k) === j).sort((a, b) => facetName(a).localeCompare(facetName(b)));
-    if (!ks.length) continue;
+    if (!ks.length) return "";
     const allOff = ks.every(k => f.facet.includes(k));
-    h += `<button type="button" class="jh${allOff ? " off" : ""}" data-fj="${esc(j)}" title="Tap: all facets of this journal on or off. Long press: only this journal.">${esc(journalName(j))}${readOnly(j) ? LOCK_SVG : ""}</button>`;
-    h += ks.map(k => `<button type="button" class="fac${f.facet.includes(k) ? " off" : ""}" data-facetf="${esc(k)}"><span class="sw" style="background:${facetColor(k) || "var(--line)"}"></span>${esc(facetName(k))}<span class="n">${c.get(k) || 0}</span></button>`).join("");
+    return `<button type="button" class="jh${allOff ? " off" : ""}" data-fj="${esc(j)}" title="Tap: all facets of this journal on or off. Long press: only this journal.">${esc(journalName(j))}${readOnly(j) ? LOCK_SVG : ""}</button>`
+      + ks.map(k => `<button type="button" class="fac${f.facet.includes(k) ? " off" : ""}" data-facetf="${esc(k)}"><span class="sw" style="background:${facetColor(k) || "var(--line)"}"></span>${esc(facetName(k))}<span class="n">${c.get(k) || 0}</span></button>`).join("");
+  };
+  h += jblock("");
+  // Entries without a facet: only when there are some (a hidden value without entries hides nothing).
+  if (total.get("")) h += `<button type="button" class="fac${f.facet.includes("") ? " off" : ""}" data-facetf="" style="margin-top:8px"><span class="sw" style="background:var(--line)"></span>without facet<span class="n">${c.get("") || 0}</span></button>`;
+  // The further journals folded below the own one (ui.md 4.6): allies first, then guests,
+  // each by name. Open or closed as left last; until then open when one of their facets is
+  // hidden. Closed, the line says how many of their facets are hidden.
+  const others = journals().filter(j => j && keys.some(k => keyJ(k) === j))
+    .sort((a, b) => readOnly(a) - readOnly(b) || journalName(a).localeCompare(journalName(b)));
+  if (others.length) {
+    const theirs = keys.filter(k => keyJ(k) && others.includes(keyJ(k)));
+    const nHidden = theirs.filter(k => f.facet.includes(k)).length;
+    h += `<details id="fpJour"${foldOpen("agenda.fjour", nHidden > 0) ? " open" : ""}><summary>${FOLD_CHEV}More journals (${others.length})<span class="fhid"> · ${theirs.length} facet${theirs.length === 1 ? "" : "s"}</span></summary><div class="more jmore">${others.map(jblock).join("")}</div></details>`;
   }
-  if (total.get("") || f.facet.includes("")) h += `<button type="button" class="fac${f.facet.includes("") ? " off" : ""}" data-facetf="" style="margin-top:8px"><span class="sw" style="background:var(--line)"></span>without facet<span class="n">${c.get("") || 0}</span></button>`;
   // The other tags, folded.
   const base = all.filter(e => passesFacet(e, f));
   let more = "";
@@ -3523,8 +3541,7 @@ function renderPanel() {
     more += `<h4>${d}</h4><div class="vals">` + vals.map(v =>
       `<button type="button" data-fdim="${d}" data-fval="${esc(v)}" class="${f.off[d].includes(v) ? "off" : ""}">${esc(filterLabel(d, v))}<span class="n">${cd.get(v) || 0}</span></button>`).join("") + `</div>`;
   }
-  const moreOpen = LS.getItem("agenda.fmore") === "1" || otherActive(f);
-  if (more) h += `<details id="fpMore"${moreOpen ? " open" : ""}><summary>More: topic, action, rank, size, time, repeats</summary><div class="more">${more}<p class="hint" style="padding:0;margin-top:14px">Tap a value to hide or show it, long press for only this value. Within one kind any shown value matches; across kinds all must match.</p></div></details>`;
+  if (more) h += `<details id="fpMore"${foldOpen("agenda.fmore", otherActive(f)) ? " open" : ""}><summary>${FOLD_CHEV}More filters${otherActive(f) ? `<span class="fhid"> · filtering</span>` : ""}</summary><div class="more">${more}<p class="hint" style="padding:0;margin-top:14px">Tap a value to hide or show it, long press for only this value. Within one kind any shown value matches; across kinds all must match.</p></div></details>`;
   const chev = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6l6 6-6 6"/></svg>';
   const ic = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">${d}</svg>`;
   h += `<div class="mlist">`
@@ -3538,7 +3555,12 @@ function renderPanel() {
   $("fpanel").innerHTML = h; $("fpanel").style.setProperty("--vswn", vswn(vs));
   if (panelNaming) $("panelNewName").focus();
   const det = $("fpMore"); if (det) det.ontoggle = () => LS.setItem("agenda.fmore", det.open ? "1" : "0");
+  const dj = $("fpJour"); if (dj) dj.ontoggle = () => LS.setItem("agenda.fjour", dj.open ? "1" : "0");
 }
+// The fold marker of the panel: the chevron of the menu rows, turned down when open.
+const FOLD_CHEV = '<svg class="fchev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+// A fold of the panel keeps the state it was left in; before any choice it is open when it filters.
+function foldOpen(key, filtering) { const v = LS.getItem(key); return v === "1" || (v !== "0" && filtering); }
 const LOCK_SVG = '<svg class="lock" width="13" height="13" viewBox="0 0 16 16" role="img" aria-label="read only"><title>read only</title><rect x="3.5" y="7" width="9" height="6.5" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>';
 
 // The line under the add field: how the filter differs from the active view, or, without
@@ -4058,7 +4080,7 @@ function itemHtml({ e, idx, j, d, local, overdue, closed, carried, snapId }, g) 
   if (has(e, "review")) marks.push(`<span class="mk review">review</span>`);
   if (local) marks.push(`<span class="mk review">not synced</span>`);
   return `<div class="item${overdue ? " overdue" : ""}${open ? " open" : ""}${closed ? " isdone" : ""}"${ro ? ' data-ro="1"' : ""}${snapId && !ro ? ` data-reopen="${esc(j)}|${esc(snapId)}"` : ""} data-line="${idx}" data-key="${esc(key)}" style="border-left-color:${bar}">
-    <div class="swipehint">→ done / reschedule</div>
+    <div class="swipehint">← done / reschedule</div>
     <div class="when${implied && !time ? " onlywide" : ""}">${whenHtml}</div>
     <div class="body"><div class="text" data-line="${idx}">${esc(e.text)}${get(e, "recurring") ? `<span class="recic" title="Recurring: ${esc(get(e, "recurring"))}" aria-label="Recurring"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v4.5h-4.5"/></svg></span>` : ""}${e.note ? `<button class="noteic" data-note="${idx}" title="Note" aria-label="Note"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg></button>` : ""}${j ? `<span class="jtag">${esc(journalName(j))}</span>` : ""}</div>
       ${open ? "" : `<div class="marks">${marks.join("")}</div>`}
@@ -4564,13 +4586,16 @@ $("sheetDate").addEventListener("blur", () => { if (sheetDateOpen) { sheetDateOp
 // own calendar symbol, which is hidden here; touch browsers open it by themselves.
 $("sheetDate").addEventListener("click", ev => { ev.stopPropagation(); try { if (matchMedia("(pointer: fine)").matches && $("sheetDate").showPicker) $("sheetDate").showPicker(); } catch {} });
 
-// Swipe right on an item. Direction is decided after a few pixels: vertical movement
-// hands the gesture back to scrolling; horizontal movement moves the item.
-// Every end of a gesture (up, cancel, lost capture) resets the item.
+// Swipes in the list (ui.md 5.2). Direction is decided after a few pixels: vertical movement
+// hands the gesture back to scrolling. Leftward on an item: the item follows the finger and
+// opens Done / reschedule. Rightward anywhere in the list, on touch screens where the panel is
+// a drawer: the panel (ui.md 5.2a). Every end of a gesture (up, cancel) resets the item.
 function endSwipe(open) {
   if (!swipe) return;
-  const { item, dx } = swipe;
+  const { item, dx, dir } = swipe;
   swipe = null;
+  if (dir === "menu") { if (open && dx > 60) openPanel(true); return; }
+  if (!item) return;
   item.classList.remove("dragging");
   item.style.transform = "";
   lastDrag = dx;
@@ -4578,22 +4603,39 @@ function endSwipe(open) {
 }
 $("agenda").addEventListener("pointerdown", ev => {
   if (ev.pointerType === "mouse" && ev.button !== 0) return;
-  const item = ev.target.closest(".item");
-  if (!item || uiBusy || ev.target.closest(".chip, input, .fold")) return;
-  swipe = { item, x: ev.clientX, y: ev.clientY, dx: 0, id: ev.pointerId, dir: null };
+  if (uiBusy || ev.target.closest(".chip, input, textarea, .fold, #detail")) return;
+  swipe = { item: ev.target.closest(".item"), x: ev.clientX, y: ev.clientY, dx: 0, id: ev.pointerId, dir: null, touch: ev.pointerType !== "mouse" };
 });
 window.addEventListener("pointermove", ev => {
   if (!swipe || ev.pointerId !== swipe.id) return;
   const dx = ev.clientX - swipe.x, dy = ev.clientY - swipe.y;
   if (!swipe.dir) {
     if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
-    if (Math.abs(dy) >= Math.abs(dx) || dx < 0) { swipe = null; return; } // scrolling or left swipe
-    swipe.dir = "right";
-    swipe.item.classList.add("dragging");
+    if (Math.abs(dy) >= Math.abs(dx)) { swipe = null; return; } // scrolling
+    if (dx > 0) {
+      // The panel only where it is a drawer, and only by touch.
+      if (!swipe.touch || panelDocked() || $("fpanel").classList.contains("open")) { swipe = null; return; }
+      swipe.dir = "menu";
+    } else {
+      if (!swipe.item) { swipe = null; return; }
+      swipe.dir = "left";
+      swipe.item.classList.add("dragging");
+    }
   }
-  swipe.dx = Math.max(0, dx);
-  swipe.item.style.transform = `translateX(${swipe.dx}px)`;
+  if (swipe.dir === "menu") { swipe.dx = Math.max(0, dx); return; }
+  swipe.dx = Math.max(0, -dx);
+  swipe.item.style.transform = `translateX(${-swipe.dx}px)`;
 });
+// Leftward on the open drawer closes it.
+{
+  let p = null;
+  $("fpanel").addEventListener("pointerdown", ev => { p = ev.pointerType === "mouse" || panelDocked() ? null : { x: ev.clientX, y: ev.clientY, id: ev.pointerId }; });
+  window.addEventListener("pointerup", ev => {
+    if (!p || ev.pointerId !== p.id) return;
+    const dx = ev.clientX - p.x, dy = ev.clientY - p.y; p = null;
+    if (dx < -60 && Math.abs(dy) < Math.abs(dx)) openPanel(false);
+  });
+}
 window.addEventListener("pointerup", ev => { if (swipe && ev.pointerId === swipe.id) endSwipe(true); });
 window.addEventListener("pointercancel", ev => { if (swipe && ev.pointerId === swipe.id) endSwipe(false); });
 

@@ -32,7 +32,7 @@ Die App fragt nach einer Facette. Wähle eine aus oder lege eine neue an. Die Ka
 
 - Tippe auf den Text eines Eintrags, um ihn zu ändern.
 - Tippe auf ein Tag, um es zu ändern oder zu entfernen; `+` fügt eines hinzu.
-- Wische einen Eintrag nach rechts, um ihn zu erledigen oder auf einen anderen Tag zu verschieben.
+- Wische einen Eintrag nach links, um ihn zu erledigen oder auf einen anderen Tag zu verschieben. Ein Wisch nach rechts öffnet das Menü.
 
 ## Beispieleinträge
 
